@@ -1,10 +1,15 @@
+
 <div class="app-container">
   <header class="app-header">
-    <h1>TaskMaster</h1>
-    <nav class="nav-menu">
-      <button class="nav-btn" (click)="currentView = 'login'" [class.active]="currentView === 'login'">Login</button>
-      <button class="nav-btn" (click)="currentView = 'tasks'" [class.active]="currentView === 'tasks'">Tasks</button>
-      <button class="nav-btn" (click)="currentView = 'profile'" [class.active]="currentView === 'profile'">Profile</button>
+    <h1>{{ title }}</h1>
+    <nav class="nav-menu" *ngIf="currentView !== 'login'">
+      <button class="nav-btn" (click)="currentView = 'dashboard'" [class.active]="currentView === 'dashboard'">Dashboard</button>
+      <button class="nav-btn" (click)="currentView = 'members'" [class.active]="currentView === 'members'">Members</button>
+      <button class="nav-btn" (click)="currentView = 'deposits'" [class.active]="currentView === 'deposits'">Deposits</button>
+      <button class="nav-btn" (click)="currentView = 'loans'" [class.active]="currentView === 'loans'">Loans</button>
+      <button class="nav-btn" (click)="currentView = 'transactions'" [class.active]="currentView === 'transactions'">Transactions</button>
+      <button class="nav-btn" (click)="currentView = 'reports'" [class.active]="currentView === 'reports'">Reports</button>
+      <button class="nav-btn logout" (click)="currentView = 'login'">Logout</button>
     </nav>
   </header>
 
@@ -13,7 +18,8 @@
       @if (currentView === 'login') {
         <div class="auth-section">
           <div class="auth-card">
-            <h2>Welcome to TaskMaster</h2>
+            <h2>Financial Management System</h2>
+            <p>Manage member deposits, loans, and financial reports</p>
             <form (ngSubmit)="login()" #loginForm="ngForm">
               <div class="form-group">
                 <label for="username">Username</label>
@@ -29,102 +35,364 @@
         </div>
       }
 
-      @if (currentView === 'tasks') {
-        <div class="tasks-section">
-          <div class="tasks-header">
-            <h2>My Tasks</h2>
-            <button class="btn btn-primary" (click)="showAddTask = !showAddTask">
-              {{ showAddTask ? 'Cancel' : 'Add New Task' }}
+      @if (currentView === 'dashboard') {
+        <div class="dashboard-section">
+          <h2>Dashboard</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>Total Members</h3>
+              <div class="stat-number">{{ getTotalMembers() }}</div>
+            </div>
+            <div class="stat-card">
+              <h3>Total Deposits</h3>
+              <div class="stat-number">${{ getTotalDeposits() | number:'1.2-2' }}</div>
+            </div>
+            <div class="stat-card">
+              <h3>Active Loans</h3>
+              <div class="stat-number">${{ getTotalActiveLoans() | number:'1.2-2' }}</div>
+            </div>
+            <div class="stat-card">
+              <h3>Monthly Interest Income</h3>
+              <div class="stat-number">${{ getMonthlyInterestIncome() | number:'1.2-2' }}</div>
+            </div>
+          </div>
+
+          <div class="recent-activities">
+            <h3>Recent Transactions</h3>
+            <div class="transaction-list">
+              @for (transaction of transactions.slice(0, 5); track transaction.id) {
+                <div class="transaction-item">
+                  <span class="transaction-type" [class]="'type-' + transaction.type">{{ transaction.type }}</span>
+                  <span class="transaction-member">{{ transaction.memberName }}</span>
+                  <span class="transaction-amount">${{ transaction.amount | number:'1.2-2' }}</span>
+                  <span class="transaction-date">{{ transaction.date | date:'shortDate' }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (currentView === 'members') {
+        <div class="members-section">
+          <div class="section-header">
+            <h2>Members Management</h2>
+            <button class="btn btn-primary" (click)="showAddMember = !showAddMember">
+              {{ showAddMember ? 'Cancel' : 'Add New Member' }}
             </button>
           </div>
 
-          @if (showAddTask) {
-            <div class="add-task-form">
-              <h3>Create New Task</h3>
-              <form (ngSubmit)="addTask()" #taskForm="ngForm">
+          @if (showAddMember) {
+            <div class="add-form">
+              <h3>Add New Member</h3>
+              <form (ngSubmit)="addMember()" #memberForm="ngForm">
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="title">Title</label>
-                    <input type="text" id="title" [(ngModel)]="newTask.title" name="title" required>
+                    <label for="memberName">Full Name</label>
+                    <input type="text" id="memberName" [(ngModel)]="newMember.name" name="memberName" required>
                   </div>
                   <div class="form-group">
-                    <label for="priority">Priority</label>
-                    <select id="priority" [(ngModel)]="newTask.priority" name="priority">
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
+                    <label for="memberEmail">Email</label>
+                    <input type="email" id="memberEmail" [(ngModel)]="newMember.email" name="memberEmail" required>
                   </div>
                 </div>
-                <div class="form-group">
-                  <label for="description">Description</label>
-                  <textarea id="description" [(ngModel)]="newTask.description" name="description" rows="3"></textarea>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="memberPhone">Phone</label>
+                    <input type="tel" id="memberPhone" [(ngModel)]="newMember.phone" name="memberPhone" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="memberAddress">Address</label>
+                    <input type="text" id="memberAddress" [(ngModel)]="newMember.address" name="memberAddress" required>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="dueDate">Due Date</label>
-                  <input type="date" id="dueDate" [(ngModel)]="newTask.dueDate" name="dueDate">
-                </div>
-                <button type="submit" class="btn btn-success" [disabled]="!taskForm.form.valid">Add Task</button>
+                <button type="submit" class="btn btn-success" [disabled]="!memberForm.form.valid">Add Member</button>
               </form>
             </div>
           }
 
-          <div class="tasks-grid">
-            @for (task of filteredTasks; track task.id) {
-              <div class="task-card" [class]="'priority-' + task.priority">
-                <div class="task-header">
-                  <h3>{{ task.title }}</h3>
-                  <span class="priority-badge" [class]="'priority-' + task.priority">{{ task.priority }}</span>
-                </div>
-                <p class="task-description">{{ task.description }}</p>
-                <div class="task-meta">
-                  <span class="due-date">Due: {{ task.dueDate | date:'shortDate' }}</span>
-                  <span class="status" [class]="'status-' + task.status">{{ task.status }}</span>
-                </div>
-                <div class="task-actions">
-                  <button class="btn btn-sm btn-success" (click)="toggleTaskStatus(task)"
-                          [disabled]="task.status === 'completed'">
-                    {{ task.status === 'completed' ? 'Completed' : 'Mark Complete' }}
-                  </button>
-                  <button class="btn btn-sm btn-warning" (click)="editTask(task)">Edit</button>
-                  <button class="btn btn-sm btn-danger" (click)="deleteTask(task.id)">Delete</button>
-                </div>
-              </div>
-            }
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Membership Date</th>
+                  <th>Total Deposits</th>
+                  <th>Active Loans</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (member of members; track member.id) {
+                  <tr>
+                    <td>{{ member.name }}</td>
+                    <td>{{ member.email }}</td>
+                    <td>{{ member.phone }}</td>
+                    <td>{{ member.membershipDate | date:'shortDate' }}</td>
+                    <td>${{ member.totalDeposits | number:'1.2-2' }}</td>
+                    <td>${{ member.activeLoans | number:'1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
-
-          @if (tasks.length === 0) {
-            <div class="empty-state">
-              <h3>No tasks yet!</h3>
-              <p>Create your first task to get started.</p>
-            </div>
-          }
         </div>
       }
 
-      @if (currentView === 'profile') {
-        <div class="profile-section">
-          <div class="profile-card">
-            <h2>User Profile</h2>
-            <div class="profile-info">
-              <div class="avatar">{{ user.username?.charAt(0).toUpperCase() }}</div>
-              <div class="user-details">
-                <h3>{{ user.username }}</h3>
-                <p>{{ user.email }}</p>
+      @if (currentView === 'deposits') {
+        <div class="deposits-section">
+          <div class="section-header">
+            <h2>Deposits Management</h2>
+            <button class="btn btn-primary" (click)="showAddDeposit = !showAddDeposit">
+              {{ showAddDeposit ? 'Cancel' : 'Record New Deposit' }}
+            </button>
+          </div>
+
+          @if (showAddDeposit) {
+            <div class="add-form">
+              <h3>Record New Deposit</h3>
+              <form (ngSubmit)="addDeposit()" #depositForm="ngForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="depositMember">Member</label>
+                    <select id="depositMember" [(ngModel)]="newDeposit.memberId" name="depositMember" required>
+                      <option value="0">Select Member</option>
+                      @for (member of members; track member.id) {
+                        <option [value]="member.id">{{ member.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="depositAmount">Amount</label>
+                    <input type="number" id="depositAmount" [(ngModel)]="newDeposit.amount" name="depositAmount" 
+                           min="0" step="0.01" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="depositDescription">Description</label>
+                  <input type="text" id="depositDescription" [(ngModel)]="newDeposit.description" name="depositDescription">
+                </div>
+                <button type="submit" class="btn btn-success" [disabled]="!depositForm.form.valid">Record Deposit</button>
+              </form>
+            </div>
+          }
+
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (deposit of deposits; track deposit.id) {
+                  <tr>
+                    <td>{{ deposit.memberName }}</td>
+                    <td>${{ deposit.amount | number:'1.2-2' }}</td>
+                    <td>{{ deposit.date | date:'shortDate' }}</td>
+                    <td>{{ deposit.description }}</td>
+                    <td><span class="status" [class]="'status-' + deposit.status">{{ deposit.status }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (currentView === 'loans') {
+        <div class="loans-section">
+          <div class="section-header">
+            <h2>Loans Management</h2>
+            <button class="btn btn-primary" (click)="showAddLoan = !showAddLoan">
+              {{ showAddLoan ? 'Cancel' : 'Create New Loan' }}
+            </button>
+          </div>
+
+          @if (showAddLoan) {
+            <div class="add-form">
+              <h3>Create New Loan</h3>
+              <form (ngSubmit)="addLoan()" #loanForm="ngForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="loanMember">Member</label>
+                    <select id="loanMember" [(ngModel)]="newLoan.memberId" name="loanMember" required>
+                      <option value="0">Select Member</option>
+                      @for (member of members; track member.id) {
+                        <option [value]="member.id">{{ member.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="loanAmount">Loan Amount</label>
+                    <input type="number" id="loanAmount" [(ngModel)]="newLoan.amount" name="loanAmount" 
+                           min="0" step="0.01" required>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="loanRate">Interest Rate (%)</label>
+                    <input type="number" id="loanRate" [(ngModel)]="newLoan.interestRate" name="loanRate" 
+                           min="0" step="0.1" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="loanTerm">Term (Months)</label>
+                    <input type="number" id="loanTerm" [(ngModel)]="newLoan.term" name="loanTerm" 
+                           min="1" required>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-success" [disabled]="!loanForm.form.valid">Create Loan</button>
+              </form>
+            </div>
+          }
+
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Amount</th>
+                  <th>Interest Rate</th>
+                  <th>Term</th>
+                  <th>Monthly Payment</th>
+                  <th>Remaining Balance</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (loan of loans; track loan.id) {
+                  <tr>
+                    <td>{{ loan.memberName }}</td>
+                    <td>${{ loan.amount | number:'1.2-2' }}</td>
+                    <td>{{ loan.interestRate }}%</td>
+                    <td>{{ loan.term }} months</td>
+                    <td>${{ loan.monthlyPayment | number:'1.2-2' }}</td>
+                    <td>${{ loan.remainingBalance | number:'1.2-2' }}</td>
+                    <td><span class="status" [class]="'status-' + loan.status">{{ loan.status }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (currentView === 'transactions') {
+        <div class="transactions-section">
+          <h2>Transaction History</h2>
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Member</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Reference</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (transaction of transactions; track transaction.id) {
+                  <tr>
+                    <td><span class="transaction-type" [class]="'type-' + transaction.type">{{ transaction.type }}</span></td>
+                    <td>{{ transaction.memberName }}</td>
+                    <td>${{ transaction.amount | number:'1.2-2' }}</td>
+                    <td>{{ transaction.date | date:'short' }}</td>
+                    <td>{{ transaction.description }}</td>
+                    <td>{{ transaction.reference }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (currentView === 'reports') {
+        <div class="reports-section">
+          <h2>Financial Reports</h2>
+          
+          <div class="report-card">
+            <h3>Trial Balance</h3>
+            <div class="trial-balance">
+              <div class="balance-section">
+                <h4>Assets</h4>
+                <div class="balance-item">
+                  <span>Cash & Bank</span>
+                  <span>${{ getTrialBalance().assets.cash | number:'1.2-2' }}</span>
+                </div>
+                <div class="balance-item">
+                  <span>Loans Receivable</span>
+                  <span>${{ getTrialBalance().assets.loansReceivable | number:'1.2-2' }}</span>
+                </div>
+                <div class="balance-total">
+                  <span>Total Assets</span>
+                  <span>${{ getTrialBalance().assets.total | number:'1.2-2' }}</span>
+                </div>
+              </div>
+
+              <div class="balance-section">
+                <h4>Liabilities</h4>
+                <div class="balance-item">
+                  <span>Member Deposits</span>
+                  <span>${{ getTrialBalance().liabilities.memberDeposits | number:'1.2-2' }}</span>
+                </div>
+                <div class="balance-total">
+                  <span>Total Liabilities</span>
+                  <span>${{ getTrialBalance().liabilities.total | number:'1.2-2' }}</span>
+                </div>
+              </div>
+
+              <div class="balance-section">
+                <h4>Equity</h4>
+                <div class="balance-item">
+                  <span>Retained Earnings</span>
+                  <span>${{ getTrialBalance().equity.retainedEarnings | number:'1.2-2' }}</span>
+                </div>
+                <div class="balance-total">
+                  <span>Total Equity</span>
+                  <span>${{ getTrialBalance().equity.total | number:'1.2-2' }}</span>
+                </div>
               </div>
             </div>
-            <div class="stats">
-              <div class="stat-item">
-                <span class="stat-number">{{ getTotalTasks() }}</span>
-                <span class="stat-label">Total Tasks</span>
+          </div>
+
+          <div class="report-summary">
+            <div class="summary-item">
+              <h4>Profit & Loss Summary</h4>
+              <div class="summary-detail">
+                <span>Interest Income</span>
+                <span>${{ getMonthlyInterestIncome() * 12 | number:'1.2-2' }}</span>
               </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ getCompletedTasks() }}</span>
-                <span class="stat-label">Completed</span>
+              <div class="summary-detail">
+                <span>Operating Expenses</span>
+                <span>$0.00</span>
               </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ getPendingTasks() }}</span>
-                <span class="stat-label">Pending</span>
+              <div class="summary-total">
+                <span>Net Income</span>
+                <span>${{ getMonthlyInterestIncome() * 12 | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <div class="summary-item">
+              <h4>Balance Sheet Summary</h4>
+              <div class="summary-detail">
+                <span>Total Assets</span>
+                <span>${{ getTrialBalance().assets.total | number:'1.2-2' }}</span>
+              </div>
+              <div class="summary-detail">
+                <span>Total Liabilities</span>
+                <span>${{ getTrialBalance().liabilities.total | number:'1.2-2' }}</span>
+              </div>
+              <div class="summary-total">
+                <span>Net Worth</span>
+                <span>${{ getTrialBalance().equity.total | number:'1.2-2' }}</span>
               </div>
             </div>
           </div>
