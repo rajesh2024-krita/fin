@@ -1,405 +1,171 @@
 
-<div class="app-container">
-  <header class="app-header">
-    <h1>{{ title }}</h1>
-    <nav class="nav-menu" *ngIf="currentView !== 'login'">
-      <button class="nav-btn" (click)="currentView = 'dashboard'" [class.active]="currentView === 'dashboard'">Dashboard</button>
-      <button class="nav-btn" (click)="currentView = 'members'" [class.active]="currentView === 'members'">Members</button>
-      <button class="nav-btn" (click)="currentView = 'deposits'" [class.active]="currentView === 'deposits'">Deposits</button>
-      <button class="nav-btn" (click)="currentView = 'loans'" [class.active]="currentView === 'loans'">Loans</button>
-      <button class="nav-btn" (click)="currentView = 'transactions'" [class.active]="currentView === 'transactions'">Transactions</button>
-      <button class="nav-btn" (click)="currentView = 'reports'" [class.active]="currentView === 'reports'">Reports</button>
-      <button class="nav-btn logout" (click)="currentView = 'login'">Logout</button>
-    </nav>
-  </header>
-
-  <main class="app-main">
-    <div class="container">
-      @if (currentView === 'login') {
-        <div class="auth-section">
-          <div class="auth-card">
-            <h2>Financial Management System</h2>
-            <p>Manage member deposits, loans, and financial reports</p>
-            <form (ngSubmit)="login()" #loginForm="ngForm">
-              <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" [(ngModel)]="user.username" name="username" required>
-              </div>
-              <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" [(ngModel)]="user.email" name="email" required>
-              </div>
-              <button type="submit" class="btn btn-primary" [disabled]="!loginForm.form.valid">Login</button>
-            </form>
-          </div>
-        </div>
-      }
-
-      @if (currentView === 'dashboard') {
-        <div class="dashboard-section">
-          <h2>Dashboard</h2>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <h3>Total Members</h3>
-              <div class="stat-number">{{ getTotalMembers() }}</div>
-            </div>
-            <div class="stat-card">
-              <h3>Total Deposits</h3>
-              <div class="stat-number">${{ getTotalDeposits() | number:'1.2-2' }}</div>
-            </div>
-            <div class="stat-card">
-              <h3>Active Loans</h3>
-              <div class="stat-number">${{ getTotalActiveLoans() | number:'1.2-2' }}</div>
-            </div>
-            <div class="stat-card">
-              <h3>Monthly Interest Income</h3>
-              <div class="stat-number">${{ getMonthlyInterestIncome() | number:'1.2-2' }}</div>
-            </div>
-          </div>
-
-          <div class="recent-activities">
-            <h3>Recent Transactions</h3>
-            <div class="transaction-list">
-              @for (transaction of transactions.slice(0, 5); track transaction.id) {
-                <div class="transaction-item">
-                  <span class="transaction-type" [class]="'type-' + transaction.type">{{ transaction.type }}</span>
-                  <span class="transaction-member">{{ transaction.memberName }}</span>
-                  <span class="transaction-amount">${{ transaction.amount | number:'1.2-2' }}</span>
-                  <span class="transaction-date">{{ transaction.date | date:'shortDate' }}</span>
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      }
-
-      @if (currentView === 'members') {
-        <div class="members-section">
-          <div class="section-header">
-            <h2>Members Management</h2>
-            <button class="btn btn-primary" (click)="showAddMember = !showAddMember">
-              {{ showAddMember ? 'Cancel' : 'Add New Member' }}
-            </button>
-          </div>
-
-          @if (showAddMember) {
-            <div class="add-form">
-              <h3>Add New Member</h3>
-              <form (ngSubmit)="addMember()" #memberForm="ngForm">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="memberName">Full Name</label>
-                    <input type="text" id="memberName" [(ngModel)]="newMember.name" name="memberName" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="memberEmail">Email</label>
-                    <input type="email" id="memberEmail" [(ngModel)]="newMember.email" name="memberEmail" required>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="memberPhone">Phone</label>
-                    <input type="tel" id="memberPhone" [(ngModel)]="newMember.phone" name="memberPhone" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="memberAddress">Address</label>
-                    <input type="text" id="memberAddress" [(ngModel)]="newMember.address" name="memberAddress" required>
-                  </div>
-                </div>
-                <button type="submit" class="btn btn-success" [disabled]="!memberForm.form.valid">Add Member</button>
-              </form>
-            </div>
-          }
-
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Membership Date</th>
-                  <th>Total Deposits</th>
-                  <th>Active Loans</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (member of members; track member.id) {
-                  <tr>
-                    <td>{{ member.name }}</td>
-                    <td>{{ member.email }}</td>
-                    <td>{{ member.phone }}</td>
-                    <td>{{ member.membershipDate | date:'shortDate' }}</td>
-                    <td>${{ member.totalDeposits | number:'1.2-2' }}</td>
-                    <td>${{ member.activeLoans | number:'1.2-2' }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      }
-
-      @if (currentView === 'deposits') {
-        <div class="deposits-section">
-          <div class="section-header">
-            <h2>Deposits Management</h2>
-            <button class="btn btn-primary" (click)="showAddDeposit = !showAddDeposit">
-              {{ showAddDeposit ? 'Cancel' : 'Record New Deposit' }}
-            </button>
-          </div>
-
-          @if (showAddDeposit) {
-            <div class="add-form">
-              <h3>Record New Deposit</h3>
-              <form (ngSubmit)="addDeposit()" #depositForm="ngForm">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="depositMember">Member</label>
-                    <select id="depositMember" [(ngModel)]="newDeposit.memberId" name="depositMember" required>
-                      <option value="0">Select Member</option>
-                      @for (member of members; track member.id) {
-                        <option [value]="member.id">{{ member.name }}</option>
-                      }
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="depositAmount">Amount</label>
-                    <input type="number" id="depositAmount" [(ngModel)]="newDeposit.amount" name="depositAmount" 
-                           min="0" step="0.01" required>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="depositDescription">Description</label>
-                  <input type="text" id="depositDescription" [(ngModel)]="newDeposit.description" name="depositDescription">
-                </div>
-                <button type="submit" class="btn btn-success" [disabled]="!depositForm.form.valid">Record Deposit</button>
-              </form>
-            </div>
-          }
-
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Member</th>
-                  <th>Amount</th>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (deposit of deposits; track deposit.id) {
-                  <tr>
-                    <td>{{ deposit.memberName }}</td>
-                    <td>${{ deposit.amount | number:'1.2-2' }}</td>
-                    <td>{{ deposit.date | date:'shortDate' }}</td>
-                    <td>{{ deposit.description }}</td>
-                    <td><span class="status" [class]="'status-' + deposit.status">{{ deposit.status }}</span></td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      }
-
-      @if (currentView === 'loans') {
-        <div class="loans-section">
-          <div class="section-header">
-            <h2>Loans Management</h2>
-            <button class="btn btn-primary" (click)="showAddLoan = !showAddLoan">
-              {{ showAddLoan ? 'Cancel' : 'Create New Loan' }}
-            </button>
-          </div>
-
-          @if (showAddLoan) {
-            <div class="add-form">
-              <h3>Create New Loan</h3>
-              <form (ngSubmit)="addLoan()" #loanForm="ngForm">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="loanMember">Member</label>
-                    <select id="loanMember" [(ngModel)]="newLoan.memberId" name="loanMember" required>
-                      <option value="0">Select Member</option>
-                      @for (member of members; track member.id) {
-                        <option [value]="member.id">{{ member.name }}</option>
-                      }
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="loanAmount">Loan Amount</label>
-                    <input type="number" id="loanAmount" [(ngModel)]="newLoan.amount" name="loanAmount" 
-                           min="0" step="0.01" required>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="loanRate">Interest Rate (%)</label>
-                    <input type="number" id="loanRate" [(ngModel)]="newLoan.interestRate" name="loanRate" 
-                           min="0" step="0.1" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="loanTerm">Term (Months)</label>
-                    <input type="number" id="loanTerm" [(ngModel)]="newLoan.term" name="loanTerm" 
-                           min="1" required>
-                  </div>
-                </div>
-                <button type="submit" class="btn btn-success" [disabled]="!loanForm.form.valid">Create Loan</button>
-              </form>
-            </div>
-          }
-
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Member</th>
-                  <th>Amount</th>
-                  <th>Interest Rate</th>
-                  <th>Term</th>
-                  <th>Monthly Payment</th>
-                  <th>Remaining Balance</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (loan of loans; track loan.id) {
-                  <tr>
-                    <td>{{ loan.memberName }}</td>
-                    <td>${{ loan.amount | number:'1.2-2' }}</td>
-                    <td>{{ loan.interestRate }}%</td>
-                    <td>{{ loan.term }} months</td>
-                    <td>${{ loan.monthlyPayment | number:'1.2-2' }}</td>
-                    <td>${{ loan.remainingBalance | number:'1.2-2' }}</td>
-                    <td><span class="status" [class]="'status-' + loan.status">{{ loan.status }}</span></td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      }
-
-      @if (currentView === 'transactions') {
-        <div class="transactions-section">
-          <h2>Transaction History</h2>
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Member</th>
-                  <th>Amount</th>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Reference</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (transaction of transactions; track transaction.id) {
-                  <tr>
-                    <td><span class="transaction-type" [class]="'type-' + transaction.type">{{ transaction.type }}</span></td>
-                    <td>{{ transaction.memberName }}</td>
-                    <td>${{ transaction.amount | number:'1.2-2' }}</td>
-                    <td>{{ transaction.date | date:'short' }}</td>
-                    <td>{{ transaction.description }}</td>
-                    <td>{{ transaction.reference }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      }
-
-      @if (currentView === 'reports') {
-        <div class="reports-section">
-          <h2>Financial Reports</h2>
-          
-          <div class="report-card">
-            <h3>Trial Balance</h3>
-            <div class="trial-balance">
-              <div class="balance-section">
-                <h4>Assets</h4>
-                <div class="balance-item">
-                  <span>Cash & Bank</span>
-                  <span>${{ getTrialBalance().assets.cash | number:'1.2-2' }}</span>
-                </div>
-                <div class="balance-item">
-                  <span>Loans Receivable</span>
-                  <span>${{ getTrialBalance().assets.loansReceivable | number:'1.2-2' }}</span>
-                </div>
-                <div class="balance-total">
-                  <span>Total Assets</span>
-                  <span>${{ getTrialBalance().assets.total | number:'1.2-2' }}</span>
-                </div>
-              </div>
-
-              <div class="balance-section">
-                <h4>Liabilities</h4>
-                <div class="balance-item">
-                  <span>Member Deposits</span>
-                  <span>${{ getTrialBalance().liabilities.memberDeposits | number:'1.2-2' }}</span>
-                </div>
-                <div class="balance-total">
-                  <span>Total Liabilities</span>
-                  <span>${{ getTrialBalance().liabilities.total | number:'1.2-2' }}</span>
-                </div>
-              </div>
-
-              <div class="balance-section">
-                <h4>Equity</h4>
-                <div class="balance-item">
-                  <span>Retained Earnings</span>
-                  <span>${{ getTrialBalance().equity.retainedEarnings | number:'1.2-2' }}</span>
-                </div>
-                <div class="balance-total">
-                  <span>Total Equity</span>
-                  <span>${{ getTrialBalance().equity.total | number:'1.2-2' }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="report-summary">
-            <div class="summary-item">
-              <h4>Profit & Loss Summary</h4>
-              <div class="summary-detail">
-                <span>Interest Income</span>
-                <span>${{ getMonthlyInterestIncome() * 12 | number:'1.2-2' }}</span>
-              </div>
-              <div class="summary-detail">
-                <span>Operating Expenses</span>
-                <span>$0.00</span>
-              </div>
-              <div class="summary-total">
-                <span>Net Income</span>
-                <span>${{ getMonthlyInterestIncome() * 12 | number:'1.2-2' }}</span>
-              </div>
-            </div>
-
-            <div class="summary-item">
-              <h4>Balance Sheet Summary</h4>
-              <div class="summary-detail">
-                <span>Total Assets</span>
-                <span>${{ getTrialBalance().assets.total | number:'1.2-2' }}</span>
-              </div>
-              <div class="summary-detail">
-                <span>Total Liabilities</span>
-                <span>${{ getTrialBalance().liabilities.total | number:'1.2-2' }}</span>
-              </div>
-              <div class="summary-total">
-                <span>Net Worth</span>
-                <span>${{ getTrialBalance().equity.total | number:'1.2-2' }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      }
+<mat-sidenav-container class="app-container" hasBackdrop="false">
+  <mat-sidenav #sidenav mode="side" opened="true" class="app-sidenav">
+    <div class="sidenav-header">
+      <mat-icon class="app-icon">account_balance</mat-icon>
+      <h2>Financial Management</h2>
     </div>
-  </main>
-</div>
+    
+    <mat-nav-list class="nav-list">
+      <!-- File Menu -->
+      <mat-expansion-panel class="nav-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>folder</mat-icon>
+            File
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="submenu">
+          <a mat-list-item routerLink="/file/society">Society</a>
+          
+          <mat-expansion-panel class="sub-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Security</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="sub-submenu">
+              <a mat-list-item routerLink="/file/security/authority">Authority</a>
+              <a mat-list-item routerLink="/file/security/my-rights">My Rights</a>
+              <a mat-list-item routerLink="/file/security/new-user">New User</a>
+              <a mat-list-item routerLink="/file/security/retrieve-password">Retrieve Password</a>
+              <a mat-list-item routerLink="/file/security/change-password">Change Password</a>
+              <a mat-list-item routerLink="/file/security/admin-handover">Admin Handover</a>
+            </div>
+          </mat-expansion-panel>
+          
+          <a mat-list-item routerLink="/file/create-new-year">Create New Year</a>
+          <a mat-list-item routerLink="/file/edit-opening-balance">Edit Opening Balance</a>
+        </div>
+      </mat-expansion-panel>
 
-<router-outlet />
+      <!-- Master Menu -->
+      <mat-expansion-panel class="nav-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>settings</mat-icon>
+            Master
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="submenu">
+          <a mat-list-item routerLink="/master/member-details">Member Details</a>
+          <a mat-list-item routerLink="/master/table">Table</a>
+          <a mat-list-item routerLink="/master/deposit-scheme">Deposit Scheme</a>
+          <a mat-list-item routerLink="/master/interest-master">Interest Master</a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Transaction Menu -->
+      <mat-expansion-panel class="nav-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>swap_horiz</mat-icon>
+            Transaction
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="submenu">
+          <a mat-list-item routerLink="/transaction/loan-taken">Loan Taken</a>
+          <a mat-list-item routerLink="/transaction/demand-process">Demand Process</a>
+          <a mat-list-item routerLink="/transaction/account-closure">Account Closure</a>
+          <a mat-list-item routerLink="/transaction/deposit-receipt">Deposit Receipt</a>
+          <a mat-list-item routerLink="/transaction/deposit-renew">Deposit Renew</a>
+          <a mat-list-item routerLink="/transaction/deposit-slip">Deposit Slip</a>
+          <a mat-list-item routerLink="/transaction/deposit-payment">Deposit Payment</a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Accounts Menu -->
+      <mat-expansion-panel class="nav-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>account_balance_wallet</mat-icon>
+            Accounts
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="submenu">
+          <a mat-list-item routerLink="/accounts/group">Group</a>
+          <a mat-list-item routerLink="/accounts/ledger">Ledger</a>
+          <a mat-list-item routerLink="/accounts/cash-book">Cash Book</a>
+          <a mat-list-item routerLink="/accounts/day-book">Day Book</a>
+          <a mat-list-item routerLink="/accounts/voucher">Voucher</a>
+          <a mat-list-item routerLink="/accounts/loan-receipt">Loan Receipt</a>
+          <a mat-list-item routerLink="/accounts/trial-balance">Trial Balance</a>
+          <a mat-list-item routerLink="/accounts/balance-sheet">Balance Sheet</a>
+          <a mat-list-item routerLink="/accounts/profit-loss">Profit & Loss A/c</a>
+          <a mat-list-item routerLink="/accounts/receipt-payment">Receipt & Payment</a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Reports Menu -->
+      <mat-expansion-panel class="nav-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>assessment</mat-icon>
+            Reports
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="submenu">
+          <a mat-list-item routerLink="/reports/employees">Employees</a>
+          <a mat-list-item routerLink="/reports/voucher">Voucher</a>
+          <a mat-list-item routerLink="/reports/opening-balance">Opening Balance</a>
+          <a mat-list-item routerLink="/reports/closing-balance">Closing Balance</a>
+          <a mat-list-item routerLink="/reports/loan">Loan</a>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Single Items -->
+      <a mat-list-item routerLink="/statement">
+        <mat-icon>description</mat-icon>
+        Statement
+      </a>
+      
+      <a mat-list-item routerLink="/backup">
+        <mat-icon>backup</mat-icon>
+        Backup
+      </a>
+      
+      <a mat-list-item routerLink="/admin">
+        <mat-icon>admin_panel_settings</mat-icon>
+        Admin
+      </a>
+      
+      <a mat-list-item routerLink="/new-year">
+        <mat-icon>calendar_today</mat-icon>
+        New Year
+      </a>
+      
+      <a mat-list-item routerLink="/login">
+        <mat-icon>exit_to_app</mat-icon>
+        Exit
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="app-content">
+    <mat-toolbar color="primary" class="app-toolbar">
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>Financial Management System</span>
+      <span class="toolbar-spacer"></span>
+      <span>Welcome, {{ currentUser }}</span>
+      <button mat-icon-button [matMenuTriggerFor]="userMenu">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item routerLink="/file/security/change-password">
+        <mat-icon>lock</mat-icon>
+        Change Password
+      </button>
+      <button mat-menu-item routerLink="/login">
+        <mat-icon>logout</mat-icon>
+        Logout
+      </button>
+    </mat-menu>
+
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
