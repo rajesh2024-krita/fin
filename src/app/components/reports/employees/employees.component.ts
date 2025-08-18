@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { FormsModule } from '@angular/forms';
 
 interface Employee {
   id: number;
@@ -29,6 +30,7 @@ interface Employee {
   imports: [
     CommonModule,
     MatTableModule,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
