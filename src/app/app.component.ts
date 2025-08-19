@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -8,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
+import { Subscription } from 'rxjs';
 import { AuthService, User, UserRole } from './services/auth.service';
 
 @Component({
@@ -15,8 +17,8 @@ import { AuthService, User, UserRole } from './services/auth.service';
   standalone: true,
   imports: [
     RouterOutlet,
-    RouterLink,           // 👈 Add this
-    RouterLinkActive,     // 👈 And this
+    RouterLink,
+    RouterLinkActive,
     CommonModule,
     MatSidenavModule,
     MatToolbarModule,
@@ -29,27 +31,46 @@ import { AuthService, User, UserRole } from './services/auth.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'Financial Management System';
   currentUser: User | null = null;
   currentUserName = '';
+  isMobile = false;
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    this.checkScreenSize();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    this.isMobile = window.innerWidth < 768;
+  }
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
+    const userSub = this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       this.currentUserName = user ? `${user.firstName} ${user.lastName}` : 'Guest';
     });
 
-    this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+    const loginSub = this.authService.isLoggedIn$.subscribe(isLoggedIn => {
       if (!isLoggedIn && this.router.url !== '/login') {
         this.router.navigate(['/login']);
       }
     });
+
+    this.subscriptions.push(userSub, loginSub);
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   logout() {
@@ -105,7 +126,7 @@ export class AppComponent implements OnInit {
   }
 
   canAccessReports(): boolean {
-    return true; // All users can view reports (with filtered data)
+    return true;
   }
 
   canAccessAdmin(): boolean {

@@ -1,9 +1,22 @@
+
 .app-container {
   @apply h-screen flex;
 }
 
 .app-sidenav {
   @apply w-72 bg-gray-50 border-r border-gray-200;
+}
+
+@screen md {
+  .app-sidenav {
+    @apply w-64;
+  }
+}
+
+@screen sm {
+  .app-sidenav {
+    @apply w-56;
+  }
 }
 
 .sidenav-header {
@@ -79,7 +92,7 @@
 }
 
 .content-wrapper {
-  @apply flex-1 p-5 bg-gray-50 overflow-y-auto;
+  @apply flex-1 p-2 sm:p-4 lg:p-6 bg-gray-50 overflow-y-auto;
 }
 
 /* Material Panel Overrides */
@@ -95,13 +108,17 @@
   @apply h-10 !important text-sm;
 }
 
-/* Responsive Design */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .app-sidenav {
-    @apply w-64;
-  }
-
   .content-wrapper {
     @apply p-2;
+  }
+  
+  .sidenav-header h2 {
+    @apply text-base;
+  }
+  
+  .nav-list a[mat-list-item] {
+    @apply text-sm;
   }
 }

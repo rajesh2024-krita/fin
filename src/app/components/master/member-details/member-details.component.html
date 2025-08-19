@@ -1,447 +1,248 @@
-
-<div class="container-responsive py-6">
-  <!-- Page Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900">Member Management</h1>
-      <p class="text-gray-600 mt-2">Manage society members and their details</p>
+<div class="container-responsive">
+  <!-- Header Section -->
+  <div class="flex-responsive mb-6">
+    <div class="flex-1">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Member Details</h1>
+      <p class="text-gray-600">Manage member information and accounts</p>
     </div>
-    <button 
-      (click)="openMemberForm()" 
-      class="btn-primary flex items-center gap-2 px-6 py-3">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-      </svg>
-      Add New Member
+    <button mat-raised-button color="primary" (click)="openAddDialog()" class="btn-primary">
+      <mat-icon>add</mat-icon>
+      <span class="hidden sm:inline ml-2">Add Member</span>
     </button>
   </div>
 
-  <!-- Search and Filters -->
-  <div class="card p-6 mb-8">
-    <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-      <div class="flex-1 max-w-md">
-        <input 
-          type="text" 
-          [(ngModel)]="searchTerm" 
-          (input)="filterMembers()"
-          placeholder="Search members..." 
-          class="form-input">
-      </div>
-      <div class="flex gap-2 flex-wrap">
-        <button 
-          *ngFor="let filter of ['All', 'Active', 'Inactive', 'Pending']"
-          (click)="setStatusFilter(filter.toLowerCase())"
-          [class]="statusFilter === filter.toLowerCase() ? 'btn-primary' : 'btn-secondary'"
-          class="px-4 py-2 text-sm">
-          {{filter}}
-        </button>
-      </div>
+  <!-- Search and Filter Section -->
+  <mat-card class="card p-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <mat-form-field class="full-width">
+        <mat-label>Search Members</mat-label>
+        <input matInput [(ngModel)]="searchTerm" (input)="applyFilter()" placeholder="Name, ID, Phone...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter" (selectionChange)="applyFilter()">
+          <mat-option value="">All</mat-option>
+          <mat-option value="active">Active</mat-option>
+          <mat-option value="inactive">Inactive</mat-option>
+          <mat-option value="suspended">Suspended</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>Category</mat-label>
+        <mat-select [(ngModel)]="categoryFilter" (selectionChange)="applyFilter()">
+          <mat-option value="">All Categories</mat-option>
+          <mat-option value="regular">Regular</mat-option>
+          <mat-option value="premium">Premium</mat-option>
+          <mat-option value="staff">Staff</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-stroked-button (click)="resetFilters()" class="btn-secondary h-14">
+        <mat-icon>clear</mat-icon>
+        Reset Filters
+      </button>
     </div>
+  </mat-card>
+
+  <!-- Statistics Cards -->
+  <div class="grid-responsive mb-6">
+    <mat-card class="card p-4 text-center">
+      <mat-icon class="text-4xl text-blue-600 mb-2">people</mat-icon>
+      <h3 class="text-xl font-bold text-gray-900">{{ totalMembers }}</h3>
+      <p class="text-gray-600">Total Members</p>
+    </mat-card>
+
+    <mat-card class="card p-4 text-center">
+      <mat-icon class="text-4xl text-green-600 mb-2">check_circle</mat-icon>
+      <h3 class="text-xl font-bold text-gray-900">{{ activeMembers }}</h3>
+      <p class="text-gray-600">Active Members</p>
+    </mat-card>
+
+    <mat-card class="card p-4 text-center">
+      <mat-icon class="text-4xl text-orange-600 mb-2">pending</mat-icon>
+      <h3 class="text-xl font-bold text-gray-900">{{ pendingMembers }}</h3>
+      <p class="text-gray-600">Pending Approval</p>
+    </mat-card>
+
+    <mat-card class="card p-4 text-center">
+      <mat-icon class="text-4xl text-purple-600 mb-2">account_balance_wallet</mat-icon>
+      <h3 class="text-xl font-bold text-gray-900">₹{{ totalBalance | number }}</h3>
+      <p class="text-gray-600">Total Balance</p>
+    </mat-card>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="card p-6 text-center">
-      <div class="text-3xl font-bold text-blue-600 mb-2">{{stats.total}}</div>
-      <div class="text-gray-600">Total Members</div>
+  <!-- Members Table -->
+  <mat-card class="card">
+    <div class="p-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold">Members List</h2>
     </div>
-    <div class="card p-6 text-center">
-      <div class="text-3xl font-bold text-green-600 mb-2">{{stats.active}}</div>
-      <div class="text-gray-600">Active Members</div>
-    </div>
-    <div class="card p-6 text-center">
-      <div class="text-3xl font-bold text-yellow-600 mb-2">{{stats.pending}}</div>
-      <div class="text-gray-600">Pending Approval</div>
-    </div>
-    <div class="card p-6 text-center">
-      <div class="text-3xl font-bold text-red-600 mb-2">{{stats.inactive}}</div>
-      <div class="text-gray-600">Inactive Members</div>
-    </div>
-  </div>
 
-  <!-- Desktop Table View -->
-  <div class="hidden lg:block">
-    <div class="card overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-lg font-semibold text-gray-900">Members List</h2>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="table-header">
-            <tr>
-              <th class="px-6 py-3 text-left">Member No.</th>
-              <th class="px-6 py-3 text-left">Name</th>
-              <th class="px-6 py-3 text-left">Branch</th>
-              <th class="px-6 py-3 text-left">Mobile</th>
-              <th class="px-6 py-3 text-left">Status</th>
-              <th class="px-6 py-3 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr *ngFor="let member of filteredMembers" class="hover:bg-gray-50">
-              <td class="table-cell font-medium">{{member.memberNo}}</td>
-              <td class="table-cell">
-                <div class="flex items-center">
-                  <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3">
-                    <span class="text-sm font-medium text-gray-700">{{member.name.charAt(0)}}</span>
-                  </div>
-                  <div>
-                    <div class="font-medium text-gray-900">{{member.name}}</div>
-                    <div class="text-sm text-gray-500">{{member.email}}</div>
-                  </div>
-                </div>
-              </td>
-              <td class="table-cell">{{member.branch}}</td>
-              <td class="table-cell">{{member.mobile}}</td>
-              <td class="table-cell">
-                <span [class]="'status-badge status-' + member.status">
-                  {{member.status | titlecase}}
-                </span>
-              </td>
-              <td class="table-cell">
-                <div class="flex gap-2">
-                  <button 
-                    (click)="editMember(member)" 
-                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                  </button>
-                  <button 
-                    (click)="deleteMember(member.id)" 
-                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Mobile Card View -->
-  <div class="lg:hidden">
-    <div class="space-y-4">
-      <div *ngFor="let member of filteredMembers" class="card p-4">
-        <div class="flex justify-between items-start mb-3">
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-3">
-              <span class="font-medium text-gray-700">{{member.name.charAt(0)}}</span>
-            </div>
-            <div>
-              <h3 class="font-semibold text-gray-900">{{member.name}}</h3>
-              <p class="text-sm text-gray-600">{{member.memberNo}}</p>
-            </div>
+    <!-- Mobile View -->
+    <div class="block sm:hidden">
+      <div *ngFor="let member of filteredMembers" class="p-4 border-b border-gray-100 last:border-b-0">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <h3 class="font-semibold text-gray-900">{{ member.firstName }} {{ member.lastName }}</h3>
+            <p class="text-sm text-gray-600">ID: {{ member.membershipId }}</p>
           </div>
-          <span [class]="'status-badge status-' + member.status">
-            {{member.status | titlecase}}
-          </span>
+          <span class="status-badge" [ngClass]="{
+            'status-active': member.status === 'active',
+            'status-inactive': member.status === 'inactive',
+            'status-pending': member.status === 'pending'
+          }">{{ member.status | titlecase }}</span>
         </div>
-        
-        <div class="space-y-2 mb-4">
-          <div class="flex items-center text-sm text-gray-600">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 7.89a2 2 0 002.83 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-            </svg>
-            {{member.email}}
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <span class="text-gray-600">Phone:</span>
+            <span class="ml-1">{{ member.phone }}</span>
           </div>
-          <div class="flex items-center text-sm text-gray-600">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-            </svg>
-            {{member.mobile}}
+          <div>
+            <span class="text-gray-600">Category:</span>
+            <span class="ml-1">{{ member.category | titlecase }}</span>
           </div>
-          <div class="flex items-center text-sm text-gray-600">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-            </svg>
-            {{member.branch}}
+          <div>
+            <span class="text-gray-600">Join Date:</span>
+            <span class="ml-1">{{ member.joinDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div>
+            <span class="text-gray-600">Balance:</span>
+            <span class="ml-1 font-semibold text-green-600">₹{{ member.balance | number }}</span>
           </div>
         </div>
-        
-        <div class="flex gap-2">
-          <button 
-            (click)="editMember(member)" 
-            class="flex-1 btn-secondary text-sm py-2">
+        <div class="flex gap-2 mt-3">
+          <button mat-button color="primary" (click)="viewMember(member)" class="flex-1">
+            <mat-icon>visibility</mat-icon>
+            View
+          </button>
+          <button mat-button (click)="editMember(member)" class="flex-1">
+            <mat-icon>edit</mat-icon>
             Edit
           </button>
-          <button 
-            (click)="deleteMember(member.id)" 
-            class="flex-1 btn-danger text-sm py-2">
+          <button mat-button color="warn" (click)="deleteMember(member)" class="flex-1">
+            <mat-icon>delete</mat-icon>
             Delete
           </button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Pagination -->
-  <div class="flex justify-center mt-8" *ngIf="filteredMembers.length > 0">
-    <nav class="flex items-center gap-2">
-      <button class="px-3 py-2 text-sm btn-secondary">Previous</button>
-      <button class="px-3 py-2 text-sm btn-primary">1</button>
-      <button class="px-3 py-2 text-sm btn-secondary">2</button>
-      <button class="px-3 py-2 text-sm btn-secondary">3</button>
-      <button class="px-3 py-2 text-sm btn-secondary">Next</button>
-    </nav>
-  </div>
+    <!-- Desktop Table View -->
+    <div class="hidden sm:block overflow-x-auto">
+      <table mat-table [dataSource]="filteredMembers" class="w-full">
+        <ng-container matColumnDef="membershipId">
+          <th mat-header-cell *matHeaderCellDef class="table-header">ID</th>
+          <td mat-cell *matCellDef="let member" class="table-cell">{{ member.membershipId }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef class="table-header">Name</th>
+          <td mat-cell *matCellDef="let member" class="table-cell">
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <span class="text-blue-600 font-semibold text-sm">
+                  {{ member.firstName.charAt(0) }}{{ member.lastName.charAt(0) }}
+                </span>
+              </div>
+              <div>
+                <div class="font-medium">{{ member.firstName }} {{ member.lastName }}</div>
+                <div class="text-sm text-gray-600">{{ member.email }}</div>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="phone">
+          <th mat-header-cell *matHeaderCellDef class="table-header">Phone</th>
+          <td mat-cell *matCellDef="let member" class="table-cell">{{ member.phone }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef class="table-header">Category</th>
+          <td mat-cell *matCellDef="let member" class="table-cell">
+            <span class="capitalize">{{ member.category }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="joinDate">
+          <th mat-header-cell *matHeaderCellDef class="table-header">Join Date</th>
+          <td mat-cell *matCellDef="let member" class="table-cell">{{ member.joinDate | date:'dd/MM/yyyy' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="balance">
+          <th mat-header-cell *matHeaderCellDef class="table-header">Balance</th>
+          <td mat-cell *matCellDef="let member" class="table-cell">
+            <span class="font-semibold text-green-600">₹{{ member.balance | number }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef class="table-header">Status</th>
+          <td mat-cell *matCellDef="let member" class="table-cell">
+            <span class="status-badge" [ngClass]="{
+              'status-active': member.status === 'active',
+              'status-inactive': member.status === 'inactive',
+              'status-pending': member.status === 'pending'
+            }">{{ member.status | titlecase }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="table-header">Actions</th>
+          <td mat-cell *matCellDef="let member" class="table-cell">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" color="primary">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewMember(member)">
+                <mat-icon>visibility</mat-icon>
+                View Details
+              </button>
+              <button mat-menu-item (click)="editMember(member)">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              <button mat-menu-item (click)="printMemberCard(member)">
+                <mat-icon>print</mat-icon>
+                Print Card
+              </button>
+              <button mat-menu-item (click)="deleteMember(member)">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator 
+      [pageSizeOptions]="[10, 25, 50, 100]" 
+      [pageSize]="25"
+      showFirstLastButtons>
+    </mat-paginator>
+  </mat-card>
 </div>
 
-<!-- Member Form Offcanvas -->
-<div class="fixed inset-0 z-50" *ngIf="showMemberForm" (click)="closeMemberForm()">
-  <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-  <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-xl" (click)="$event.stopPropagation()">
-    <div class="h-full flex flex-col">
-      <!-- Form Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-200">
-        <h2 class="text-xl font-semibold text-gray-900">
-          {{currentMember?.id ? 'Edit Member' : 'Add New Member'}}
-        </h2>
-        <button (click)="closeMemberForm()" class="p-2 text-gray-400 hover:text-gray-600">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
+<!-- Loading State -->
+<div *ngIf="loading" class="loading">
+  <mat-spinner diameter="50"></mat-spinner>
+  <p class="mt-4 text-gray-600">Loading members...</p>
+</div>
 
-      <!-- Form Content -->
-      <div class="flex-1 overflow-y-auto p-6">
-        <form [formGroup]="memberForm" (ngSubmit)="saveMember()">
-          <!-- Tabs -->
-          <div class="border-b border-gray-200 mb-6">
-            <nav class="flex space-x-8">
-              <button 
-                type="button"
-                *ngFor="let tab of tabs; let i = index"
-                (click)="setActiveTab(i)"
-                [class]="activeTab === i ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                class="py-2 px-1 border-b-2 font-medium text-sm">
-                {{tab.title}}
-              </button>
-            </nav>
-          </div>
-
-          <!-- General Tab -->
-          <div *ngIf="activeTab === 0" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="form-label">Member No.</label>
-                <input type="text" formControlName="memberNo" class="form-input bg-gray-50" readonly>
-              </div>
-              <div>
-                <label class="form-label">Name *</label>
-                <input type="text" formControlName="name" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">F/H Name</label>
-                <input type="text" formControlName="fhName" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Mobile *</label>
-                <input type="tel" formControlName="mobile" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Email</label>
-                <input type="email" formControlName="email" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Branch *</label>
-                <select formControlName="branch" class="form-input">
-                  <option value="">Select Branch</option>
-                  <option value="main">Main Branch</option>
-                  <option value="north">North Branch</option>
-                  <option value="south">South Branch</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label">Phone (Off.)</label>
-                <input type="tel" formControlName="phoneOffice" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Phone (Res.)</label>
-                <input type="tel" formControlName="phoneResidence" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Designation</label>
-                <input type="text" formControlName="designation" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Date of Birth</label>
-                <input type="date" formControlName="dob" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Date of Joining Society</label>
-                <input type="date" formControlName="dojSociety" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Date of Joining</label>
-                <input type="date" formControlName="doj" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Date of Retirement</label>
-                <input type="date" formControlName="dor" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Nominee</label>
-                <input type="text" formControlName="nominee" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Nominee Relation</label>
-                <input type="text" formControlName="nomineeRelation" class="form-input">
-              </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="form-label">Office Address</label>
-                <textarea formControlName="officeAddress" rows="3" class="form-input"></textarea>
-              </div>
-              <div>
-                <label class="form-label">Residence Address</label>
-                <textarea formControlName="residenceAddress" rows="3" class="form-input"></textarea>
-              </div>
-            </div>
-            
-            <div>
-              <label class="form-label">City</label>
-              <input type="text" formControlName="city" class="form-input">
-            </div>
-          </div>
-
-          <!-- Photo & Opening Balance Tab -->
-          <div *ngIf="activeTab === 1" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="form-label">Opening Balance (Share)</label>
-                <input type="number" formControlName="openingBalanceShare" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Opening Balance (CR)</label>
-                <input type="number" formControlName="openingBalanceCr" class="form-input">
-              </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="form-label">Bank Name</label>
-                <input type="text" formControlName="bankName" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Payable At</label>
-                <input type="text" formControlName="payableAt" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Account No.</label>
-                <input type="text" formControlName="accountNo" class="form-input">
-              </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="form-label">Status</label>
-                <select formControlName="status" class="form-input">
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="pending">Pending</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label">Date</label>
-                <input type="date" formControlName="date" class="form-input">
-              </div>
-            </div>
-          </div>
-
-          <!-- Monthly Deduction Tab -->
-          <div *ngIf="activeTab === 2" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="form-label">Deduction Share</label>
-                <input type="number" formControlName="deductionShare" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">Deduction Withdrawal</label>
-                <input type="number" formControlName="deductionWithdrawal" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">G Loan Instalment</label>
-                <input type="number" formControlName="gLoanInstalment" class="form-input">
-              </div>
-              <div>
-                <label class="form-label">E Loan Instalment</label>
-                <input type="number" formControlName="eLoanInstalment" class="form-input">
-              </div>
-            </div>
-          </div>
-
-          <!-- Photo Tab -->
-          <div *ngIf="activeTab === 3" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Photo Upload -->
-              <div>
-                <label class="form-label">Photo</label>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
-                     (click)="photoInput.click()"
-                     (dragover)="onDragOver($event)"
-                     (drop)="onPhotoDrop($event)">
-                  <div *ngIf="!photoPreview" class="space-y-2">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <div class="text-sm text-gray-600">
-                      <span class="font-medium text-blue-600 hover:text-blue-500">Click to upload</span> or drag and drop
-                    </div>
-                    <p class="text-xs text-gray-500">PNG, JPG up to 2MB</p>
-                  </div>
-                  <div *ngIf="photoPreview" class="space-y-2">
-                    <img [src]="photoPreview" alt="Photo preview" class="mx-auto h-32 w-32 object-cover rounded-lg">
-                    <button type="button" (click)="removePhoto(); $event.stopPropagation()" class="text-sm text-red-600 hover:text-red-500">Remove</button>
-                  </div>
-                </div>
-                <input #photoInput type="file" (change)="onPhotoSelect($event)" accept="image/*" class="hidden">
-              </div>
-
-              <!-- Signature Upload -->
-              <div>
-                <label class="form-label">Signature</label>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
-                     (click)="signatureInput.click()"
-                     (dragover)="onDragOver($event)"
-                     (drop)="onSignatureDrop($event)">
-                  <div *ngIf="!signaturePreview" class="space-y-2">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M8 14v20c0 4.418 7.163 8 16 8 1.381 0 2.721-.087 4-.252M8 14c0 4.418 7.163 8 16 8s16-3.582 16-8M8 14c0-4.418 7.163-8 16-8s16 3.582 16 8m0 0v14m-16-4h.01M32 18.01h.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <div class="text-sm text-gray-600">
-                      <span class="font-medium text-blue-600 hover:text-blue-500">Click to upload</span> or drag and drop
-                    </div>
-                    <p class="text-xs text-gray-500">PNG, JPG up to 1MB</p>
-                  </div>
-                  <div *ngIf="signaturePreview" class="space-y-2">
-                    <img [src]="signaturePreview" alt="Signature preview" class="mx-auto h-20 w-32 object-cover rounded-lg">
-                    <button type="button" (click)="removeSignature(); $event.stopPropagation()" class="text-sm text-red-600 hover:text-red-500">Remove</button>
-                  </div>
-                </div>
-                <input #signatureInput type="file" (change)="onSignatureSelect($event)" accept="image/*" class="hidden">
-              </div>
-            </div>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 mt-8">
-            <button type="button" (click)="closeMemberForm()" class="btn-secondary px-6 py-3">
-              Cancel
-            </button>
-            <button type="submit" [disabled]="memberForm.invalid" class="btn-primary px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
-              {{currentMember?.id ? 'Update Member' : 'Save Member'}}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+<!-- Empty State -->
+<div *ngIf="!loading && filteredMembers.length === 0" class="text-center py-12">
+  <mat-icon class="text-6xl text-gray-400 mb-4">people_outline</mat-icon>
+  <h3 class="text-xl font-semibold text-gray-600 mb-2">No members found</h3>
+  <p class="text-gray-500 mb-4">Try adjusting your search criteria or add a new member.</p>
+  <button mat-raised-button color="primary" (click)="openAddDialog()">
+    <mat-icon>add</mat-icon>
+    Add First Member
+  </button>
 </div>
