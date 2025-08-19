@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -17,6 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { AuthService, UserRole } from '../../../services/auth.service';
 
 interface Member {
@@ -79,439 +80,442 @@ interface Member {
     MatTooltipModule,
     MatTabsModule,
     MatCheckboxModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatSidenavModule
   ],
   template: `
     <div class="page-container">
-      <div class="page-header">
-        <h1>Member Details Management</h1>
-        <div class="header-actions" *ngIf="canCreateMembers">
-          <button mat-fab color="primary" class="add-fab" (click)="scrollToForm()" 
-                  [class.hidden-mobile]="true">
-            <mat-icon>add</mat-icon>
-          </button>
-        </div>
-      </div>
-      
-      <!-- Access Denied Message -->
-      <mat-card *ngIf="!canCreateMembers && !canEditMembers" class="access-denied">
-        <mat-card-content>
-          <div class="access-denied-content">
-            <mat-icon color="warn">block</mat-icon>
-            <h3>Access Denied</h3>
-            <p>You don't have permission to manage members. Only Super Admins and Society Admins can create and manage members.</p>
+      <mat-sidenav-container class="sidenav-container">
+        <!-- Main Content -->
+        <mat-sidenav-content>
+          <div class="page-header">
+            <h1>Member Details Management</h1>
+            <div class="header-actions" *ngIf="canCreateMembers">
+              <button mat-raised-button color="primary" (click)="openMemberForm()" 
+                      class="add-member-btn">
+                <mat-icon>add</mat-icon>
+                Add New Member
+              </button>
+            </div>
           </div>
-        </mat-card-content>
-      </mat-card>
 
-      <!-- Add/Edit Member Form -->
-      <mat-card class="form-card" *ngIf="canCreateMembers" #memberFormCard>
-        <mat-card-header>
-          <div class="card-header-content">
-            <mat-card-title>{{editingMember ? 'Edit Member' : 'Add New Member'}}</mat-card-title>
-            <button mat-icon-button class="close-form-btn" (click)="resetForm()" *ngIf="editingMember">
+          <!-- Access Denied Message -->
+          <mat-card *ngIf="!canCreateMembers && !canEditMembers" class="access-denied">
+            <mat-card-content>
+              <div class="access-denied-content">
+                <mat-icon color="warn">block</mat-icon>
+                <h3>Access Denied</h3>
+                <p>You don't have permission to manage members. Only Super Admins and Society Admins can create and manage members.</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Members List -->
+          <mat-card class="table-card" *ngIf="canCreateMembers || canEditMembers">
+            <mat-card-header>
+              <div class="card-header-content">
+                <mat-card-title>Members List ({{filteredMembers.length}})</mat-card-title>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-controls">
+                <mat-form-field appearance="outline" class="search-field">
+                  <mat-label>Search Members</mat-label>
+                  <input matInput (keyup)="applyFilter($event)" placeholder="Search by name, phone, or member no">
+                  <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+              </div>
+              
+              <!-- Desktop Table View -->
+              <div class="table-container desktop-view">
+                <table mat-table [dataSource]="filteredMembers" class="members-table">
+                  <ng-container matColumnDef="memberNo">
+                    <th mat-header-cell *matHeaderCellDef>Member No</th>
+                    <td mat-cell *matCellDef="let member">{{member.memberNo}}</td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let member">{{member.name}}</td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="mobile">
+                    <th mat-header-cell *matHeaderCellDef>Mobile</th>
+                    <td mat-cell *matCellDef="let member">{{member.mobile}}</td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="branch">
+                    <th mat-header-cell *matHeaderCellDef>Branch</th>
+                    <td mat-cell *matCellDef="let member">{{member.branch}}</td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="dojSociety">
+                    <th mat-header-cell *matHeaderCellDef>DOJ Society</th>
+                    <td mat-cell *matCellDef="let member">{{member.dojSociety | date}}</td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let member">
+                      <span class="status-badge" [class]="'status-' + member.status.toLowerCase()">
+                        {{member.status}}
+                      </span>
+                    </td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let member">
+                      <div class="action-buttons">
+                        <button mat-icon-button (click)="editMember(member)" color="primary" 
+                                [disabled]="!canEditMembers"
+                                matTooltip="Edit Member">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="deleteMember(member.id)" color="warn"
+                                [disabled]="!canEditMembers"
+                                matTooltip="Delete Member">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="viewMember(member)" color="accent"
+                                matTooltip="View Details">
+                          <mat-icon>visibility</mat-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </ng-container>
+                  
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+              </div>
+
+              <!-- Mobile Card View -->
+              <div class="mobile-view">
+                <div class="member-card" *ngFor="let member of filteredMembers">
+                  <div class="member-card-header">
+                    <div class="member-info">
+                      <h3>{{member.name}}</h3>
+                      <p class="member-number">{{member.memberNo}}</p>
+                    </div>
+                    <span class="status-badge" [class]="'status-' + member.status.toLowerCase()">
+                      {{member.status}}
+                    </span>
+                  </div>
+                  <div class="member-card-content">
+                    <div class="info-row">
+                      <mat-icon>phone</mat-icon>
+                      <span>{{member.mobile}}</span>
+                    </div>
+                    <div class="info-row">
+                      <mat-icon>business</mat-icon>
+                      <span>{{member.branch}}</span>
+                    </div>
+                    <div class="info-row">
+                      <mat-icon>calendar_today</mat-icon>
+                      <span>{{member.dojSociety | date}}</span>
+                    </div>
+                    <div class="info-row">
+                      <mat-icon>email</mat-icon>
+                      <span>{{member.email || 'Not provided'}}</span>
+                    </div>
+                  </div>
+                  <div class="member-card-actions">
+                    <button mat-button (click)="editMember(member)" color="primary"
+                            [disabled]="!canEditMembers">
+                      <mat-icon>edit</mat-icon>
+                      Edit
+                    </button>
+                    <button mat-button (click)="viewMember(member)" color="accent">
+                      <mat-icon>visibility</mat-icon>
+                      View
+                    </button>
+                    <button mat-button (click)="deleteMember(member.id)" color="warn"
+                            [disabled]="!canEditMembers">
+                      <mat-icon>delete</mat-icon>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="no-data" *ngIf="filteredMembers.length === 0">
+                <mat-icon>people_outline</mat-icon>
+                <h3>No members found</h3>
+                <p>{{members.length === 0 ? 'Start by adding your first member' : 'Try adjusting your search criteria'}}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </mat-sidenav-content>
+
+        <!-- Offcanvas Form -->
+        <mat-sidenav #memberFormSidenav 
+                     mode="over" 
+                     position="end" 
+                     class="member-form-sidenav"
+                     (closed)="closeMemberForm()">
+          <div class="sidenav-header">
+            <h2>{{editingMember ? 'Edit Member' : 'Add New Member'}}</h2>
+            <button mat-icon-button (click)="closeMemberForm()">
               <mat-icon>close</mat-icon>
             </button>
           </div>
-        </mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="memberForm" (ngSubmit)="saveMember()">
-            <mat-tab-group class="member-tabs">
-              
-              <!-- General Tab -->
-              <mat-tab label="General">
-                <div class="tab-content">
-                  <div class="form-grid">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Member No</mat-label>
-                      <input matInput formControlName="memberNo" readonly>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Name</mat-label>
-                      <input matInput formControlName="name" required>
-                      <mat-error *ngIf="memberForm.get('name')?.hasError('required')">Name is required</mat-error>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>F/H Name</mat-label>
-                      <input matInput formControlName="fatherHusbandName" required>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>Office Address</mat-label>
-                      <textarea matInput formControlName="officeAddress" rows="2"></textarea>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>City</mat-label>
-                      <input matInput formControlName="city" required>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Phone (Off.)</mat-label>
-                      <input matInput formControlName="phoneOffice">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Branch</mat-label>
-                      <mat-select formControlName="branch">
-                        <mat-option value="Main Branch">Main Branch</mat-option>
-                        <mat-option value="Branch A">Branch A</mat-option>
-                        <mat-option value="Branch B">Branch B</mat-option>
-                        <mat-option value="Branch C">Branch C</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Phone (Res.)</mat-label>
-                      <input matInput formControlName="phoneResidence">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Designation</mat-label>
-                      <input matInput formControlName="designation">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Mobile</mat-label>
-                      <input matInput formControlName="mobile" required>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>Residence Address</mat-label>
-                      <textarea matInput formControlName="residenceAddress" rows="2" required></textarea>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Date of Birth</mat-label>
-                      <input matInput [matDatepicker]="dobPicker" formControlName="dob">
-                      <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
-                      <mat-datepicker #dobPicker></mat-datepicker>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>DOJ Society</mat-label>
-                      <input matInput [matDatepicker]="dojSocietyPicker" formControlName="dojSociety">
-                      <mat-datepicker-toggle matSuffix [for]="dojSocietyPicker"></mat-datepicker-toggle>
-                      <mat-datepicker #dojSocietyPicker></mat-datepicker>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Email</mat-label>
-                      <input matInput type="email" formControlName="email">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>DOJ</mat-label>
-                      <input matInput [matDatepicker]="dojPicker" formControlName="doj">
-                      <mat-datepicker-toggle matSuffix [for]="dojPicker"></mat-datepicker-toggle>
-                      <mat-datepicker #dojPicker></mat-datepicker>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>DOR</mat-label>
-                      <input matInput [matDatepicker]="dorPicker" formControlName="dor">
-                      <mat-datepicker-toggle matSuffix [for]="dorPicker"></mat-datepicker-toggle>
-                      <mat-datepicker #dorPicker></mat-datepicker>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Nominee</mat-label>
-                      <input matInput formControlName="nominee">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Nominee Relation</mat-label>
-                      <mat-select formControlName="nomineeRelation">
-                        <mat-option value="Spouse">Spouse</mat-option>
-                        <mat-option value="Son">Son</mat-option>
-                        <mat-option value="Daughter">Daughter</mat-option>
-                        <mat-option value="Father">Father</mat-option>
-                        <mat-option value="Mother">Mother</mat-option>
-                        <mat-option value="Brother">Brother</mat-option>
-                        <mat-option value="Sister">Sister</mat-option>
-                        <mat-option value="Other">Other</mat-option>
-                      </mat-select>
-                    </mat-form-field>
+
+          <div class="sidenav-content">
+            <form [formGroup]="memberForm" (ngSubmit)="saveMember()">
+              <mat-tab-group class="member-tabs">
+                
+                <!-- General Tab -->
+                <mat-tab label="General">
+                  <div class="tab-content">
+                    <div class="form-grid">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Member No</mat-label>
+                        <input matInput formControlName="memberNo" readonly>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Name</mat-label>
+                        <input matInput formControlName="name" required>
+                        <mat-error *ngIf="memberForm.get('name')?.hasError('required')">Name is required</mat-error>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>F/H Name</mat-label>
+                        <input matInput formControlName="fatherHusbandName" required>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Office Address</mat-label>
+                        <textarea matInput formControlName="officeAddress" rows="2"></textarea>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>City</mat-label>
+                        <input matInput formControlName="city" required>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Phone (Off.)</mat-label>
+                        <input matInput formControlName="phoneOffice">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Branch</mat-label>
+                        <mat-select formControlName="branch">
+                          <mat-option value="Main Branch">Main Branch</mat-option>
+                          <mat-option value="Branch A">Branch A</mat-option>
+                          <mat-option value="Branch B">Branch B</mat-option>
+                          <mat-option value="Branch C">Branch C</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Phone (Res.)</mat-label>
+                        <input matInput formControlName="phoneResidence">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Designation</mat-label>
+                        <input matInput formControlName="designation">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Mobile</mat-label>
+                        <input matInput formControlName="mobile" required>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Residence Address</mat-label>
+                        <textarea matInput formControlName="residenceAddress" rows="2" required></textarea>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Date of Birth</mat-label>
+                        <input matInput [matDatepicker]="dobPicker" formControlName="dob">
+                        <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #dobPicker></mat-datepicker>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>DOJ Society</mat-label>
+                        <input matInput [matDatepicker]="dojSocietyPicker" formControlName="dojSociety">
+                        <mat-datepicker-toggle matSuffix [for]="dojSocietyPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #dojSocietyPicker></mat-datepicker>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Email</mat-label>
+                        <input matInput type="email" formControlName="email">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>DOJ</mat-label>
+                        <input matInput [matDatepicker]="dojPicker" formControlName="doj">
+                        <mat-datepicker-toggle matSuffix [for]="dojPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #dojPicker></mat-datepicker>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>DOR</mat-label>
+                        <input matInput [matDatepicker]="dorPicker" formControlName="dor">
+                        <mat-datepicker-toggle matSuffix [for]="dorPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #dorPicker></mat-datepicker>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Nominee</mat-label>
+                        <input matInput formControlName="nominee">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Nominee Relation</mat-label>
+                        <mat-select formControlName="nomineeRelation">
+                          <mat-option value="Spouse">Spouse</mat-option>
+                          <mat-option value="Son">Son</mat-option>
+                          <mat-option value="Daughter">Daughter</mat-option>
+                          <mat-option value="Father">Father</mat-option>
+                          <mat-option value="Mother">Mother</mat-option>
+                          <mat-option value="Brother">Brother</mat-option>
+                          <mat-option value="Sister">Sister</mat-option>
+                          <mat-option value="Other">Other</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
                   </div>
-                </div>
-              </mat-tab>
-              
-              <!-- Photo & Opening Balance Tab -->
-              <mat-tab label="Photo & Opening Balance">
-                <div class="tab-content">
-                  <div class="form-grid">
-                    <div class="photo-upload-section full-width">
-                      <h3>Photo & Signature</h3>
-                      <div class="upload-row">
-                        <div class="upload-item">
-                          <label>Member Photo</label>
-                          <div class="image-upload-area" (click)="photoInput.click()">
-                            <img *ngIf="photoPreview" [src]="photoPreview" alt="Member Photo" class="preview-image">
-                            <div *ngIf="!photoPreview" class="upload-placeholder">
-                              <mat-icon>add_a_photo</mat-icon>
-                              <span>Click to upload photo</span>
+                </mat-tab>
+                
+                <!-- Photo & Opening Balance Tab -->
+                <mat-tab label="Photo & Opening Balance">
+                  <div class="tab-content">
+                    <div class="form-grid">
+                      <div class="photo-upload-section full-width">
+                        <h3>Photo & Signature</h3>
+                        <div class="upload-row">
+                          <div class="upload-item">
+                            <label>Member Photo</label>
+                            <div class="image-upload-area" (click)="photoInput.click()">
+                              <img *ngIf="photoPreview" [src]="photoPreview" alt="Member Photo" class="preview-image">
+                              <div *ngIf="!photoPreview" class="upload-placeholder">
+                                <mat-icon>add_a_photo</mat-icon>
+                                <span>Click to upload photo</span>
+                              </div>
                             </div>
+                            <input #photoInput type="file" accept="image/*" (change)="onPhotoSelected($event)" style="display: none">
                           </div>
-                          <input #photoInput type="file" accept="image/*" (change)="onPhotoSelected($event)" style="display: none">
-                        </div>
-                        
-                        <div class="upload-item">
-                          <label>Signature</label>
-                          <div class="image-upload-area" (click)="signatureInput.click()">
-                            <img *ngIf="signaturePreview" [src]="signaturePreview" alt="Signature" class="preview-image">
-                            <div *ngIf="!signaturePreview" class="upload-placeholder">
-                              <mat-icon>edit</mat-icon>
-                              <span>Click to upload signature</span>
+                          
+                          <div class="upload-item">
+                            <label>Signature</label>
+                            <div class="image-upload-area" (click)="signatureInput.click()">
+                              <img *ngIf="signaturePreview" [src]="signaturePreview" alt="Signature" class="preview-image">
+                              <div *ngIf="!signaturePreview" class="upload-placeholder">
+                                <mat-icon>edit</mat-icon>
+                                <span>Click to upload signature</span>
+                              </div>
                             </div>
+                            <input #signatureInput type="file" accept="image/*" (change)="onSignatureSelected($event)" style="display: none">
                           </div>
-                          <input #signatureInput type="file" accept="image/*" (change)="onSignatureSelected($event)" style="display: none">
                         </div>
                       </div>
+                      
+                      <div class="section-divider full-width"></div>
+                      
+                      <h3 class="full-width">Opening Balance</h3>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Opening Balance (Share)</mat-label>
+                        <input matInput type="number" formControlName="openingBalanceShare">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Opening Balance (CR)</mat-label>
+                        <input matInput type="number" formControlName="openingBalanceCR">
+                      </mat-form-field>
+                      
+                      <h3 class="full-width">Bank Details</h3>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Bank Name</mat-label>
+                        <input matInput formControlName="bankName">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Payable At</mat-label>
+                        <input matInput formControlName="bankPayableAt">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Account No</mat-label>
+                        <input matInput formControlName="bankAccountNo">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Status</mat-label>
+                        <mat-select formControlName="status">
+                          <mat-option value="Active">Active</mat-option>
+                          <mat-option value="Inactive">Inactive</mat-option>
+                          <mat-option value="Suspended">Suspended</mat-option>
+                          <mat-option value="Closed">Closed</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Status Date</mat-label>
+                        <input matInput [matDatepicker]="statusDatePicker" formControlName="statusDate">
+                        <mat-datepicker-toggle matSuffix [for]="statusDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #statusDatePicker></mat-datepicker>
+                      </mat-form-field>
                     </div>
-                    
-                    <div class="section-divider full-width"></div>
-                    
-                    <h3 class="full-width">Opening Balance</h3>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Opening Balance (Share)</mat-label>
-                      <input matInput type="number" formControlName="openingBalanceShare">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Opening Balance (CR)</mat-label>
-                      <input matInput type="number" formControlName="openingBalanceCR">
-                    </mat-form-field>
-                    
-                    <h3 class="full-width">Bank Details</h3>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Bank Name</mat-label>
-                      <input matInput formControlName="bankName">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Payable At</mat-label>
-                      <input matInput formControlName="bankPayableAt">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Account No</mat-label>
-                      <input matInput formControlName="bankAccountNo">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Status</mat-label>
-                      <mat-select formControlName="status">
-                        <mat-option value="Active">Active</mat-option>
-                        <mat-option value="Inactive">Inactive</mat-option>
-                        <mat-option value="Suspended">Suspended</mat-option>
-                        <mat-option value="Closed">Closed</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Status Date</mat-label>
-                      <input matInput [matDatepicker]="statusDatePicker" formControlName="statusDate">
-                      <mat-datepicker-toggle matSuffix [for]="statusDatePicker"></mat-datepicker-toggle>
-                      <mat-datepicker #statusDatePicker></mat-datepicker>
-                    </mat-form-field>
                   </div>
-                </div>
-              </mat-tab>
-              
-              <!-- Monthly Deduction Tab -->
-              <mat-tab label="Monthly Deduction">
-                <div class="tab-content">
-                  <div class="form-grid">
-                    <h3 class="full-width">Monthly Deductions</h3>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Share Deduction</mat-label>
-                      <input matInput type="number" formControlName="deductionShare">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>Withdrawal Deduction</mat-label>
-                      <input matInput type="number" formControlName="deductionWithdrawal">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>G Loan Instalment</mat-label>
-                      <input matInput type="number" formControlName="deductionGLoanInstalment">
-                    </mat-form-field>
-                    
-                    <mat-form-field appearance="outline">
-                      <mat-label>E Loan Instalment</mat-label>
-                      <input matInput type="number" formControlName="deductionELoanInstalment">
-                    </mat-form-field>
+                </mat-tab>
+                
+                <!-- Monthly Deduction Tab -->
+                <mat-tab label="Monthly Deduction">
+                  <div class="tab-content">
+                    <div class="form-grid">
+                      <h3 class="full-width">Monthly Deductions</h3>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Share Deduction</mat-label>
+                        <input matInput type="number" formControlName="deductionShare">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Withdrawal Deduction</mat-label>
+                        <input matInput type="number" formControlName="deductionWithdrawal">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>G Loan Instalment</mat-label>
+                        <input matInput type="number" formControlName="deductionGLoanInstalment">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>E Loan Instalment</mat-label>
+                        <input matInput type="number" formControlName="deductionELoanInstalment">
+                      </mat-form-field>
+                    </div>
                   </div>
-                </div>
-              </mat-tab>
+                </mat-tab>
+                
+              </mat-tab-group>
               
-            </mat-tab-group>
-            
-            <div class="form-actions">
-              <button mat-raised-button color="primary" type="submit" 
-                      [disabled]="!memberForm.valid || !canCreateMembers"
-                      class="submit-btn">
-                <mat-icon>{{editingMember ? 'update' : 'add'}}</mat-icon>
-                {{editingMember ? 'Update Member' : 'Add Member'}}
-              </button>
-              <button mat-stroked-button type="button" (click)="resetForm()" *ngIf="editingMember">
-                <mat-icon>cancel</mat-icon>
-                Cancel
-              </button>
-            </div>
-          </form>
-        </mat-card-content>
-      </mat-card>
-      
-      <!-- Members List -->
-      <mat-card class="table-card" *ngIf="canCreateMembers || canEditMembers">
-        <mat-card-header>
-          <div class="card-header-content">
-            <mat-card-title>Members List ({{filteredMembers.length}})</mat-card-title>
-            <div class="header-actions-mobile">
-              <button mat-raised-button color="primary" (click)="scrollToForm()" 
-                      *ngIf="canCreateMembers" class="visible-mobile">
-                <mat-icon>add</mat-icon>
-                Add Member
-              </button>
-            </div>
-          </div>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="table-controls">
-            <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Search Members</mat-label>
-              <input matInput (keyup)="applyFilter($event)" placeholder="Search by name, phone, or member no">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-          </div>
-          
-          <!-- Desktop Table View -->
-          <div class="table-container desktop-view">
-            <table mat-table [dataSource]="filteredMembers" class="members-table">
-              <ng-container matColumnDef="memberNo">
-                <th mat-header-cell *matHeaderCellDef>Member No</th>
-                <td mat-cell *matCellDef="let member">{{member.memberNo}}</td>
-              </ng-container>
-              
-              <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
-                <td mat-cell *matCellDef="let member">{{member.name}}</td>
-              </ng-container>
-              
-              <ng-container matColumnDef="mobile">
-                <th mat-header-cell *matHeaderCellDef>Mobile</th>
-                <td mat-cell *matCellDef="let member">{{member.mobile}}</td>
-              </ng-container>
-              
-              <ng-container matColumnDef="branch">
-                <th mat-header-cell *matHeaderCellDef>Branch</th>
-                <td mat-cell *matCellDef="let member">{{member.branch}}</td>
-              </ng-container>
-              
-              <ng-container matColumnDef="dojSociety">
-                <th mat-header-cell *matHeaderCellDef>DOJ Society</th>
-                <td mat-cell *matCellDef="let member">{{member.dojSociety | date}}</td>
-              </ng-container>
-              
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let member">
-                  <span class="status-badge" [class]="'status-' + member.status.toLowerCase()">
-                    {{member.status}}
-                  </span>
-                </td>
-              </ng-container>
-              
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let member">
-                  <div class="action-buttons">
-                    <button mat-icon-button (click)="editMember(member)" color="primary" 
-                            [disabled]="!canEditMembers"
-                            matTooltip="Edit Member">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="deleteMember(member.id)" color="warn"
-                            [disabled]="!canEditMembers"
-                            matTooltip="Delete Member">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="viewMember(member)" color="accent"
-                            matTooltip="View Details">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                  </div>
-                </td>
-              </ng-container>
-              
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-          </div>
-
-          <!-- Mobile Card View -->
-          <div class="mobile-view">
-            <div class="member-card" *ngFor="let member of filteredMembers">
-              <div class="member-card-header">
-                <div class="member-info">
-                  <h3>{{member.name}}</h3>
-                  <p class="member-number">{{member.memberNo}}</p>
-                </div>
-                <span class="status-badge" [class]="'status-' + member.status.toLowerCase()">
-                  {{member.status}}
-                </span>
-              </div>
-              <div class="member-card-content">
-                <div class="info-row">
-                  <mat-icon>phone</mat-icon>
-                  <span>{{member.mobile}}</span>
-                </div>
-                <div class="info-row">
-                  <mat-icon>business</mat-icon>
-                  <span>{{member.branch}}</span>
-                </div>
-                <div class="info-row">
-                  <mat-icon>calendar_today</mat-icon>
-                  <span>{{member.dojSociety | date}}</span>
-                </div>
-                <div class="info-row">
-                  <mat-icon>email</mat-icon>
-                  <span>{{member.email || 'Not provided'}}</span>
-                </div>
-              </div>
-              <div class="member-card-actions">
-                <button mat-button (click)="editMember(member)" color="primary"
-                        [disabled]="!canEditMembers">
-                  <mat-icon>edit</mat-icon>
-                  Edit
+              <div class="form-actions">
+                <button mat-raised-button color="primary" type="submit" 
+                        [disabled]="!memberForm.valid || !canCreateMembers"
+                        class="submit-btn">
+                  <mat-icon>{{editingMember ? 'update' : 'add'}}</mat-icon>
+                  {{editingMember ? 'Update Member' : 'Add Member'}}
                 </button>
-                <button mat-button (click)="viewMember(member)" color="accent">
-                  <mat-icon>visibility</mat-icon>
-                  View
-                </button>
-                <button mat-button (click)="deleteMember(member.id)" color="warn"
-                        [disabled]="!canEditMembers">
-                  <mat-icon>delete</mat-icon>
-                  Delete
+                <button mat-stroked-button type="button" (click)="closeMemberForm()">
+                  <mat-icon>cancel</mat-icon>
+                  Cancel
                 </button>
               </div>
-            </div>
+            </form>
           </div>
-
-          <div class="no-data" *ngIf="filteredMembers.length === 0">
-            <mat-icon>people_outline</mat-icon>
-            <h3>No members found</h3>
-            <p>{{members.length === 0 ? 'Start by adding your first member' : 'Try adjusting your search criteria'}}</p>
-          </div>
-        </mat-card-content>
-      </mat-card>
+        </mat-sidenav>
+      </mat-sidenav-container>
     </div>
   `,
   styles: [`
@@ -519,6 +523,40 @@ interface Member {
       max-width: 1400px;
       margin: 0 auto;
       padding: 16px;
+    }
+
+    .sidenav-container {
+      min-height: calc(100vh - 32px);
+    }
+
+    .member-form-sidenav {
+      width: 600px;
+      max-width: 90vw;
+    }
+
+    .sidenav-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e0e0e0;
+      background-color: #fafafa;
+    }
+
+    .sidenav-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    .sidenav-content {
+      padding: 24px;
+      overflow-y: auto;
+      height: calc(100vh - 80px);
+    }
+
+    .add-member-btn {
+      min-width: 150px;
     }
     
     .page-header {
@@ -820,6 +858,15 @@ interface Member {
       .page-header h1 {
         font-size: 1.5rem;
       }
+
+      .member-form-sidenav {
+        width: 100vw;
+        max-width: 100vw;
+      }
+
+      .sidenav-content {
+        padding: 16px;
+      }
       
       .form-grid {
         grid-template-columns: 1fr;
@@ -832,10 +879,12 @@ interface Member {
       
       .form-actions {
         justify-content: stretch;
+        flex-direction: column;
       }
       
       .form-actions button {
-        flex: 1;
+        width: 100%;
+        margin-bottom: 8px;
       }
       
       .desktop-view {
@@ -843,18 +892,6 @@ interface Member {
       }
       
       .mobile-view {
-        display: block;
-      }
-      
-      .hidden-mobile {
-        display: none;
-      }
-      
-      .visible-mobile {
-        display: inline-flex !important;
-      }
-      
-      .header-actions-mobile {
         display: block;
       }
       
@@ -866,6 +903,10 @@ interface Member {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+      }
+
+      .add-member-btn {
+        width: 100%;
       }
     }
     
@@ -919,6 +960,8 @@ export class MemberDetailsComponent implements OnInit {
   currentUser: any = null;
   photoPreview: string | null = null;
   signaturePreview: string | null = null;
+  
+  @ViewChild('memberFormSidenav') memberFormSidenav!: any;
 
   constructor(
     private fb: FormBuilder,
@@ -1082,7 +1125,7 @@ export class MemberDetailsComponent implements OnInit {
       }
       
       this.filteredMembers = [...this.members];
-      this.resetForm();
+      this.closeMemberForm();
     }
   }
 
@@ -1091,7 +1134,7 @@ export class MemberDetailsComponent implements OnInit {
     this.memberForm.patchValue(member);
     this.photoPreview = member.photo;
     this.signaturePreview = member.signature;
-    this.scrollToForm();
+    this.memberFormSidenav.open();
   }
 
   deleteMember(id: number) {
@@ -1137,10 +1180,17 @@ export class MemberDetailsComponent implements OnInit {
     );
   }
 
+  openMemberForm() {
+    this.resetForm();
+    this.memberFormSidenav.open();
+  }
+
+  closeMemberForm() {
+    this.memberFormSidenav.close();
+    this.resetForm();
+  }
+
   scrollToForm() {
-    const formElement = document.querySelector('.form-card');
-    if (formElement) {
-      formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    this.openMemberForm();
   }
 }
