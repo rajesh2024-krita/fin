@@ -2,173 +2,219 @@
 <mat-sidenav-container class="app-container" hasBackdrop="false" *ngIf="!isLoginPage">
   <mat-sidenav #sidenav mode="side" [opened]="!isMobile" class="app-sidenav">
     <div class="sidenav-header">
-      <mat-icon class="app-icon">account_balance</mat-icon>
-      <h2>Financial Management</h2>
+      <h3>{{title}}</h3>
+      <p class="user-info" *ngIf="currentUser">{{currentUserName}}</p>
+      <p class="role-info" *ngIf="currentUser">{{getUserRoleDisplayName()}}</p>
     </div>
 
-    <mat-nav-list class="nav-list">
-      <!-- User Management (for admins) -->
-      <a mat-list-item routerLink="/user-management" routerLinkActive="active" *ngIf="canAccessUserManagement()">
-        <mat-icon matListItemIcon>people</mat-icon>
-        <span matListItemTitle>User Management</span>
-      </a>
+    <!-- File Menu -->
+    <mat-expansion-panel class="nav-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>folder</mat-icon>
+          File
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item routerLink="/file/society" *ngIf="canManageFinancialYear()">
+          <mat-icon matListItemIcon>business</mat-icon>
+          <span matListItemTitle>Society</span>
+        </a>
+        <a mat-list-item routerLink="/file/create-new-year" *ngIf="canManageFinancialYear()">
+          <mat-icon matListItemIcon>add_circle</mat-icon>
+          <span matListItemTitle>Create New Year</span>
+        </a>
+        <a mat-list-item routerLink="/file/edit-opening-balance" *ngIf="canEditOpeningBalance()">
+          <mat-icon matListItemIcon>edit</mat-icon>
+          <span matListItemTitle>Edit Opening Balance</span>
+        </a>
+        
+        <!-- Security Submenu -->
+        <mat-expansion-panel class="sub-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>security</mat-icon>
+              Security
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          
+          <mat-nav-list class="sub-nav">
+            <a mat-list-item routerLink="/file/security/authority" *ngIf="canAccessAdmin()">
+              <span matListItemTitle>Authority</span>
+            </a>
+            <a mat-list-item routerLink="/file/security/new-user" *ngIf="canCreateUsers()">
+              <span matListItemTitle>New User</span>
+            </a>
+            <a mat-list-item routerLink="/file/security/my-rights">
+              <span matListItemTitle>My Rights</span>
+            </a>
+            <a mat-list-item routerLink="/file/security/change-password">
+              <span matListItemTitle>Change Password</span>
+            </a>
+            <a mat-list-item routerLink="/file/security/retrieve-password" *ngIf="canAccessAdmin()">
+              <span matListItemTitle>Retrieve Password</span>
+            </a>
+            <a mat-list-item routerLink="/file/security/admin-handover" *ngIf="canAccessAdmin()">
+              <span matListItemTitle>Admin Handover</span>
+            </a>
+          </mat-nav-list>
+        </mat-expansion-panel>
+      </mat-nav-list>
+    </mat-expansion-panel>
 
-      <!-- Dashboard -->
-      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
-        <mat-icon matListItemIcon>dashboard</mat-icon>
-        <span matListItemTitle>Dashboard</span>
-      </a>
+    <!-- Master Menu -->
+    <mat-expansion-panel class="nav-panel" *ngIf="canAccessMaster()">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>settings</mat-icon>
+          Master
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item routerLink="/master/member-details">
+          <mat-icon matListItemIcon>people</mat-icon>
+          <span matListItemTitle>Member Details</span>
+        </a>
+        <a mat-list-item routerLink="/master/deposit-scheme">
+          <mat-icon matListItemIcon>account_balance</mat-icon>
+          <span matListItemTitle>Deposit Scheme</span>
+        </a>
+        <a mat-list-item routerLink="/master/interest-master">
+          <mat-icon matListItemIcon>percent</mat-icon>
+          <span matListItemTitle>Interest Master</span>
+        </a>
+        <a mat-list-item routerLink="/master/table">
+          <mat-icon matListItemIcon>table_chart</mat-icon>
+          <span matListItemTitle>Table</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
 
-      <!-- File Menu -->
-      <mat-expansion-panel class="nav-panel">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <mat-icon>folder</mat-icon>
-            File
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <mat-nav-list class="submenu">
-          <a mat-list-item routerLink="/file/society" routerLinkActive="active">Society</a>
-          <mat-expansion-panel class="sub-panel">
-            <mat-expansion-panel-header>
-              <mat-panel-title>Security</mat-panel-title>
-            </mat-expansion-panel-header>
-            <mat-nav-list class="sub-submenu">
-              <a mat-list-item routerLink="/file/security/authority" routerLinkActive="active" *ngIf="isSuperAdmin()">Authority</a>
-              <a mat-list-item routerLink="/file/security/my-rights" routerLinkActive="active">My Rights</a>
-              <a mat-list-item routerLink="/file/security/new-user" routerLinkActive="active" *ngIf="canCreateUsers()">New User</a>
-              <a mat-list-item routerLink="/file/security/retrieve-password" routerLinkActive="active">Retrieve Password</a>
-              <a mat-list-item routerLink="/file/security/change-password" routerLinkActive="active">Change Password</a>
-              <a mat-list-item routerLink="/file/security/admin-handover" routerLinkActive="active" *ngIf="isSuperAdmin()">Admin Handover</a>
-            </mat-nav-list>
-          </mat-expansion-panel>
-          <a mat-list-item routerLink="/file/create-new-year" routerLinkActive="active" *ngIf="canManageFinancialYear()">Create New Year</a>
-          <a mat-list-item routerLink="/file/edit-opening-balance" routerLinkActive="active" *ngIf="canEditOpeningBalance()">Edit Opening Balance</a>
-        </mat-nav-list>
-      </mat-expansion-panel>
+    <!-- Transaction Menu -->
+    <mat-expansion-panel class="nav-panel" *ngIf="canAccessTransactions()">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>receipt</mat-icon>
+          Transaction
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item routerLink="/transaction/deposit-receipt">
+          <span matListItemTitle>Deposit Receipt</span>
+        </a>
+        <a mat-list-item routerLink="/transaction/deposit-payment">
+          <span matListItemTitle>Deposit Payment</span>
+        </a>
+        <a mat-list-item routerLink="/transaction/deposit-renew">
+          <span matListItemTitle>Deposit Renew</span>
+        </a>
+        <a mat-list-item routerLink="/transaction/loan-taken">
+          <span matListItemTitle>Loan Taken</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
 
-      <!-- Master Menu -->
-      <mat-expansion-panel class="nav-panel" *ngIf="canAccessMaster()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <mat-icon>storage</mat-icon>
-            Master
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <mat-nav-list class="submenu">
-          <a mat-list-item routerLink="/master/member-details" routerLinkActive="active">Member Details</a>
-          <a mat-list-item routerLink="/master/table" routerLinkActive="active">Table</a>
-          <a mat-list-item routerLink="/master/deposit-scheme" routerLinkActive="active" *ngIf="isSuperAdmin() || isSocietyAdmin()">Deposit Scheme</a>
-          <a mat-list-item routerLink="/master/interest-master" routerLinkActive="active" *ngIf="isSuperAdmin() || isSocietyAdmin()">Interest Master</a>
-        </mat-nav-list>
-      </mat-expansion-panel>
+    <!-- Accounts Menu -->
+    <mat-expansion-panel class="nav-panel" *ngIf="canAccessAccounts()">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>account_balance_wallet</mat-icon>
+          Accounts
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item routerLink="/accounts/ledger">
+          <span matListItemTitle>Ledger</span>
+        </a>
+        <a mat-list-item routerLink="/accounts/cash-book">
+          <span matListItemTitle>Cash Book</span>
+        </a>
+        <a mat-list-item routerLink="/accounts/trial-balance">
+          <span matListItemTitle>Trial Balance</span>
+        </a>
+        <a mat-list-item routerLink="/accounts/profit-loss">
+          <span matListItemTitle>Profit & Loss</span>
+        </a>
+        <a mat-list-item routerLink="/accounts/balance-sheet">
+          <span matListItemTitle>Balance Sheet</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
 
-      <!-- Transaction Menu -->
-      <mat-expansion-panel class="nav-panel" *ngIf="canAccessTransactions()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <mat-icon>receipt</mat-icon>
-            Transaction
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <mat-nav-list class="submenu">
-          <a mat-list-item routerLink="/transaction/loan-taken" routerLinkActive="active">Loan Taken</a>
-          <a mat-list-item routerLink="/transaction/demand-process" routerLinkActive="active">Demand Process</a>
-          <a mat-list-item routerLink="/transaction/account-closure" routerLinkActive="active" *ngIf="isSuperAdmin() || isSocietyAdmin()">Account Closure</a>
-          <a mat-list-item routerLink="/transaction/deposit-receipt" routerLinkActive="active">Deposit Receipt</a>
-          <a mat-list-item routerLink="/transaction/deposit-renew" routerLinkActive="active">Deposit Renew</a>
-          <a mat-list-item routerLink="/transaction/deposit-slip" routerLinkActive="active">Deposit Slip</a>
-          <a mat-list-item routerLink="/transaction/deposit-payment" routerLinkActive="active">Deposit Payment</a>
-        </mat-nav-list>
-      </mat-expansion-panel>
+    <!-- Reports Menu -->
+    <mat-expansion-panel class="nav-panel" *ngIf="canAccessReports()">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>assessment</mat-icon>
+          Reports
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      
+      <mat-nav-list>
+        <a mat-list-item routerLink="/reports/opening-balance">
+          <span matListItemTitle>Opening Balance</span>
+        </a>
+        <a mat-list-item routerLink="/reports/closing-balance">
+          <span matListItemTitle>Closing Balance</span>
+        </a>
+        <a mat-list-item routerLink="/reports/loan">
+          <span matListItemTitle>Loan Reports</span>
+        </a>
+        <a mat-list-item routerLink="/reports/employees">
+          <span matListItemTitle>Employee Reports</span>
+        </a>
+      </mat-nav-list>
+    </mat-expansion-panel>
 
-      <!-- Accounts Menu -->
-      <mat-expansion-panel class="nav-panel" *ngIf="canAccessAccounts()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <mat-icon>account_balance</mat-icon>
-            Accounts
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <mat-nav-list class="submenu">
-          <a mat-list-item routerLink="/accounts/group" routerLinkActive="active">Group</a>
-          <a mat-list-item routerLink="/accounts/ledger" routerLinkActive="active">Ledger</a>
-          <a mat-list-item routerLink="/accounts/cash-book" routerLinkActive="active">Cash Book</a>
-          <a mat-list-item routerLink="/accounts/day-book" routerLinkActive="active">Day Book</a>
-          <a mat-list-item routerLink="/accounts/voucher" routerLinkActive="active">Voucher</a>
-          <a mat-list-item routerLink="/accounts/loan-receipt" routerLinkActive="active">Loan Receipt</a>
-          <a mat-list-item routerLink="/accounts/trial-balance" routerLinkActive="active">Trial Balance</a>
-          <a mat-list-item routerLink="/accounts/balance-sheet" routerLinkActive="active">Balance Sheet</a>
-          <a mat-list-item routerLink="/accounts/profit-loss" routerLinkActive="active">Profit & Loss</a>
-          <a mat-list-item routerLink="/accounts/receipt-payment" routerLinkActive="active">Receipt & Payment</a>
-        </mat-nav-list>
-      </mat-expansion-panel>
+    <!-- User Management -->
+    <a mat-list-item routerLink="/user-management" *ngIf="canAccessUserManagement()">
+      <mat-icon matListItemIcon>manage_accounts</mat-icon>
+      <span matListItemTitle>User Management</span>
+    </a>
 
-      <!-- Reports Menu -->
-      <mat-expansion-panel class="nav-panel" *ngIf="canAccessReports()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <mat-icon>assessment</mat-icon>
-            Reports
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <mat-nav-list class="submenu">
-          <a mat-list-item routerLink="/reports/employees" routerLinkActive="active">Employees</a>
-          <a mat-list-item routerLink="/reports/voucher" routerLinkActive="active">Voucher</a>
-          <a mat-list-item routerLink="/reports/opening-balance" routerLinkActive="active">Opening Balance</a>
-          <a mat-list-item routerLink="/reports/closing-balance" routerLinkActive="active">Closing Balance</a>
-          <a mat-list-item routerLink="/reports/loan" routerLinkActive="active">Loan</a>
-        </mat-nav-list>
-      </mat-expansion-panel>
+    <!-- Admin -->
+    <a mat-list-item routerLink="/admin" *ngIf="canAccessAdmin()">
+      <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+      <span matListItemTitle>Admin</span>
+    </a>
 
-      <!-- Other Menu Items -->
-      <a mat-list-item routerLink="/statement" routerLinkActive="active">
-        <mat-icon matListItemIcon>description</mat-icon>
-        <span matListItemTitle>Statement</span>
-      </a>
-      <a mat-list-item routerLink="/backup" routerLinkActive="active" *ngIf="canAccessBackup()">
-        <mat-icon matListItemIcon>backup</mat-icon>
-        <span matListItemTitle>Backup</span>
-      </a>
-      <a mat-list-item routerLink="/admin" routerLinkActive="active" *ngIf="canAccessAdmin()">
-        <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
-        <span matListItemTitle>Admin</span>
-      </a>
-      <a mat-list-item routerLink="/new-year" routerLinkActive="active" *ngIf="canManageFinancialYear()">
-        <mat-icon matListItemIcon>calendar_today</mat-icon>
-        <span matListItemTitle>New Year</span>
-      </a>
-
-      <a mat-list-item (click)="logout()">
-        <mat-icon>exit_to_app</mat-icon>
-        Exit
-      </a>
-    </mat-nav-list>
+    <!-- Backup -->
+    <a mat-list-item routerLink="/backup" *ngIf="canAccessBackup()">
+      <mat-icon matListItemIcon>backup</mat-icon>
+      <span matListItemTitle>Backup</span>
+    </a>
   </mat-sidenav>
 
   <mat-sidenav-content class="app-content">
     <mat-toolbar color="primary" class="app-toolbar">
-      <button mat-icon-button (click)="sidenav.toggle()">
+      <button mat-icon-button (click)="sidenav.toggle()" *ngIf="isMobile">
         <mat-icon>menu</mat-icon>
       </button>
-      <span class="hidden sm:inline">Financial Management System</span>
-      <span class="sm:hidden">FMS</span>
+      
       <span class="toolbar-spacer"></span>
-      <span class="user-info hidden lg:block" *ngIf="isUserLoggedIn">
-        {{ currentUser?.societyName ? currentUser?.societyName + ' - ' : '' }}{{ getUserRoleDisplayName() }}
+      
+      <span class="user-welcome" *ngIf="currentUser && !isMobile">
+        Welcome, {{currentUserName}}
       </span>
+      
       <button mat-icon-button [matMenuTriggerFor]="userMenu" *ngIf="isUserLoggedIn">
         <mat-icon>account_circle</mat-icon>
       </button>
+      
       <mat-menu #userMenu="matMenu">
-        <button mat-menu-item>
-          <mat-icon>person</mat-icon>
-          <span>{{currentUserName}}</span>
+        <button mat-menu-item routerLink="/file/security/my-rights">
+          <mat-icon>security</mat-icon>
+          <span>My Rights</span>
         </button>
-        <button mat-menu-item>
-          <mat-icon>settings</mat-icon>
-          <span>Settings</span>
+        <button mat-menu-item routerLink="/file/security/change-password">
+          <mat-icon>lock</mat-icon>
+          <span>Change Password</span>
         </button>
+        <mat-divider></mat-divider>
         <button mat-menu-item (click)="logout()">
           <mat-icon>logout</mat-icon>
           <span>Logout</span>
@@ -176,13 +222,12 @@
       </mat-menu>
     </mat-toolbar>
 
-    <div class="content-wrapper">
+    <main class="main-content">
       <router-outlet></router-outlet>
-    </div>
+    </main>
   </mat-sidenav-content>
 </mat-sidenav-container>
 
-<!-- Login page content (full screen, no sidebar/toolbar) -->
-<div *ngIf="isLoginPage" class="login-container">
+<div *ngIf="isLoginPage" class="login-wrapper">
   <router-outlet></router-outlet>
 </div>
