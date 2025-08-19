@@ -2,23 +2,48 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-society',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule],
   template: `
-    <div class="page-container">
-      <h1>Society Management</h1>
-      <mat-card>
-        <mat-card-content>
-          <p>Society configuration and management features will be implemented here.</p>
-        </mat-card-content>
-      </mat-card>
+    <div class="space-y-6">
+      <!-- Page Header -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-full">
+            <mat-icon class="text-primary-600 dark:text-primary-400">business</mat-icon>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Society Management</h1>
+            <p class="text-gray-600 dark:text-gray-400">Configure society settings and information</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="p-6">
+          <div class="text-center py-12">
+            <mat-icon class="text-6xl text-gray-400 dark:text-gray-500 mb-4">settings</mat-icon>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Society Configuration</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">Society configuration and management features will be implemented here.</p>
+            <button class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200">
+              <mat-icon class="mr-2">add</mat-icon>
+              Configure Society
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
-    .page-container { max-width: 800px; margin: 0 auto; }
+    :host {
+      display: block;
+    }
   `]
 })
 export class SocietyComponent {}

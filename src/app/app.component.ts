@@ -1,3 +1,4 @@
+
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -15,8 +16,8 @@ import { AuthService, User, UserRole } from './services/auth.service';
   standalone: true,
   imports: [
     RouterOutlet,
-    RouterLink,           // 👈 Add this
-    RouterLinkActive,     // 👈 And this
+    RouterLink,
+    RouterLinkActive,
     CommonModule,
     MatSidenavModule,
     MatToolbarModule,
@@ -33,11 +34,27 @@ export class AppComponent implements OnInit {
   title = 'Financial Management System';
   currentUser: User | null = null;
   currentUserName = '';
+  
+  // Menu states
+  isMobileSidebarOpen = false;
+  isFileMenuOpen = false;
+  isSecurityMenuOpen = false;
+  isMasterMenuOpen = false;
+  isTransactionMenuOpen = false;
+  isAccountsMenuOpen = false;
+  isReportsMenuOpen = false;
+  
+  // Theme state
+  isDarkMode = false;
 
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    // Initialize theme from localStorage
+    this.isDarkMode = localStorage.getItem('theme') === 'dark';
+    this.applyTheme();
+  }
 
   ngOnInit() {
     this.authService.currentUser$.subscribe(user => {
@@ -50,6 +67,55 @@ export class AppComponent implements OnInit {
         this.router.navigate(['/login']);
       }
     });
+  }
+
+  // Theme management
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+    this.applyTheme();
+  }
+
+  private applyTheme() {
+    if (this.isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+
+  // Mobile sidebar management
+  toggleMobileSidebar() {
+    this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
+  }
+
+  closeMobileSidebar() {
+    this.isMobileSidebarOpen = false;
+  }
+
+  // Menu toggle methods
+  toggleFileMenu() {
+    this.isFileMenuOpen = !this.isFileMenuOpen;
+  }
+
+  toggleSecurityMenu() {
+    this.isSecurityMenuOpen = !this.isSecurityMenuOpen;
+  }
+
+  toggleMasterMenu() {
+    this.isMasterMenuOpen = !this.isMasterMenuOpen;
+  }
+
+  toggleTransactionMenu() {
+    this.isTransactionMenuOpen = !this.isTransactionMenuOpen;
+  }
+
+  toggleAccountsMenu() {
+    this.isAccountsMenuOpen = !this.isAccountsMenuOpen;
+  }
+
+  toggleReportsMenu() {
+    this.isReportsMenuOpen = !this.isReportsMenuOpen;
   }
 
   logout() {

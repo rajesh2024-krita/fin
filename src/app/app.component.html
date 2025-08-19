@@ -1,181 +1,313 @@
-<mat-sidenav-container class="flex h-screen">
-  <mat-sidenav #sidenav mode="side" opened="true" class="w-72 bg-gray-50 border-r border-gray-200">
-    <div class="p-5 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-center">
-      <mat-icon class="text-4xl w-10 h-10 mb-2">account_balance</mat-icon>
-      <h2 class="text-lg font-medium m-0">Financial Management System</h2>
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+  <!-- Mobile menu button -->
+  <div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+    <div class="flex items-center justify-between p-4">
+      <button 
+        (click)="toggleMobileSidebar()" 
+        class="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+      <h1 class="text-lg font-semibold text-gray-900 dark:text-white">FMS</h1>
+      <button 
+        mat-icon-button 
+        [matMenuTriggerFor]="userMenu" 
+        *ngIf="isLoggedIn()"
+        class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      >
+        <mat-icon class="text-gray-600 dark:text-gray-300">account_circle</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside 
+    class="fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0"
+    [class.translate-x-0]="isMobileSidebarOpen"
+    [class.-translate-x-full]="!isMobileSidebarOpen"
+  >
+    <!-- Sidebar header -->
+    <div class="flex items-center justify-center h-20 px-6 bg-gradient-to-br from-primary-500 to-primary-700 dark:from-primary-600 dark:to-primary-800">
+      <div class="text-center">
+        <mat-icon class="text-4xl text-white mb-2">account_balance</mat-icon>
+        <h2 class="text-lg font-bold text-white leading-tight">Financial Management</h2>
+      </div>
     </div>
 
-    <mat-nav-list class="p-0">
-      <!-- User Management (for admins) -->
-      <a mat-list-item routerLink="/user-management" *ngIf="canAccessUserManagement()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
-        <mat-icon matListItemIcon>people</mat-icon>
-        <span matListItemTitle>User Management</span>
+    <!-- Navigation -->
+    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto h-[calc(100vh-5rem)]">
+      <!-- User Management -->
+      <a 
+        *ngIf="canAccessUserManagement()" 
+        routerLink="/user-management"
+        routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-700 dark:text-primary-300 border-r-3 border-primary-500"
+        class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 group"
+      >
+        <mat-icon class="mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-500">people</mat-icon>
+        User Management
       </a>
 
       <!-- File Menu -->
-      <mat-expansion-panel class="shadow-none border-b border-gray-200 m-0">
-        <mat-expansion-panel-header class="px-4 h-12">
-          <mat-panel-title class="flex items-center gap-3 font-medium">
-            <mat-icon>folder</mat-icon>
+      <div class="space-y-1">
+        <button 
+          (click)="toggleFileMenu()"
+          class="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+        >
+          <div class="flex items-center">
+            <mat-icon class="mr-3 text-gray-500 dark:text-gray-400">folder</mat-icon>
             File
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <div class="pl-4">
-          <mat-expansion-panel class="shadow-none my-2">
-            <mat-expansion-panel-header class="px-4 h-12">
-              <mat-panel-title class="flex items-center gap-3 font-medium">
-                <mat-icon>security</mat-icon>
+          </div>
+          <mat-icon [class.rotate-180]="isFileMenuOpen" class="transform transition-transform duration-200">expand_more</mat-icon>
+        </button>
+        
+        <div *ngIf="isFileMenuOpen" class="ml-6 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+          <!-- Security Submenu -->
+          <div class="space-y-1">
+            <button 
+              (click)="toggleSecurityMenu()"
+              class="flex items-center justify-between w-full px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <div class="flex items-center">
+                <mat-icon class="mr-2 text-xs">security</mat-icon>
                 Security
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <div class="pl-5">
-              <a mat-list-item routerLink="/file/security/authority" *ngIf="isSuperAdmin()" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">Authority</a>
-              <a mat-list-item routerLink="/file/security/my-rights" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">My Rights</a>
-              <a mat-list-item routerLink="/file/security/new-user" *ngIf="canCreateUsers()" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">New User</a>
-              <a mat-list-item routerLink="/file/security/retrieve-password" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">Retrieve Password</a>
-              <a mat-list-item routerLink="/file/security/change-password" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">Change Password</a>
-              <a mat-list-item routerLink="/file/security/admin-handover" *ngIf="isSuperAdmin()" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">Admin Handover</a>
+              </div>
+              <mat-icon [class.rotate-180]="isSecurityMenuOpen" class="transform transition-transform duration-200 text-xs">expand_more</mat-icon>
+            </button>
+            
+            <div *ngIf="isSecurityMenuOpen" class="ml-4 space-y-1">
+              <a *ngIf="isSuperAdmin()" routerLink="/file/security/authority" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-xs text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Authority</a>
+              <a routerLink="/file/security/my-rights" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-xs text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">My Rights</a>
+              <a *ngIf="canCreateUsers()" routerLink="/file/security/new-user" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-xs text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">New User</a>
+              <a routerLink="/file/security/retrieve-password" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-xs text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Retrieve Password</a>
+              <a routerLink="/file/security/change-password" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-xs text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Change Password</a>
+              <a *ngIf="isSuperAdmin()" routerLink="/file/security/admin-handover" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-xs text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Admin Handover</a>
             </div>
-          </mat-expansion-panel>
-          <a mat-list-item routerLink="/file/society" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Society</a>
-          <a mat-list-item routerLink="/file/create-new-year" *ngIf="canManageFinancialYear()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Create New Year</a>
-          <a mat-list-item routerLink="/file/edit-opening-balance" *ngIf="canEditOpeningBalance()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Edit Opening Balance</a>
+          </div>
+          
+          <a routerLink="/file/society" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Society</a>
+          <a *ngIf="canManageFinancialYear()" routerLink="/file/create-new-year" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Create New Year</a>
+          <a *ngIf="canEditOpeningBalance()" routerLink="/file/edit-opening-balance" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit Opening Balance</a>
         </div>
-      </mat-expansion-panel>
+      </div>
 
       <!-- Master Menu -->
-      <mat-expansion-panel *ngIf="canAccessMaster()" class="shadow-none border-b border-gray-200 m-0">
-        <mat-expansion-panel-header class="px-4 h-12">
-          <mat-panel-title class="flex items-center gap-3 font-medium">
-            <mat-icon>storage</mat-icon>
+      <div *ngIf="canAccessMaster()" class="space-y-1">
+        <button 
+          (click)="toggleMasterMenu()"
+          class="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+        >
+          <div class="flex items-center">
+            <mat-icon class="mr-3 text-gray-500 dark:text-gray-400">storage</mat-icon>
             Master
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <div class="pl-4">
-          <a mat-list-item routerLink="/master/member-details" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Member Details</a>
-          <a mat-list-item routerLink="/master/table" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Table</a>
-          <a mat-list-item routerLink="/master/deposit-scheme" *ngIf="isSuperAdmin() || isSocietyAdmin()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Scheme</a>
-          <a mat-list-item routerLink="/master/interest-master" *ngIf="isSuperAdmin() || isSocietyAdmin()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Interest Master</a>
+          </div>
+          <mat-icon [class.rotate-180]="isMasterMenuOpen" class="transform transition-transform duration-200">expand_more</mat-icon>
+        </button>
+        
+        <div *ngIf="isMasterMenuOpen" class="ml-6 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+          <a routerLink="/master/member-details" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Member Details</a>
+          <a routerLink="/master/table" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Table</a>
+          <a *ngIf="isSuperAdmin() || isSocietyAdmin()" routerLink="/master/deposit-scheme" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Deposit Scheme</a>
+          <a *ngIf="isSuperAdmin() || isSocietyAdmin()" routerLink="/master/interest-master" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Interest Master</a>
         </div>
-      </mat-expansion-panel>
+      </div>
 
       <!-- Transaction Menu -->
-      <mat-expansion-panel *ngIf="canAccessTransactions()" class="shadow-none border-b border-gray-200 m-0">
-        <mat-expansion-panel-header class="px-4 h-12">
-          <mat-panel-title class="flex items-center gap-3 font-medium">
-            <mat-icon>receipt</mat-icon>
+      <div *ngIf="canAccessTransactions()" class="space-y-1">
+        <button 
+          (click)="toggleTransactionMenu()"
+          class="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+        >
+          <div class="flex items-center">
+            <mat-icon class="mr-3 text-gray-500 dark:text-gray-400">receipt</mat-icon>
             Transaction
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-
-        <div class="pl-4">
-          <a mat-list-item routerLink="/transaction/loan-taken" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Loan Taken</a>
-          <a mat-list-item routerLink="/transaction/demand-process" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Demand Process</a>
-          <a mat-list-item routerLink="/transaction/account-closure" *ngIf="isSuperAdmin() || isSocietyAdmin()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Account Closure</a>
-          <a mat-list-item routerLink="/transaction/deposit-receipt" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Receipt</a>
-          <a mat-list-item routerLink="/transaction/deposit-renew" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Renew</a>
-          <a mat-list-item routerLink="/transaction/deposit-slip" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Slip</a>
-          <a mat-list-item routerLink="/transaction/deposit-payment" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Payment</a>
+          </div>
+          <mat-icon [class.rotate-180]="isTransactionMenuOpen" class="transform transition-transform duration-200">expand_more</mat-icon>
+        </button>
+        
+        <div *ngIf="isTransactionMenuOpen" class="ml-6 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+          <a routerLink="/transaction/loan-taken" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Loan Taken</a>
+          <a routerLink="/transaction/demand-process" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Demand Process</a>
+          <a *ngIf="isSuperAdmin() || isSocietyAdmin()" routerLink="/transaction/account-closure" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Account Closure</a>
+          <a routerLink="/transaction/deposit-receipt" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Deposit Receipt</a>
+          <a routerLink="/transaction/deposit-renew" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Deposit Renew</a>
+          <a routerLink="/transaction/deposit-slip" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Deposit Slip</a>
+          <a routerLink="/transaction/deposit-payment" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Deposit Payment</a>
         </div>
-      </mat-expansion-panel>
+      </div>
 
       <!-- Accounts Menu -->
-      <mat-expansion-panel *ngIf="canAccessAccounts()" class="shadow-none border-b border-gray-200 m-0">
-        <mat-expansion-panel-header class="px-4 h-12">
-          <mat-panel-title class="flex items-center gap-3 font-medium">
-            <mat-icon>account_balance</mat-icon>
+      <div *ngIf="canAccessAccounts()" class="space-y-1">
+        <button 
+          (click)="toggleAccountsMenu()"
+          class="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+        >
+          <div class="flex items-center">
+            <mat-icon class="mr-3 text-gray-500 dark:text-gray-400">account_balance</mat-icon>
             Accounts
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-
-        <div class="pl-4">
-          <a mat-list-item routerLink="/accounts/group" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Group</a>
-          <a mat-list-item routerLink="/accounts/ledger" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Ledger</a>
-          <a mat-list-item routerLink="/accounts/cash-book" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Cash Book</a>
-          <a mat-list-item routerLink="/accounts/day-book" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Day Book</a>
-          <a mat-list-item routerLink="/accounts/voucher" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Voucher</a>
-          <a mat-list-item routerLink="/accounts/loan-receipt" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Loan Receipt</a>
-          <a mat-list-item routerLink="/accounts/trial-balance" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Trial Balance</a>
-          <a mat-list-item routerLink="/accounts/balance-sheet" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Balance Sheet</a>
-          <a mat-list-item routerLink="/accounts/profit-loss" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Profit & Loss</a>
-          <a mat-list-item routerLink="/accounts/receipt-payment" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Receipt & Payment</a>
+          </div>
+          <mat-icon [class.rotate-180]="isAccountsMenuOpen" class="transform transition-transform duration-200">expand_more</mat-icon>
+        </button>
+        
+        <div *ngIf="isAccountsMenuOpen" class="ml-6 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+          <a routerLink="/accounts/group" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Group</a>
+          <a routerLink="/accounts/ledger" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Ledger</a>
+          <a routerLink="/accounts/cash-book" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cash Book</a>
+          <a routerLink="/accounts/day-book" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Day Book</a>
+          <a routerLink="/accounts/voucher" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Voucher</a>
+          <a routerLink="/accounts/loan-receipt" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Loan Receipt</a>
+          <a routerLink="/accounts/trial-balance" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Trial Balance</a>
+          <a routerLink="/accounts/balance-sheet" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Balance Sheet</a>
+          <a routerLink="/accounts/profit-loss" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Profit & Loss</a>
+          <a routerLink="/accounts/receipt-payment" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Receipt & Payment</a>
         </div>
-      </mat-expansion-panel>
+      </div>
 
       <!-- Reports Menu -->
-      <mat-expansion-panel *ngIf="canAccessReports()" class="shadow-none border-b border-gray-200 m-0">
-        <mat-expansion-panel-header class="px-4 h-12">
-          <mat-panel-title class="flex items-center gap-3 font-medium">
-            <mat-icon>assessment</mat-icon>
+      <div *ngIf="canAccessReports()" class="space-y-1">
+        <button 
+          (click)="toggleReportsMenu()"
+          class="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+        >
+          <div class="flex items-center">
+            <mat-icon class="mr-3 text-gray-500 dark:text-gray-400">assessment</mat-icon>
             Reports
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-
-        <div class="pl-4">
-          <a mat-list-item routerLink="/reports/employees" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Employees</a>
-          <a mat-list-item routerLink="/reports/voucher" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Voucher</a>
-          <a mat-list-item routerLink="/reports/opening-balance" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Opening Balance</a>
-          <a mat-list-item routerLink="/reports/closing-balance" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Closing Balance</a>
-          <a mat-list-item routerLink="/reports/loan" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Loan</a>
+          </div>
+          <mat-icon [class.rotate-180]="isReportsMenuOpen" class="transform transition-transform duration-200">expand_more</mat-icon>
+        </button>
+        
+        <div *ngIf="isReportsMenuOpen" class="ml-6 space-y-1 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+          <a routerLink="/reports/employees" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Employees</a>
+          <a routerLink="/reports/voucher" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Voucher</a>
+          <a routerLink="/reports/opening-balance" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Opening Balance</a>
+          <a routerLink="/reports/closing-balance" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Closing Balance</a>
+          <a routerLink="/reports/loan" routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Loan</a>
         </div>
-      </mat-expansion-panel>
+      </div>
 
       <!-- Other Menu Items -->
-      <a mat-list-item routerLink="/statement" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
-        <mat-icon matListItemIcon>description</mat-icon>
-        <span matListItemTitle>Statement</span>
-      </a>
-      <a mat-list-item routerLink="/backup" *ngIf="canAccessBackup()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
-        <mat-icon matListItemIcon>backup</mat-icon>
-        <span matListItemTitle>Backup</span>
-      </a>
-      <a mat-list-item routerLink="/admin" *ngIf="canAccessAdmin()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
-        <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
-        <span matListItemTitle>Admin</span>
-      </a>
-      <a mat-list-item routerLink="/new-year" *ngIf="canManageFinancialYear()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
-        <mat-icon matListItemIcon>calendar_today</mat-icon>
-        <span matListItemTitle>New Year</span>
+      <a 
+        routerLink="/statement" 
+        routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-700 dark:text-primary-300 border-r-3 border-primary-500"
+        class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 group"
+      >
+        <mat-icon class="mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-500">description</mat-icon>
+        Statement
       </a>
 
-      <a mat-list-item routerLink="/login" class="flex items-center gap-3 font-medium px-4 h-12 hover:bg-red-500 hover:text-white transition-colors">
-        <mat-icon>exit_to_app</mat-icon>
-        Exit
+      <a 
+        *ngIf="canAccessBackup()" 
+        routerLink="/backup" 
+        routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-700 dark:text-primary-300 border-r-3 border-primary-500"
+        class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 group"
+      >
+        <mat-icon class="mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-500">backup</mat-icon>
+        Backup
       </a>
-    </mat-nav-list>
-  </mat-sidenav>
 
-  <mat-sidenav-content class="flex-1 flex flex-col">
-    <mat-toolbar color="primary" class="z-10 shadow-md">
-      <button mat-icon-button (click)="sidenav.toggle()">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>Financial Management System</span>
-      <span class="toolbar-spacer"></span>
-      <span class="user-info mr-4 text-sm text-gray-200" *ngIf="isLoggedIn()">
-        {{ currentUser?.societyName ? currentUser?.societyName + ' - ' : '' }}{{ getUserRoleDisplayName() }}
-      </span>
-      <button mat-icon-button [matMenuTriggerFor]="userMenu" *ngIf="isLoggedIn()">
-        <mat-icon>account_circle</mat-icon>
-      </button>
-      <mat-menu #userMenu="matMenu">
-        <button mat-menu-item>
-          <mat-icon>person</mat-icon>
-          <span>{{currentUserName}}</span>
-        </button>
-        <button mat-menu-item>
-          <mat-icon>settings</mat-icon>
-          <span>Settings</span>
-        </button>
-        <button mat-menu-item (click)="logout()">
-          <mat-icon>logout</mat-icon>
-          <span>Logout</span>
-        </button>
-      </mat-menu>
-    </mat-toolbar>
+      <a 
+        *ngIf="canAccessAdmin()" 
+        routerLink="/admin" 
+        routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-700 dark:text-primary-300 border-r-3 border-primary-500"
+        class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 group"
+      >
+        <mat-icon class="mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-500">admin_panel_settings</mat-icon>
+        Admin
+      </a>
 
-    <div class="flex-1 overflow-auto p-4">
-      <router-outlet></router-outlet>
+      <a 
+        *ngIf="canManageFinancialYear()" 
+        routerLink="/new-year" 
+        routerLinkActive="bg-primary-50 dark:bg-primary-900 text-primary-700 dark:text-primary-300 border-r-3 border-primary-500"
+        class="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 group"
+      >
+        <mat-icon class="mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-500">calendar_today</mat-icon>
+        New Year
+      </a>
+
+      <!-- Logout -->
+      <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
+        <a 
+          routerLink="/login" 
+          class="flex items-center px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"
+        >
+          <mat-icon class="mr-3 group-hover:text-red-500">exit_to_app</mat-icon>
+          Exit
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Mobile sidebar overlay -->
+  <div 
+    *ngIf="isMobileSidebarOpen" 
+    class="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden" 
+    (click)="closeMobileSidebar()"
+  ></div>
+
+  <!-- Main content -->
+  <div class="lg:ml-72">
+    <!-- Top navigation bar -->
+    <header class="hidden lg:block bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Financial Management System</h1>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <!-- Theme toggle -->
+            <button 
+              (click)="toggleTheme()"
+              class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            </button>
+            
+            <!-- User info -->
+            <div *ngIf="isLoggedIn()" class="text-sm text-gray-600 dark:text-gray-300">
+              {{ currentUser?.societyName ? currentUser?.societyName + ' - ' : '' }}{{ getUserRoleDisplayName() }}
+            </div>
+            
+            <!-- User menu -->
+            <button 
+              *ngIf="isLoggedIn()" 
+              mat-icon-button 
+              [matMenuTriggerFor]="userMenu"
+              class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <mat-icon class="text-gray-600 dark:text-gray-300">account_circle</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="min-h-screen pt-16 lg:pt-0 p-6 bg-gray-50 dark:bg-gray-900">
+      <div class="max-w-7xl mx-auto">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+
+  <!-- User menu -->
+  <mat-menu #userMenu="matMenu" class="mt-2">
+    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+      <p class="text-sm font-medium text-gray-900 dark:text-white">{{currentUserName}}</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400">{{ getUserRoleDisplayName() }}</p>
     </div>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    <button mat-menu-item class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+      <mat-icon class="mr-3">person</mat-icon>
+      Profile
+    </button>
+    <button mat-menu-item class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+      <mat-icon class="mr-3">settings</mat-icon>
+      Settings
+    </button>
+    <button mat-menu-item (click)="logout()" class="flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+      <mat-icon class="mr-3">logout</mat-icon>
+      Logout
+    </button>
+  </mat-menu>
+</div>

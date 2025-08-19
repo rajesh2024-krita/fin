@@ -1,1 +1,16 @@
-/* Tailwind CSS classes will be used directly in the template */
+
+/* All styles are now handled by Tailwind utility classes in the template */
+:host {
+  display: block;
+}
+
+/* Custom utility classes for specific Material components */
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+}
