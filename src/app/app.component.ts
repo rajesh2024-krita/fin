@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet, Router } from '@angular/router';
+import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -15,6 +15,8 @@ import { AuthService, User, UserRole } from './services/auth.service';
   standalone: true,
   imports: [
     RouterOutlet,
+    RouterLink,           // 👈 Add this
+    RouterLinkActive,     // 👈 And this
     CommonModule,
     MatSidenavModule,
     MatToolbarModule,

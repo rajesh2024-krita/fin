@@ -36,7 +36,7 @@ export interface Permission {
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
-  
+
   public currentUser$ = this.currentUserSubject.asObservable();
   public isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
@@ -122,14 +122,17 @@ export class AuthService {
 
   login(username: string, password: string): Observable<boolean> {
     return new Observable(observer => {
-      // Simulate API call
       setTimeout(() => {
         const user = this.users.find(u => u.username === username && u.isActive);
-        if (user && password === 'password') { // Simple password check for demo
+        if (user && password === 'password') {
           user.lastLogin = new Date();
           this.currentUserSubject.next(user);
           this.isLoggedInSubject.next(true);
-          localStorage.setItem('currentUser', JSON.stringify(user));
+
+          if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+          }
+
           observer.next(true);
         } else {
           observer.next(false);
@@ -140,11 +143,14 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('currentUser');
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.removeItem('currentUser');
+    }
     this.currentUserSubject.next(null);
     this.isLoggedInSubject.next(false);
     this.router.navigate(['/login']);
   }
+
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
@@ -160,7 +166,7 @@ export class AuthService {
     // Super admin has all permissions
     if (user.role === UserRole.SUPER_ADMIN) return true;
 
-    return permissions.some(permission => 
+    return permissions.some(permission =>
       (permission.module === module || permission.module === 'all') &&
       permission.actions.includes(action)
     );
@@ -220,7 +226,7 @@ export class AuthService {
     if (!currentUser) return new Observable(obs => obs.next([]));
 
     let filteredUsers = this.users;
-    
+
     if (currentUser.role === UserRole.SOCIETY_ADMIN) {
       filteredUsers = this.users.filter(u => u.societyId === currentUser.societyId);
     }
@@ -246,13 +252,16 @@ export class AuthService {
   }
 
   private loadUserFromStorage(): void {
-    const userData = localStorage.getItem('currentUser');
-    if (userData) {
-      const user = JSON.parse(userData);
-      this.currentUserSubject.next(user);
-      this.isLoggedInSubject.next(true);
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const userData = localStorage.getItem('currentUser');
+      if (userData) {
+        const user = JSON.parse(userData);
+        this.currentUserSubject.next(user);
+        this.isLoggedInSubject.next(true);
+      }
     }
   }
+
 
   getUserRoles(): UserRole[] {
     return Object.values(UserRole);

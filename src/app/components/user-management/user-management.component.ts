@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -9,8 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snackbar';
+import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material/dialog';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { AuthService, User, UserRole } from '../../services/auth.service';
 
@@ -95,7 +95,8 @@ export class UserFormDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<UserFormDialogComponent>,
     private fb: FormBuilder,
     private authService: AuthService,
-    public data: { user?: User }
+    // public data: { user?: User }
+    @Inject(MAT_DIALOG_DATA) public data: { user?: User }
   ) {
     this.userForm = this.fb.group({
       username: ['', Validators.required],

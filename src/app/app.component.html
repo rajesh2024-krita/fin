@@ -147,7 +147,7 @@
       <span>Financial Management System</span>
       <span class="toolbar-spacer"></span>
       <span class="user-info" *ngIf="isLoggedIn()">
-        {{currentUser?.societyName ? currentUser.societyName + ' - ' : ''}}{{getUserRoleDisplayName()}}
+        {{ currentUser?.societyName ? currentUser?.societyName + ' - ' : '' }}{{ getUserRoleDisplayName() }}
       </span>
       <button mat-icon-button [matMenuTriggerFor]="userMenu" *ngIf="isLoggedIn()">
         <mat-icon>account_circle</mat-icon>
