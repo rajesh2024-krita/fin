@@ -1,433 +1,447 @@
-<div class="page-container">
-      <mat-sidenav-container class="sidenav-container">
-        <!-- Main Content -->
-        <mat-sidenav-content>
-          <div class="page-header">
-            <h1>Member Details Management</h1>
-            <div class="header-actions" *ngIf="canCreateMembers">
-              <button mat-raised-button color="primary" (click)="openMemberForm()" 
-                      class="add-member-btn">
-                <mat-icon>add</mat-icon>
-                Add New Member
+
+<div class="container-responsive py-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Member Management</h1>
+      <p class="text-gray-600 mt-2">Manage society members and their details</p>
+    </div>
+    <button 
+      (click)="openMemberForm()" 
+      class="btn-primary flex items-center gap-2 px-6 py-3">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      </svg>
+      Add New Member
+    </button>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="card p-6 mb-8">
+    <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+      <div class="flex-1 max-w-md">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (input)="filterMembers()"
+          placeholder="Search members..." 
+          class="form-input">
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <button 
+          *ngFor="let filter of ['All', 'Active', 'Inactive', 'Pending']"
+          (click)="setStatusFilter(filter.toLowerCase())"
+          [class]="statusFilter === filter.toLowerCase() ? 'btn-primary' : 'btn-secondary'"
+          class="px-4 py-2 text-sm">
+          {{filter}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="card p-6 text-center">
+      <div class="text-3xl font-bold text-blue-600 mb-2">{{stats.total}}</div>
+      <div class="text-gray-600">Total Members</div>
+    </div>
+    <div class="card p-6 text-center">
+      <div class="text-3xl font-bold text-green-600 mb-2">{{stats.active}}</div>
+      <div class="text-gray-600">Active Members</div>
+    </div>
+    <div class="card p-6 text-center">
+      <div class="text-3xl font-bold text-yellow-600 mb-2">{{stats.pending}}</div>
+      <div class="text-gray-600">Pending Approval</div>
+    </div>
+    <div class="card p-6 text-center">
+      <div class="text-3xl font-bold text-red-600 mb-2">{{stats.inactive}}</div>
+      <div class="text-gray-600">Inactive Members</div>
+    </div>
+  </div>
+
+  <!-- Desktop Table View -->
+  <div class="hidden lg:block">
+    <div class="card overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-900">Members List</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="table-header">
+            <tr>
+              <th class="px-6 py-3 text-left">Member No.</th>
+              <th class="px-6 py-3 text-left">Name</th>
+              <th class="px-6 py-3 text-left">Branch</th>
+              <th class="px-6 py-3 text-left">Mobile</th>
+              <th class="px-6 py-3 text-left">Status</th>
+              <th class="px-6 py-3 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let member of filteredMembers" class="hover:bg-gray-50">
+              <td class="table-cell font-medium">{{member.memberNo}}</td>
+              <td class="table-cell">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                    <span class="text-sm font-medium text-gray-700">{{member.name.charAt(0)}}</span>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">{{member.name}}</div>
+                    <div class="text-sm text-gray-500">{{member.email}}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="table-cell">{{member.branch}}</td>
+              <td class="table-cell">{{member.mobile}}</td>
+              <td class="table-cell">
+                <span [class]="'status-badge status-' + member.status">
+                  {{member.status | titlecase}}
+                </span>
+              </td>
+              <td class="table-cell">
+                <div class="flex gap-2">
+                  <button 
+                    (click)="editMember(member)" 
+                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </button>
+                  <button 
+                    (click)="deleteMember(member.id)" 
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Card View -->
+  <div class="lg:hidden">
+    <div class="space-y-4">
+      <div *ngFor="let member of filteredMembers" class="card p-4">
+        <div class="flex justify-between items-start mb-3">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+              <span class="font-medium text-gray-700">{{member.name.charAt(0)}}</span>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">{{member.name}}</h3>
+              <p class="text-sm text-gray-600">{{member.memberNo}}</p>
+            </div>
+          </div>
+          <span [class]="'status-badge status-' + member.status">
+            {{member.status | titlecase}}
+          </span>
+        </div>
+        
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center text-sm text-gray-600">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 7.89a2 2 0 002.83 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            {{member.email}}
+          </div>
+          <div class="flex items-center text-sm text-gray-600">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+            </svg>
+            {{member.mobile}}
+          </div>
+          <div class="flex items-center text-sm text-gray-600">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            {{member.branch}}
+          </div>
+        </div>
+        
+        <div class="flex gap-2">
+          <button 
+            (click)="editMember(member)" 
+            class="flex-1 btn-secondary text-sm py-2">
+            Edit
+          </button>
+          <button 
+            (click)="deleteMember(member.id)" 
+            class="flex-1 btn-danger text-sm py-2">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex justify-center mt-8" *ngIf="filteredMembers.length > 0">
+    <nav class="flex items-center gap-2">
+      <button class="px-3 py-2 text-sm btn-secondary">Previous</button>
+      <button class="px-3 py-2 text-sm btn-primary">1</button>
+      <button class="px-3 py-2 text-sm btn-secondary">2</button>
+      <button class="px-3 py-2 text-sm btn-secondary">3</button>
+      <button class="px-3 py-2 text-sm btn-secondary">Next</button>
+    </nav>
+  </div>
+</div>
+
+<!-- Member Form Offcanvas -->
+<div class="fixed inset-0 z-50" *ngIf="showMemberForm" (click)="closeMemberForm()">
+  <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+  <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-xl" (click)="$event.stopPropagation()">
+    <div class="h-full flex flex-col">
+      <!-- Form Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">
+          {{currentMember?.id ? 'Edit Member' : 'Add New Member'}}
+        </h2>
+        <button (click)="closeMemberForm()" class="p-2 text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form Content -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <form [formGroup]="memberForm" (ngSubmit)="saveMember()">
+          <!-- Tabs -->
+          <div class="border-b border-gray-200 mb-6">
+            <nav class="flex space-x-8">
+              <button 
+                type="button"
+                *ngFor="let tab of tabs; let i = index"
+                (click)="setActiveTab(i)"
+                [class]="activeTab === i ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="py-2 px-1 border-b-2 font-medium text-sm">
+                {{tab.title}}
               </button>
+            </nav>
+          </div>
+
+          <!-- General Tab -->
+          <div *ngIf="activeTab === 0" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Member No.</label>
+                <input type="text" formControlName="memberNo" class="form-input bg-gray-50" readonly>
+              </div>
+              <div>
+                <label class="form-label">Name *</label>
+                <input type="text" formControlName="name" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">F/H Name</label>
+                <input type="text" formControlName="fhName" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Mobile *</label>
+                <input type="tel" formControlName="mobile" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Email</label>
+                <input type="email" formControlName="email" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Branch *</label>
+                <select formControlName="branch" class="form-input">
+                  <option value="">Select Branch</option>
+                  <option value="main">Main Branch</option>
+                  <option value="north">North Branch</option>
+                  <option value="south">South Branch</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Phone (Off.)</label>
+                <input type="tel" formControlName="phoneOffice" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Phone (Res.)</label>
+                <input type="tel" formControlName="phoneResidence" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Designation</label>
+                <input type="text" formControlName="designation" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Date of Birth</label>
+                <input type="date" formControlName="dob" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Date of Joining Society</label>
+                <input type="date" formControlName="dojSociety" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Date of Joining</label>
+                <input type="date" formControlName="doj" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Date of Retirement</label>
+                <input type="date" formControlName="dor" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Nominee</label>
+                <input type="text" formControlName="nominee" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Nominee Relation</label>
+                <input type="text" formControlName="nomineeRelation" class="form-input">
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Office Address</label>
+                <textarea formControlName="officeAddress" rows="3" class="form-input"></textarea>
+              </div>
+              <div>
+                <label class="form-label">Residence Address</label>
+                <textarea formControlName="residenceAddress" rows="3" class="form-input"></textarea>
+              </div>
+            </div>
+            
+            <div>
+              <label class="form-label">City</label>
+              <input type="text" formControlName="city" class="form-input">
             </div>
           </div>
 
-          <!-- Access Denied Message -->
-          <mat-card *ngIf="!canCreateMembers && !canEditMembers" class="access-denied">
-            <mat-card-content>
-              <div class="access-denied-content">
-                <mat-icon color="warn">block</mat-icon>
-                <h3>Access Denied</h3>
-                <p>You don't have permission to manage members. Only Super Admins and Society Admins can create and manage members.</p>
+          <!-- Photo & Opening Balance Tab -->
+          <div *ngIf="activeTab === 1" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="form-label">Opening Balance (Share)</label>
+                <input type="number" formControlName="openingBalanceShare" class="form-input">
               </div>
-            </mat-card-content>
-          </mat-card>
+              <div>
+                <label class="form-label">Opening Balance (CR)</label>
+                <input type="number" formControlName="openingBalanceCr" class="form-input">
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="form-label">Bank Name</label>
+                <input type="text" formControlName="bankName" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Payable At</label>
+                <input type="text" formControlName="payableAt" class="form-input">
+              </div>
+              <div>
+                <label class="form-label">Account No.</label>
+                <input type="text" formControlName="accountNo" class="form-input">
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Status</label>
+                <select formControlName="status" class="form-input">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Date</label>
+                <input type="date" formControlName="date" class="form-input">
+              </div>
+            </div>
+          </div>
 
-          <!-- Members List -->
-          <mat-card class="table-card" *ngIf="canCreateMembers || canEditMembers">
-            <mat-card-header>
-              <div class="card-header-content">
-                <mat-card-title>Members List ({{filteredMembers.length}})</mat-card-title>
+          <!-- Monthly Deduction Tab -->
+          <div *ngIf="activeTab === 2" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Deduction Share</label>
+                <input type="number" formControlName="deductionShare" class="form-input">
               </div>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="table-controls">
-                <mat-form-field appearance="outline" class="search-field">
-                  <mat-label>Search Members</mat-label>
-                  <input matInput (keyup)="applyFilter($event)" placeholder="Search by name, phone, or member no">
-                  <mat-icon matSuffix>search</mat-icon>
-                </mat-form-field>
+              <div>
+                <label class="form-label">Deduction Withdrawal</label>
+                <input type="number" formControlName="deductionWithdrawal" class="form-input">
               </div>
-              
-              <!-- Desktop Table View -->
-              <div class="table-container desktop-view">
-                <table mat-table [dataSource]="filteredMembers" class="members-table">
-                  <ng-container matColumnDef="memberNo">
-                    <th mat-header-cell *matHeaderCellDef>Member No</th>
-                    <td mat-cell *matCellDef="let member">{{member.memberNo}}</td>
-                  </ng-container>
-                  
-                  <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef>Name</th>
-                    <td mat-cell *matCellDef="let member">{{member.name}}</td>
-                  </ng-container>
-                  
-                  <ng-container matColumnDef="mobile">
-                    <th mat-header-cell *matHeaderCellDef>Mobile</th>
-                    <td mat-cell *matCellDef="let member">{{member.mobile}}</td>
-                  </ng-container>
-                  
-                  <ng-container matColumnDef="branch">
-                    <th mat-header-cell *matHeaderCellDef>Branch</th>
-                    <td mat-cell *matCellDef="let member">{{member.branch}}</td>
-                  </ng-container>
-                  
-                  <ng-container matColumnDef="dojSociety">
-                    <th mat-header-cell *matHeaderCellDef>DOJ Society</th>
-                    <td mat-cell *matCellDef="let member">{{member.dojSociety | date}}</td>
-                  </ng-container>
-                  
-                  <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>Status</th>
-                    <td mat-cell *matCellDef="let member">
-                      <span class="status-badge" [class]="'status-' + member.status.toLowerCase()">
-                        {{member.status}}
-                      </span>
-                    </td>
-                  </ng-container>
-                  
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let member">
-                      <div class="action-buttons">
-                        <button mat-icon-button (click)="editMember(member)" color="primary" 
-                                [disabled]="!canEditMembers"
-                                matTooltip="Edit Member">
-                          <mat-icon>edit</mat-icon>
-                        </button>
-                        <button mat-icon-button (click)="deleteMember(member.id)" color="warn"
-                                [disabled]="!canEditMembers"
-                                matTooltip="Delete Member">
-                          <mat-icon>delete</mat-icon>
-                        </button>
-                        <button mat-icon-button (click)="viewMember(member)" color="accent"
-                                matTooltip="View Details">
-                          <mat-icon>visibility</mat-icon>
-                        </button>
-                      </div>
-                    </td>
-                  </ng-container>
-                  
-                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                </table>
+              <div>
+                <label class="form-label">G Loan Instalment</label>
+                <input type="number" formControlName="gLoanInstalment" class="form-input">
               </div>
+              <div>
+                <label class="form-label">E Loan Instalment</label>
+                <input type="number" formControlName="eLoanInstalment" class="form-input">
+              </div>
+            </div>
+          </div>
 
-              <!-- Mobile Card View -->
-              <div class="mobile-view">
-                <div class="member-card" *ngFor="let member of filteredMembers">
-                  <div class="member-card-header">
-                    <div class="member-info">
-                      <h3>{{member.name}}</h3>
-                      <p class="member-number">{{member.memberNo}}</p>
+          <!-- Photo Tab -->
+          <div *ngIf="activeTab === 3" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Photo Upload -->
+              <div>
+                <label class="form-label">Photo</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
+                     (click)="photoInput.click()"
+                     (dragover)="onDragOver($event)"
+                     (drop)="onPhotoDrop($event)">
+                  <div *ngIf="!photoPreview" class="space-y-2">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="text-sm text-gray-600">
+                      <span class="font-medium text-blue-600 hover:text-blue-500">Click to upload</span> or drag and drop
                     </div>
-                    <span class="status-badge" [class]="'status-' + member.status.toLowerCase()">
-                      {{member.status}}
-                    </span>
+                    <p class="text-xs text-gray-500">PNG, JPG up to 2MB</p>
                   </div>
-                  <div class="member-card-content">
-                    <div class="info-row">
-                      <mat-icon>phone</mat-icon>
-                      <span>{{member.mobile}}</span>
-                    </div>
-                    <div class="info-row">
-                      <mat-icon>business</mat-icon>
-                      <span>{{member.branch}}</span>
-                    </div>
-                    <div class="info-row">
-                      <mat-icon>calendar_today</mat-icon>
-                      <span>{{member.dojSociety | date}}</span>
-                    </div>
-                    <div class="info-row">
-                      <mat-icon>email</mat-icon>
-                      <span>{{member.email || 'Not provided'}}</span>
-                    </div>
-                  </div>
-                  <div class="member-card-actions">
-                    <button mat-button (click)="editMember(member)" color="primary"
-                            [disabled]="!canEditMembers">
-                      <mat-icon>edit</mat-icon>
-                      Edit
-                    </button>
-                    <button mat-button (click)="viewMember(member)" color="accent">
-                      <mat-icon>visibility</mat-icon>
-                      View
-                    </button>
-                    <button mat-button (click)="deleteMember(member.id)" color="warn"
-                            [disabled]="!canEditMembers">
-                      <mat-icon>delete</mat-icon>
-                      Delete
-                    </button>
+                  <div *ngIf="photoPreview" class="space-y-2">
+                    <img [src]="photoPreview" alt="Photo preview" class="mx-auto h-32 w-32 object-cover rounded-lg">
+                    <button type="button" (click)="removePhoto(); $event.stopPropagation()" class="text-sm text-red-600 hover:text-red-500">Remove</button>
                   </div>
                 </div>
+                <input #photoInput type="file" (change)="onPhotoSelect($event)" accept="image/*" class="hidden">
               </div>
 
-              <div class="no-data" *ngIf="filteredMembers.length === 0">
-                <mat-icon>people_outline</mat-icon>
-                <h3>No members found</h3>
-                <p>{{members.length === 0 ? 'Start by adding your first member' : 'Try adjusting your search criteria'}}</p>
+              <!-- Signature Upload -->
+              <div>
+                <label class="form-label">Signature</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
+                     (click)="signatureInput.click()"
+                     (dragover)="onDragOver($event)"
+                     (drop)="onSignatureDrop($event)">
+                  <div *ngIf="!signaturePreview" class="space-y-2">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M8 14v20c0 4.418 7.163 8 16 8 1.381 0 2.721-.087 4-.252M8 14c0 4.418 7.163 8 16 8s16-3.582 16-8M8 14c0-4.418 7.163-8 16-8s16 3.582 16 8m0 0v14m-16-4h.01M32 18.01h.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="text-sm text-gray-600">
+                      <span class="font-medium text-blue-600 hover:text-blue-500">Click to upload</span> or drag and drop
+                    </div>
+                    <p class="text-xs text-gray-500">PNG, JPG up to 1MB</p>
+                  </div>
+                  <div *ngIf="signaturePreview" class="space-y-2">
+                    <img [src]="signaturePreview" alt="Signature preview" class="mx-auto h-20 w-32 object-cover rounded-lg">
+                    <button type="button" (click)="removeSignature(); $event.stopPropagation()" class="text-sm text-red-600 hover:text-red-500">Remove</button>
+                  </div>
+                </div>
+                <input #signatureInput type="file" (change)="onSignatureSelect($event)" accept="image/*" class="hidden">
               </div>
-            </mat-card-content>
-          </mat-card>
-        </mat-sidenav-content>
+            </div>
+          </div>
 
-        <!-- Offcanvas Form -->
-        <mat-sidenav #memberFormSidenav 
-                     mode="over" 
-                     position="end" 
-                     class="member-form-sidenav"
-                     (closed)="closeMemberForm()">
-          <div class="sidenav-header">
-            <h2>{{editingMember ? 'Edit Member' : 'Add New Member'}}</h2>
-            <button mat-icon-button (click)="closeMemberForm()">
-              <mat-icon>close</mat-icon>
+          <!-- Form Actions -->
+          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 mt-8">
+            <button type="button" (click)="closeMemberForm()" class="btn-secondary px-6 py-3">
+              Cancel
+            </button>
+            <button type="submit" [disabled]="memberForm.invalid" class="btn-primary px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
+              {{currentMember?.id ? 'Update Member' : 'Save Member'}}
             </button>
           </div>
-
-          <div class="sidenav-content">
-            <form [formGroup]="memberForm" (ngSubmit)="saveMember()">
-              <mat-tab-group class="member-tabs">
-                
-                <!-- General Tab -->
-                <mat-tab label="General">
-                  <div class="tab-content">
-                    <div class="form-grid">
-                      <mat-form-field appearance="outline">
-                        <mat-label>Member No</mat-label>
-                        <input matInput formControlName="memberNo" readonly>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Name</mat-label>
-                        <input matInput formControlName="name" required>
-                        <mat-error *ngIf="memberForm.get('name')?.hasError('required')">Name is required</mat-error>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>F/H Name</mat-label>
-                        <input matInput formControlName="fatherHusbandName" required>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>Office Address</mat-label>
-                        <textarea matInput formControlName="officeAddress" rows="2"></textarea>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>City</mat-label>
-                        <input matInput formControlName="city" required>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Phone (Off.)</mat-label>
-                        <input matInput formControlName="phoneOffice">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Branch</mat-label>
-                        <mat-select formControlName="branch">
-                          <mat-option value="Main Branch">Main Branch</mat-option>
-                          <mat-option value="Branch A">Branch A</mat-option>
-                          <mat-option value="Branch B">Branch B</mat-option>
-                          <mat-option value="Branch C">Branch C</mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Phone (Res.)</mat-label>
-                        <input matInput formControlName="phoneResidence">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Designation</mat-label>
-                        <input matInput formControlName="designation">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Mobile</mat-label>
-                        <input matInput formControlName="mobile" required>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>Residence Address</mat-label>
-                        <textarea matInput formControlName="residenceAddress" rows="2" required></textarea>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Date of Birth</mat-label>
-                        <input matInput [matDatepicker]="dobPicker" formControlName="dob">
-                        <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #dobPicker></mat-datepicker>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>DOJ Society</mat-label>
-                        <input matInput [matDatepicker]="dojSocietyPicker" formControlName="dojSociety">
-                        <mat-datepicker-toggle matSuffix [for]="dojSocietyPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #dojSocietyPicker></mat-datepicker>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Email</mat-label>
-                        <input matInput type="email" formControlName="email">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>DOJ</mat-label>
-                        <input matInput [matDatepicker]="dojPicker" formControlName="doj">
-                        <mat-datepicker-toggle matSuffix [for]="dojPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #dojPicker></mat-datepicker>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>DOR</mat-label>
-                        <input matInput [matDatepicker]="dorPicker" formControlName="dor">
-                        <mat-datepicker-toggle matSuffix [for]="dorPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #dorPicker></mat-datepicker>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Nominee</mat-label>
-                        <input matInput formControlName="nominee">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Nominee Relation</mat-label>
-                        <mat-select formControlName="nomineeRelation">
-                          <mat-option value="Spouse">Spouse</mat-option>
-                          <mat-option value="Son">Son</mat-option>
-                          <mat-option value="Daughter">Daughter</mat-option>
-                          <mat-option value="Father">Father</mat-option>
-                          <mat-option value="Mother">Mother</mat-option>
-                          <mat-option value="Brother">Brother</mat-option>
-                          <mat-option value="Sister">Sister</mat-option>
-                          <mat-option value="Other">Other</mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                    </div>
-                  </div>
-                </mat-tab>
-                
-                <!-- Photo & Opening Balance Tab -->
-                <mat-tab label="Photo & Opening Balance">
-                  <div class="tab-content">
-                    <div class="form-grid">
-                      <div class="photo-upload-section full-width">
-                        <h3>Photo & Signature</h3>
-                        <div class="upload-row">
-                          <div class="upload-item">
-                            <label>Member Photo</label>
-                            <div class="image-upload-area" (click)="photoInput.click()">
-                              <img *ngIf="photoPreview" [src]="photoPreview" alt="Member Photo" class="preview-image">
-                              <div *ngIf="!photoPreview" class="upload-placeholder">
-                                <mat-icon>add_a_photo</mat-icon>
-                                <span>Click to upload photo</span>
-                              </div>
-                            </div>
-                            <input #photoInput type="file" accept="image/*" (change)="onPhotoSelected($event)" style="display: none">
-                          </div>
-                          
-                          <div class="upload-item">
-                            <label>Signature</label>
-                            <div class="image-upload-area" (click)="signatureInput.click()">
-                              <img *ngIf="signaturePreview" [src]="signaturePreview" alt="Signature" class="preview-image">
-                              <div *ngIf="!signaturePreview" class="upload-placeholder">
-                                <mat-icon>edit</mat-icon>
-                                <span>Click to upload signature</span>
-                              </div>
-                            </div>
-                            <input #signatureInput type="file" accept="image/*" (change)="onSignatureSelected($event)" style="display: none">
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div class="section-divider full-width"></div>
-                      
-                      <h3 class="full-width">Opening Balance</h3>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Opening Balance (Share)</mat-label>
-                        <input matInput type="number" formControlName="openingBalanceShare">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Opening Balance (CR)</mat-label>
-                        <input matInput type="number" formControlName="openingBalanceCR">
-                      </mat-form-field>
-                      
-                      <h3 class="full-width">Bank Details</h3>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Bank Name</mat-label>
-                        <input matInput formControlName="bankName">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Payable At</mat-label>
-                        <input matInput formControlName="bankPayableAt">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Account No</mat-label>
-                        <input matInput formControlName="bankAccountNo">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Status</mat-label>
-                        <mat-select formControlName="status">
-                          <mat-option value="Active">Active</mat-option>
-                          <mat-option value="Inactive">Inactive</mat-option>
-                          <mat-option value="Suspended">Suspended</mat-option>
-                          <mat-option value="Closed">Closed</mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Status Date</mat-label>
-                        <input matInput [matDatepicker]="statusDatePicker" formControlName="statusDate">
-                        <mat-datepicker-toggle matSuffix [for]="statusDatePicker"></mat-datepicker-toggle>
-                        <mat-datepicker #statusDatePicker></mat-datepicker>
-                      </mat-form-field>
-                    </div>
-                  </div>
-                </mat-tab>
-                
-                <!-- Monthly Deduction Tab -->
-                <mat-tab label="Monthly Deduction">
-                  <div class="tab-content">
-                    <div class="form-grid">
-                      <h3 class="full-width">Monthly Deductions</h3>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Share Deduction</mat-label>
-                        <input matInput type="number" formControlName="deductionShare">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>Withdrawal Deduction</mat-label>
-                        <input matInput type="number" formControlName="deductionWithdrawal">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>G Loan Instalment</mat-label>
-                        <input matInput type="number" formControlName="deductionGLoanInstalment">
-                      </mat-form-field>
-                      
-                      <mat-form-field appearance="outline">
-                        <mat-label>E Loan Instalment</mat-label>
-                        <input matInput type="number" formControlName="deductionELoanInstalment">
-                      </mat-form-field>
-                    </div>
-                  </div>
-                </mat-tab>
-                
-              </mat-tab-group>
-              
-              <div class="form-actions">
-                <button mat-raised-button color="primary" type="submit" 
-                        [disabled]="!memberForm.valid || !canCreateMembers"
-                        class="submit-btn">
-                  <mat-icon>{{editingMember ? 'update' : 'add'}}</mat-icon>
-                  {{editingMember ? 'Update Member' : 'Add Member'}}
-                </button>
-                <button mat-stroked-button type="button" (click)="closeMemberForm()">
-                  <mat-icon>cancel</mat-icon>
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </mat-sidenav>
-      </mat-sidenav-container>
+        </form>
+      </div>
     </div>
+  </div>
+</div>
