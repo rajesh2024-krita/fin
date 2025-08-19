@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
+import { AuthService, User, UserRole } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -26,7 +27,95 @@ import { MatMenuModule } from '@angular/material/menu';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'Financial Management System';
-  currentUser = 'Admin User';
+  currentUser: User | null = null;
+  currentUserName = '';
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      this.currentUserName = user ? `${user.firstName} ${user.lastName}` : 'Guest';
+    });
+
+    this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+      if (!isLoggedIn && this.router.url !== '/login') {
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+
+  logout() {
+    this.authService.logout();
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.currentUser;
+  }
+
+  isSuperAdmin(): boolean {
+    return this.currentUser?.role === UserRole.SUPER_ADMIN;
+  }
+
+  isSocietyAdmin(): boolean {
+    return this.currentUser?.role === UserRole.SOCIETY_ADMIN;
+  }
+
+  isAccountant(): boolean {
+    return this.currentUser?.role === UserRole.ACCOUNTANT;
+  }
+
+  isMember(): boolean {
+    return this.currentUser?.role === UserRole.MEMBER;
+  }
+
+  canAccessUserManagement(): boolean {
+    return this.authService.hasPermission('users', 'read');
+  }
+
+  canCreateUsers(): boolean {
+    return this.authService.hasPermission('users', 'create');
+  }
+
+  canManageFinancialYear(): boolean {
+    return this.isSuperAdmin() || this.isSocietyAdmin();
+  }
+
+  canEditOpeningBalance(): boolean {
+    return this.isSuperAdmin() || this.isSocietyAdmin() || this.isAccountant();
+  }
+
+  canAccessMaster(): boolean {
+    return !this.isMember();
+  }
+
+  canAccessTransactions(): boolean {
+    return !this.isMember();
+  }
+
+  canAccessAccounts(): boolean {
+    return !this.isMember();
+  }
+
+  canAccessReports(): boolean {
+    return true; // All users can view reports (with filtered data)
+  }
+
+  canAccessAdmin(): boolean {
+    return this.isSuperAdmin();
+  }
+
+  canAccessBackup(): boolean {
+    return this.isSuperAdmin() || this.isSocietyAdmin();
+  }
+
+  getUserRoleDisplayName(): string {
+    if (!this.currentUser) return '';
+    return this.currentUser.role.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+  }
 }

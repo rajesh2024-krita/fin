@@ -1,58 +1,63 @@
-
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snackbar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AuthService, UserRole } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, MatCardModule, 
-    MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule
   ],
   template: `
     <div class="login-container">
       <mat-card class="login-card">
         <mat-card-header>
-          <mat-card-title>
-            <mat-icon class="login-icon">account_balance</mat-icon>
-            Financial Management System
-          </mat-card-title>
+          <mat-card-title>Financial Management System</mat-card-title>
           <mat-card-subtitle>Please sign in to continue</mat-card-subtitle>
         </mat-card-header>
-        
         <mat-card-content>
-          <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Username</mat-label>
               <input matInput formControlName="username" required>
-              <mat-icon matSuffix>person</mat-icon>
             </mat-form-field>
-            
+
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Password</mat-label>
-              <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" required>
-              <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
-                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-              </button>
+              <input matInput type="password" formControlName="password" required>
             </mat-form-field>
-            
-            <button mat-raised-button color="primary" type="submit" class="full-width login-btn" 
-                    [disabled]="!loginForm.valid">
-              Sign In
+
+            <button mat-raised-button color="primary" type="submit" 
+                    [disabled]="loginForm.invalid || loading" class="full-width">
+              <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+              <span *ngIf="!loading">Sign In</span>
             </button>
           </form>
+
+          <div class="demo-accounts">
+            <h4>Demo Accounts:</h4>
+            <div class="demo-account" *ngFor="let account of demoAccounts">
+              <strong>{{account.role}}:</strong> {{account.username}} / password
+            </div>
+          </div>
         </mat-card-content>
-        
-        <mat-card-actions>
-          <button mat-button routerLink="/file/security/retrieve-password">Forgot Password?</button>
-        </mat-card-actions>
       </mat-card>
     </div>
   `,
@@ -69,53 +74,98 @@ import { MatIconModule } from '@angular/material/icon';
     .login-card {
       width: 100%;
       max-width: 400px;
-      text-align: center;
+      padding: 20px;
     }
 
-    .login-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      color: #1976d2;
-      margin-bottom: 10px;
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .full-width {
       width: 100%;
-      margin: 10px 0;
     }
 
-    .login-btn {
+    .demo-accounts {
       margin-top: 20px;
-      height: 48px;
+      padding: 16px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
     }
 
-    mat-card-title {
-      font-size: 24px;
-      margin-bottom: 10px;
+    .demo-account {
+      font-size: 12px;
+      margin: 4px 0;
+    }
+
+    mat-card-header {
+      text-align: center;
+      margin-bottom: 20px;
     }
   `]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
-  hidePassword = true;
+  loading = false;
+  returnUrl: string = '/dashboard';
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  demoAccounts = [
+    { role: 'Super Admin', username: 'superadmin' },
+    { role: 'Society Admin', username: 'societyadmin' },
+    { role: 'Accountant', username: 'accountant1' },
+    { role: 'Member', username: 'member1' }
+  ];
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
+  ) {
     this.loginForm = this.fb.group({
-      username: ['admin', Validators.required],
-      password: ['password', Validators.required]
+      username: ['', Validators.required],
+      password: ['', Validators.required]
     });
   }
 
-  onLogin() {
-    if (this.loginForm.valid) {
-      // Placeholder authentication
-      const { username, password } = this.loginForm.value;
-      if (username === 'admin' && password === 'password') {
-        this.router.navigate(['/dashboard']);
-      } else {
-        alert('Invalid credentials');
-      }
+  ngOnInit() {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+
+    // Redirect if already logged in
+    if (this.authService.getCurrentUser()) {
+      this.router.navigate([this.returnUrl]);
     }
+  }
+
+  onSubmit() {
+    if (this.loginForm.invalid) return;
+
+    this.loading = true;
+    const { username, password } = this.loginForm.value;
+
+    this.authService.login(username, password).subscribe({
+      next: (success) => {
+        this.loading = false;
+        if (success) {
+          const user = this.authService.getCurrentUser();
+          this.snackBar.open(`Welcome ${user?.firstName} ${user?.lastName}!`, 'Close', {
+            duration: 3000
+          });
+          this.router.navigate([this.returnUrl]);
+        } else {
+          this.snackBar.open('Invalid username or password', 'Close', {
+            duration: 3000
+          });
+        }
+      },
+      error: () => {
+        this.loading = false;
+        this.snackBar.open('Login failed. Please try again.', 'Close', {
+          duration: 3000
+        });
+      }
+    });
   }
 }

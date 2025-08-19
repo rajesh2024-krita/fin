@@ -99,6 +99,12 @@
   flex: 1 1 auto;
 }
 
+.user-info {
+  margin-right: 16px;
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .content-wrapper {
   flex: 1;
   padding: 20px;
