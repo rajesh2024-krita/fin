@@ -1,13 +1,13 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTableModule } from '@angular/material/table';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -19,13 +19,10 @@ interface CashBookEntry {
   date: Date;
   particulars: string;
   voucherNo: string;
-  debitAmount: number;
-  creditAmount: number;
+  type: 'Receipt' | 'Payment';
+  amount: number;
   balance: number;
-  type: 'RECEIPT' | 'PAYMENT';
-  category: string;
-  referenceNo: string;
-  narration: string;
+  description: string;
 }
 
 @Component({
@@ -33,13 +30,14 @@ interface CashBookEntry {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
-    MatTableModule,
-    MatButtonModule,
-    MatIconModule,
+    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatCardModule,
+    MatButtonModule,
+    MatTableModule,
+    MatIconModule,
     MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
@@ -50,224 +48,208 @@ interface CashBookEntry {
     <div class="page-container">
       <h1>Cash Book Management</h1>
       
-      <!-- Entry Form -->
-      <mat-card class="form-card">
-        <mat-card-header>
-          <mat-card-title>{{isEditing ? 'Edit' : 'Add'}} Cash Entry</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="entryForm" (ngSubmit)="onSubmit()" class="entry-form">
-            <div class="form-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Date</mat-label>
-                <input matInput [matDatepicker]="picker" formControlName="date" required>
-                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Voucher No</mat-label>
-                <input matInput formControlName="voucherNo" required>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Type</mat-label>
-                <mat-select formControlName="type" required (selectionChange)="onTypeChange($event.value)">
-                  <mat-option value="RECEIPT">Cash Receipt</mat-option>
-                  <mat-option value="PAYMENT">Cash Payment</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Particulars</mat-label>
-                <input matInput formControlName="particulars" required>
-              </mat-form-field>
-            </div>
-            
-            <div class="form-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Category</mat-label>
-                <mat-select formControlName="category" required>
-                  <mat-option value="Deposit">Member Deposit</mat-option>
-                  <mat-option value="Withdrawal">Member Withdrawal</mat-option>
-                  <mat-option value="Loan">Loan Transaction</mat-option>
-                  <mat-option value="Interest">Interest Payment</mat-option>
-                  <mat-option value="Administrative">Administrative Expense</mat-option>
-                  <mat-option value="Other">Other</mat-option>
-                </mat-select>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Reference No</mat-label>
-                <input matInput formControlName="referenceNo">
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Amount</mat-label>
-                <input matInput formControlName="amount" type="number" required>
-              </mat-form-field>
-            </div>
-            
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Narration</mat-label>
-                <textarea matInput formControlName="narration" rows="3"></textarea>
-              </mat-form-field>
-            </div>
-            
-            <div class="form-actions">
-              <button mat-raised-button color="primary" type="submit" [disabled]="!entryForm.valid">
-                {{isEditing ? 'Update' : 'Add'}} Entry
-              </button>
-              <button mat-button type="button" (click)="resetForm()" class="ml-2">
-                Reset
-              </button>
-            </div>
-          </form>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Cash Book Display -->
-      <mat-card class="table-card">
-        <mat-card-header>
-          <mat-card-title>Cash Book Entries</mat-card-title>
-          <div class="balance-summary">
-            <div class="balance-item">
-              <span class="label">Opening Balance:</span>
-              <span class="amount">₹{{openingBalance | number}}</span>
-            </div>
-            <div class="balance-item">
-              <span class="label">Current Balance:</span>
-              <span class="amount" [class.negative]="currentBalance < 0">₹{{currentBalance | number}}</span>
-            </div>
-          </div>
-        </mat-card-header>
-        <mat-card-content>
-          <mat-tab-group>
-            <!-- All Entries Tab -->
-            <mat-tab label="All Entries">
-              <div class="table-container">
-                <table mat-table [dataSource]="cashBookEntries" class="mat-elevation-z8">
+      <mat-tab-group>
+        <!-- Cash Entry Tab -->
+        <mat-tab label="Cash Entry">
+          <mat-card class="form-card">
+            <mat-card-header>
+              <mat-card-title>{{editingEntry ? 'Edit Cash Entry' : 'New Cash Entry'}}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="cashForm" (ngSubmit)="saveEntry()">
+                <div class="form-grid">
+                  <mat-form-field>
+                    <mat-label>Date</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="date" required>
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                  </mat-form-field>
                   
+                  <mat-form-field>
+                    <mat-label>Voucher No</mat-label>
+                    <input matInput formControlName="voucherNo" required>
+                  </mat-form-field>
+                  
+                  <mat-form-field>
+                    <mat-label>Type</mat-label>
+                    <mat-select formControlName="type" required>
+                      <mat-option value="Receipt">Cash Receipt</mat-option>
+                      <mat-option value="Payment">Cash Payment</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  
+                  <mat-form-field>
+                    <mat-label>Amount</mat-label>
+                    <input matInput type="number" formControlName="amount" required min="0.01" step="0.01">
+                  </mat-form-field>
+                  
+                  <mat-form-field class="full-width">
+                    <mat-label>Particulars</mat-label>
+                    <input matInput formControlName="particulars" required>
+                  </mat-form-field>
+                  
+                  <mat-form-field class="full-width">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput formControlName="description" rows="3"></textarea>
+                  </mat-form-field>
+                </div>
+                
+                <div class="form-actions">
+                  <button mat-raised-button color="primary" type="submit" [disabled]="!cashForm.valid">
+                    {{editingEntry ? 'Update Entry' : 'Add Entry'}}
+                  </button>
+                  <button mat-button type="button" (click)="resetForm()" *ngIf="editingEntry">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+        
+        <!-- Cash Book View Tab -->
+        <mat-tab label="Cash Book">
+          <mat-card class="table-card">
+            <mat-card-header>
+              <mat-card-title>Cash Book Entries</mat-card-title>
+              <div class="card-actions">
+                <mat-form-field class="date-filter">
+                  <mat-label>From Date</mat-label>
+                  <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" (dateChange)="filterEntries()">
+                  <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #fromPicker></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field class="date-filter">
+                  <mat-label>To Date</mat-label>
+                  <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" (dateChange)="filterEntries()">
+                  <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #toPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="summary-cards">
+                <div class="summary-card receipt">
+                  <h3>Total Receipts</h3>
+                  <p>₹{{totalReceipts | number:'1.2-2'}}</p>
+                </div>
+                <div class="summary-card payment">
+                  <h3>Total Payments</h3>
+                  <p>₹{{totalPayments | number:'1.2-2'}}</p>
+                </div>
+                <div class="summary-card balance">
+                  <h3>Closing Balance</h3>
+                  <p>₹{{closingBalance | number:'1.2-2'}}</p>
+                </div>
+              </div>
+              
+              <div class="table-container">
+                <table mat-table [dataSource]="filteredEntries" class="cash-book-table">
                   <ng-container matColumnDef="date">
                     <th mat-header-cell *matHeaderCellDef>Date</th>
                     <td mat-cell *matCellDef="let entry">{{entry.date | date:'dd/MM/yyyy'}}</td>
                   </ng-container>
-
+                  
                   <ng-container matColumnDef="voucherNo">
                     <th mat-header-cell *matHeaderCellDef>Voucher No</th>
                     <td mat-cell *matCellDef="let entry">{{entry.voucherNo}}</td>
                   </ng-container>
-
+                  
                   <ng-container matColumnDef="particulars">
                     <th mat-header-cell *matHeaderCellDef>Particulars</th>
-                    <td mat-cell *matCellDef="let entry">
-                      <div>{{entry.particulars}}</div>
-                      <small class="text-muted">{{entry.category}}</small>
+                    <td mat-cell *matCellDef="let entry">{{entry.particulars}}</td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="receipt">
+                    <th mat-header-cell *matHeaderCellDef>Receipt</th>
+                    <td mat-cell *matCellDef="let entry" class="amount-cell receipt">
+                      {{entry.type === 'Receipt' ? (entry.amount | number:'1.2-2') : ''}}
                     </td>
                   </ng-container>
-
-                  <ng-container matColumnDef="debitAmount">
-                    <th mat-header-cell *matHeaderCellDef>Receipts (Dr)</th>
-                    <td mat-cell *matCellDef="let entry" class="amount-cell">
-                      {{entry.debitAmount > 0 ? (entry.debitAmount | number) : '-'}}
+                  
+                  <ng-container matColumnDef="payment">
+                    <th mat-header-cell *matHeaderCellDef>Payment</th>
+                    <td mat-cell *matCellDef="let entry" class="amount-cell payment">
+                      {{entry.type === 'Payment' ? (entry.amount | number:'1.2-2') : ''}}
                     </td>
                   </ng-container>
-
-                  <ng-container matColumnDef="creditAmount">
-                    <th mat-header-cell *matHeaderCellDef>Payments (Cr)</th>
-                    <td mat-cell *matCellDef="let entry" class="amount-cell">
-                      {{entry.creditAmount > 0 ? (entry.creditAmount | number) : '-'}}
-                    </td>
-                  </ng-container>
-
+                  
                   <ng-container matColumnDef="balance">
                     <th mat-header-cell *matHeaderCellDef>Balance</th>
-                    <td mat-cell *matCellDef="let entry" class="amount-cell">
-                      <span [class.negative]="entry.balance < 0">₹{{entry.balance | number}}</span>
+                    <td mat-cell *matCellDef="let entry" class="amount-cell balance">
+                      {{entry.balance | number:'1.2-2'}}
                     </td>
                   </ng-container>
-
+                  
                   <ng-container matColumnDef="actions">
                     <th mat-header-cell *matHeaderCellDef>Actions</th>
                     <td mat-cell *matCellDef="let entry">
-                      <button mat-icon-button color="primary" (click)="editEntry(entry)">
+                      <button mat-icon-button (click)="editEntry(entry)" color="primary">
                         <mat-icon>edit</mat-icon>
                       </button>
-                      <button mat-icon-button color="warn" (click)="deleteEntry(entry.id)">
+                      <button mat-icon-button (click)="deleteEntry(entry.id)" color="warn">
                         <mat-icon>delete</mat-icon>
                       </button>
                     </td>
                   </ng-container>
-
+                  
                   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
-                      [class.receipt-row]="row.type === 'RECEIPT'"
-                      [class.payment-row]="row.type === 'PAYMENT'"></tr>
+                      [class.receipt-row]="row.type === 'Receipt'"
+                      [class.payment-row]="row.type === 'Payment'"></tr>
                 </table>
               </div>
-            </mat-tab>
-
-            <!-- Receipts Tab -->
-            <mat-tab label="Receipts Only">
-              <div class="table-container">
-                <table mat-table [dataSource]="receiptsOnly" class="mat-elevation-z8">
-                  <ng-container matColumnDef="date">
-                    <th mat-header-cell *matHeaderCellDef>Date</th>
-                    <td mat-cell *matCellDef="let entry">{{entry.date | date:'dd/MM/yyyy'}}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="particulars">
-                    <th mat-header-cell *matHeaderCellDef>Particulars</th>
-                    <td mat-cell *matCellDef="let entry">{{entry.particulars}}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="amount">
-                    <th mat-header-cell *matHeaderCellDef>Amount</th>
-                    <td mat-cell *matCellDef="let entry" class="amount-cell">₹{{entry.debitAmount | number}}</td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="['date', 'particulars', 'amount']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['date', 'particulars', 'amount'];"></tr>
-                </table>
-                <div class="total-row">
-                  <strong>Total Receipts: ₹{{totalReceipts | number}}</strong>
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+        
+        <!-- Reports Tab -->
+        <mat-tab label="Reports">
+          <mat-card class="report-card">
+            <mat-card-header>
+              <mat-card-title>Cash Book Reports</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="report-buttons">
+                <button mat-raised-button color="primary" (click)="printCashBook()">
+                  <mat-icon>print</mat-icon>
+                  Print Cash Book
+                </button>
+                <button mat-raised-button color="accent" (click)="exportToExcel()">
+                  <mat-icon>download</mat-icon>
+                  Export to Excel
+                </button>
+                <button mat-raised-button (click)="generateSummary()">
+                  <mat-icon>assessment</mat-icon>
+                  Generate Summary
+                </button>
+              </div>
+              
+              <div class="monthly-summary" *ngIf="monthlySummary">
+                <h3>Monthly Summary</h3>
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <label>Opening Balance:</label>
+                    <span>₹{{monthlySummary.openingBalance | number:'1.2-2'}}</span>
+                  </div>
+                  <div class="summary-item">
+                    <label>Total Receipts:</label>
+                    <span>₹{{monthlySummary.totalReceipts | number:'1.2-2'}}</span>
+                  </div>
+                  <div class="summary-item">
+                    <label>Total Payments:</label>
+                    <span>₹{{monthlySummary.totalPayments | number:'1.2-2'}}</span>
+                  </div>
+                  <div class="summary-item">
+                    <label>Closing Balance:</label>
+                    <span>₹{{monthlySummary.closingBalance | number:'1.2-2'}}</span>
+                  </div>
                 </div>
               </div>
-            </mat-tab>
-
-            <!-- Payments Tab -->
-            <mat-tab label="Payments Only">
-              <div class="table-container">
-                <table mat-table [dataSource]="paymentsOnly" class="mat-elevation-z8">
-                  <ng-container matColumnDef="date">
-                    <th mat-header-cell *matHeaderCellDef>Date</th>
-                    <td mat-cell *matCellDef="let entry">{{entry.date | date:'dd/MM/yyyy'}}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="particulars">
-                    <th mat-header-cell *matHeaderCellDef>Particulars</th>
-                    <td mat-cell *matCellDef="let entry">{{entry.particulars}}</td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="amount">
-                    <th mat-header-cell *matHeaderCellDef>Amount</th>
-                    <td mat-cell *matCellDef="let entry" class="amount-cell">₹{{entry.creditAmount | number}}</td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="['date', 'particulars', 'amount']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['date', 'particulars', 'amount'];"></tr>
-                </table>
-                <div class="total-row">
-                  <strong>Total Payments: ₹{{totalPayments | number}}</strong>
-                </div>
-              </div>
-            </mat-tab>
-          </mat-tab-group>
-        </mat-card-content>
-      </mat-card>
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+      </mat-tab-group>
     </div>
   `,
   styles: [`
@@ -276,330 +258,347 @@ interface CashBookEntry {
       margin: 0 auto;
       padding: 20px;
     }
-
-    .form-card, .table-card {
+    
+    .form-card, .table-card, .report-card {
+      margin: 20px 0;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
       margin-bottom: 20px;
     }
-
-    .entry-form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 20px;
-      align-items: flex-start;
-    }
-
-    .form-row mat-form-field {
-      flex: 1;
-    }
-
+    
     .full-width {
-      width: 100%;
+      grid-column: 1 / -1;
     }
-
+    
     .form-actions {
       display: flex;
       gap: 10px;
-      margin-top: 20px;
+      justify-content: flex-end;
     }
-
-    .balance-summary {
+    
+    .card-actions {
       display: flex;
-      gap: 30px;
+      gap: 10px;
       align-items: center;
     }
-
-    .balance-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    
+    .date-filter {
+      width: 150px;
     }
-
-    .balance-item .label {
-      font-size: 12px;
-      color: #666;
+    
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
     }
-
-    .balance-item .amount {
-      font-size: 16px;
+    
+    .summary-card {
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      color: white;
+    }
+    
+    .summary-card.receipt {
+      background-color: #4caf50;
+    }
+    
+    .summary-card.payment {
+      background-color: #f44336;
+    }
+    
+    .summary-card.balance {
+      background-color: #2196f3;
+    }
+    
+    .summary-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
       font-weight: 500;
-      color: #2e7d32;
     }
-
-    .amount.negative {
-      color: #d32f2f;
+    
+    .summary-card p {
+      margin: 0;
+      font-size: 20px;
+      font-weight: bold;
     }
-
+    
     .table-container {
-      max-height: 600px;
-      overflow: auto;
+      overflow-x: auto;
     }
-
+    
+    .cash-book-table {
+      width: 100%;
+    }
+    
     .amount-cell {
       text-align: right;
-      font-family: monospace;
+      font-weight: 500;
     }
-
+    
+    .amount-cell.receipt {
+      color: #4caf50;
+    }
+    
+    .amount-cell.payment {
+      color: #f44336;
+    }
+    
+    .amount-cell.balance {
+      color: #2196f3;
+      font-weight: bold;
+    }
+    
     .receipt-row {
-      background-color: #f1f8e9;
+      background-color: #e8f5e8;
     }
-
+    
     .payment-row {
-      background-color: #fce4ec;
+      background-color: #fdeaea;
     }
-
-    .text-muted {
-      color: #666;
-      font-size: 12px;
+    
+    .report-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
-
-    .total-row {
-      padding: 15px;
-      text-align: right;
-      background-color: #f5f5f5;
-      border-top: 2px solid #ddd;
+    
+    .monthly-summary {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
     }
-
-    .negative {
-      color: #d32f2f;
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
     }
-
-    .ml-2 {
-      margin-left: 8px;
+    
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .summary-item label {
+      font-weight: 500;
+    }
+    
+    .summary-item span {
+      font-weight: bold;
+      color: #2196f3;
     }
   `]
 })
 export class CashBookComponent implements OnInit {
-  entryForm: FormGroup;
-  cashBookEntries: CashBookEntry[] = [];
-  isEditing = false;
-  editingId: number | null = null;
-  displayedColumns: string[] = ['date', 'voucherNo', 'particulars', 'debitAmount', 'creditAmount', 'balance', 'actions'];
+  cashForm: FormGroup;
+  entries: CashBookEntry[] = [];
+  filteredEntries: CashBookEntry[] = [];
+  displayedColumns = ['date', 'voucherNo', 'particulars', 'receipt', 'payment', 'balance', 'actions'];
+  editingEntry: CashBookEntry | null = null;
   
-  openingBalance = 50000;
-  currentBalance = 0;
+  fromDate: Date | null = null;
+  toDate: Date | null = null;
+  
   totalReceipts = 0;
   totalPayments = 0;
-
-  receiptsOnly: CashBookEntry[] = [];
-  paymentsOnly: CashBookEntry[] = [];
+  closingBalance = 0;
+  
+  monthlySummary: any = null;
 
   constructor(
     private fb: FormBuilder,
     private snackBar: MatSnackBar
   ) {
-    this.entryForm = this.fb.group({
-      date: [new Date(), Validators.required],
-      voucherNo: ['', Validators.required],
-      particulars: ['', Validators.required],
-      type: ['RECEIPT', Validators.required],
-      category: ['', Validators.required],
-      referenceNo: [''],
-      amount: [0, [Validators.required, Validators.min(0.01)]],
-      narration: ['']
-    });
+    this.cashForm = this.createForm();
   }
 
   ngOnInit() {
-    this.generateVoucherNo();
     this.loadSampleData();
-    this.calculateTotals();
+    this.calculateSummary();
+    this.setDefaultDateRange();
   }
 
-  generateVoucherNo() {
-    const voucherNo = 'V' + Date.now().toString().slice(-6);
-    this.entryForm.patchValue({ voucherNo });
+  createForm(): FormGroup {
+    return this.fb.group({
+      date: [new Date(), Validators.required],
+      voucherNo: ['', Validators.required],
+      type: ['Receipt', Validators.required],
+      amount: ['', [Validators.required, Validators.min(0.01)]],
+      particulars: ['', Validators.required],
+      description: ['']
+    });
   }
 
-  onTypeChange(type: string) {
-    this.generateVoucherNo();
+  setDefaultDateRange() {
+    const today = new Date();
+    this.fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    this.toDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    this.filterEntries();
   }
 
   loadSampleData() {
-    let runningBalance = this.openingBalance;
+    let balance = 10000; // Opening balance
     
-    this.cashBookEntries = [
+    this.entries = [
       {
         id: 1,
         date: new Date('2024-01-01'),
         particulars: 'Opening Balance',
         voucherNo: 'OB001',
-        debitAmount: this.openingBalance,
-        creditAmount: 0,
-        balance: runningBalance,
-        type: 'RECEIPT',
-        category: 'Opening',
-        referenceNo: '',
-        narration: 'Opening balance for the financial year'
-      }
-    ];
-
-    // Add some sample transactions
-    const sampleTransactions = [
+        type: 'Receipt',
+        amount: 10000,
+        balance: balance,
+        description: 'Opening balance for the year'
+      },
       {
+        id: 2,
         date: new Date('2024-01-02'),
         particulars: 'Member Deposit - John Doe',
-        type: 'RECEIPT' as const,
-        category: 'Deposit',
-        amount: 25000,
-        referenceNo: 'DR001234',
-        narration: 'Fixed deposit by member John Doe'
+        voucherNo: 'CR001',
+        type: 'Receipt',
+        amount: 50000,
+        balance: balance + 50000,
+        description: 'Fixed deposit by member'
       },
       {
+        id: 3,
         date: new Date('2024-01-03'),
-        particulars: 'Office Rent Payment',
-        type: 'PAYMENT' as const,
-        category: 'Administrative',
-        amount: 8000,
-        referenceNo: 'RENT001',
-        narration: 'Monthly office rent payment'
-      },
-      {
-        date: new Date('2024-01-04'),
-        particulars: 'Member Withdrawal - Alice Smith',
-        type: 'PAYMENT' as const,
-        category: 'Withdrawal',
+        particulars: 'Office Rent',
+        voucherNo: 'CP001',
+        type: 'Payment',
         amount: 15000,
-        referenceNo: 'WD001',
-        narration: 'Partial withdrawal by member Alice Smith'
+        balance: balance + 50000 - 15000,
+        description: 'Monthly office rent payment'
       }
     ];
-
-    sampleTransactions.forEach((transaction, index) => {
-      const debitAmount = transaction.type === 'RECEIPT' ? transaction.amount : 0;
-      const creditAmount = transaction.type === 'PAYMENT' ? transaction.amount : 0;
-      runningBalance += debitAmount - creditAmount;
-
-      this.cashBookEntries.push({
-        id: index + 2,
-        date: transaction.date,
-        particulars: transaction.particulars,
-        voucherNo: `V${String(index + 1).padStart(6, '0')}`,
-        debitAmount,
-        creditAmount,
-        balance: runningBalance,
-        type: transaction.type,
-        category: transaction.category,
-        referenceNo: transaction.referenceNo,
-        narration: transaction.narration
-      });
-    });
-
-    this.currentBalance = runningBalance;
+    
+    this.filteredEntries = [...this.entries];
   }
 
-  calculateTotals() {
-    this.totalReceipts = this.cashBookEntries.reduce((sum, entry) => sum + entry.debitAmount, 0);
-    this.totalPayments = this.cashBookEntries.reduce((sum, entry) => sum + entry.creditAmount, 0);
-    this.receiptsOnly = this.cashBookEntries.filter(entry => entry.type === 'RECEIPT');
-    this.paymentsOnly = this.cashBookEntries.filter(entry => entry.type === 'PAYMENT');
-  }
-
-  onSubmit() {
-    if (this.entryForm.valid) {
-      const formData = this.entryForm.value;
-      const amount = formData.amount;
-      const type = formData.type;
+  saveEntry() {
+    if (this.cashForm.valid) {
+      const formValue = this.cashForm.value;
       
-      const debitAmount = type === 'RECEIPT' ? amount : 0;
-      const creditAmount = type === 'PAYMENT' ? amount : 0;
-      
-      if (this.isEditing && this.editingId) {
-        const index = this.cashBookEntries.findIndex(e => e.id === this.editingId);
-        if (index !== -1) {
-          this.cashBookEntries[index] = {
-            ...this.cashBookEntries[index],
-            ...formData,
-            debitAmount,
-            creditAmount
-          };
-          this.recalculateBalances();
-          this.snackBar.open('Cash entry updated successfully!', 'Close', { duration: 3000 });
-        }
+      if (this.editingEntry) {
+        const index = this.entries.findIndex(e => e.id === this.editingEntry!.id);
+        this.entries[index] = { ...this.editingEntry, ...formValue };
+        this.snackBar.open('Entry updated successfully', 'Close', { duration: 3000 });
       } else {
         const newEntry: CashBookEntry = {
-          id: Math.max(...this.cashBookEntries.map(e => e.id), 0) + 1,
-          date: formData.date,
-          particulars: formData.particulars,
-          voucherNo: formData.voucherNo,
-          debitAmount,
-          creditAmount,
-          balance: 0, // Will be calculated
-          type: formData.type,
-          category: formData.category,
-          referenceNo: formData.referenceNo,
-          narration: formData.narration
+          id: Date.now(),
+          ...formValue,
+          balance: this.calculateRunningBalance(formValue)
         };
-        
-        this.cashBookEntries.push(newEntry);
-        this.cashBookEntries.sort((a, b) => a.date.getTime() - b.date.getTime());
-        this.recalculateBalances();
-        this.snackBar.open('Cash entry added successfully!', 'Close', { duration: 3000 });
+        this.entries.push(newEntry);
+        this.snackBar.open('Entry added successfully', 'Close', { duration: 3000 });
       }
       
-      this.calculateTotals();
+      this.sortAndRecalculateBalances();
+      this.filterEntries();
+      this.calculateSummary();
       this.resetForm();
     }
   }
 
-  recalculateBalances() {
-    let runningBalance = 0;
+  calculateRunningBalance(entry: any): number {
+    const lastBalance = this.entries.length > 0 ? 
+      Math.max(...this.entries.map(e => e.balance)) : 0;
     
-    this.cashBookEntries.forEach(entry => {
+    return entry.type === 'Receipt' ? 
+      lastBalance + entry.amount : 
+      lastBalance - entry.amount;
+  }
+
+  sortAndRecalculateBalances() {
+    this.entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    let runningBalance = 0;
+    this.entries.forEach(entry => {
       if (entry.particulars === 'Opening Balance') {
-        runningBalance = entry.debitAmount;
+        runningBalance = entry.amount;
       } else {
-        runningBalance += entry.debitAmount - entry.creditAmount;
+        runningBalance += entry.type === 'Receipt' ? entry.amount : -entry.amount;
       }
       entry.balance = runningBalance;
     });
-    
-    this.currentBalance = runningBalance;
   }
 
   editEntry(entry: CashBookEntry) {
-    this.isEditing = true;
-    this.editingId = entry.id;
-    this.entryForm.patchValue({
-      date: entry.date,
-      voucherNo: entry.voucherNo,
-      particulars: entry.particulars,
-      type: entry.type,
-      category: entry.category,
-      referenceNo: entry.referenceNo,
-      amount: entry.type === 'RECEIPT' ? entry.debitAmount : entry.creditAmount,
-      narration: entry.narration
-    });
+    this.editingEntry = entry;
+    this.cashForm.patchValue(entry);
   }
 
   deleteEntry(id: number) {
-    const entry = this.cashBookEntries.find(e => e.id === id);
-    if (entry && entry.particulars === 'Opening Balance') {
-      this.snackBar.open('Cannot delete opening balance entry!', 'Close', { duration: 3000 });
-      return;
-    }
-
-    if (confirm('Are you sure you want to delete this cash entry?')) {
-      this.cashBookEntries = this.cashBookEntries.filter(e => e.id !== id);
-      this.recalculateBalances();
-      this.calculateTotals();
-      this.snackBar.open('Cash entry deleted successfully!', 'Close', { duration: 3000 });
+    if (confirm('Are you sure you want to delete this entry?')) {
+      this.entries = this.entries.filter(e => e.id !== id);
+      this.sortAndRecalculateBalances();
+      this.filterEntries();
+      this.calculateSummary();
+      this.snackBar.open('Entry deleted successfully', 'Close', { duration: 3000 });
     }
   }
 
   resetForm() {
-    this.entryForm.reset();
-    this.entryForm.patchValue({
+    this.editingEntry = null;
+    this.cashForm.reset();
+    this.cashForm.patchValue({
       date: new Date(),
-      type: 'RECEIPT',
-      amount: 0
+      type: 'Receipt'
     });
-    this.generateVoucherNo();
-    this.isEditing = false;
-    this.editingId = null;
+  }
+
+  filterEntries() {
+    if (this.fromDate && this.toDate) {
+      this.filteredEntries = this.entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate >= this.fromDate! && entryDate <= this.toDate!;
+      });
+    } else {
+      this.filteredEntries = [...this.entries];
+    }
+    this.calculateSummary();
+  }
+
+  calculateSummary() {
+    this.totalReceipts = this.filteredEntries
+      .filter(e => e.type === 'Receipt')
+      .reduce((sum, e) => sum + e.amount, 0);
+    
+    this.totalPayments = this.filteredEntries
+      .filter(e => e.type === 'Payment')
+      .reduce((sum, e) => sum + e.amount, 0);
+    
+    this.closingBalance = this.filteredEntries.length > 0 ? 
+      this.filteredEntries[this.filteredEntries.length - 1].balance : 0;
+  }
+
+  printCashBook() {
+    this.snackBar.open('Print functionality will be implemented', 'Close', { duration: 2000 });
+  }
+
+  exportToExcel() {
+    this.snackBar.open('Export functionality will be implemented', 'Close', { duration: 2000 });
+  }
+
+  generateSummary() {
+    const openingBalance = this.entries.find(e => e.particulars === 'Opening Balance')?.amount || 0;
+    
+    this.monthlySummary = {
+      openingBalance: openingBalance,
+      totalReceipts: this.totalReceipts,
+      totalPayments: this.totalPayments,
+      closingBalance: this.closingBalance
+    };
+    
+    this.snackBar.open('Summary generated successfully', 'Close', { duration: 2000 });
   }
 }
