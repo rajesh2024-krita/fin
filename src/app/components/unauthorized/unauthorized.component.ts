@@ -1,3 +1,4 @@
+
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -12,24 +13,17 @@ import { Router } from '@angular/router';
   template: `
     <div class="unauthorized-container">
       <mat-card class="unauthorized-card">
-        <mat-card-header>
-          <mat-icon mat-card-avatar color="warn">block</mat-icon>
-          <mat-card-title>Access Denied</mat-card-title>
-          <mat-card-subtitle>You don't have permission to access this resource</mat-card-subtitle>
-        </mat-card-header>
         <mat-card-content>
-          <p>Sorry, you don't have the necessary permissions to view this page. Please contact your administrator if you believe this is an error.</p>
+          <div class="content">
+            <mat-icon class="warning-icon">warning</mat-icon>
+            <h1>Access Denied</h1>
+            <p>You don't have permission to access this page.</p>
+            <p>Please contact your administrator if you believe this is an error.</p>
+            <button mat-raised-button color="primary" (click)="goToDashboard()">
+              Go to Dashboard
+            </button>
+          </div>
         </mat-card-content>
-        <mat-card-actions align="center">
-          <button mat-raised-button color="primary" (click)="goBack()">
-            <mat-icon>arrow_back</mat-icon>
-            Go Back
-          </button>
-          <button mat-raised-button (click)="goToDashboard()">
-            <mat-icon>home</mat-icon>
-            Dashboard
-          </button>
-        </mat-card-actions>
       </mat-card>
     </div>
   `,
@@ -38,32 +32,38 @@ import { Router } from '@angular/router';
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 60vh;
-      padding: 24px;
+      min-height: 100vh;
+      background-color: #f5f5f5;
     }
 
     .unauthorized-card {
-      max-width: 500px;
+      max-width: 400px;
       text-align: center;
     }
 
-    mat-icon[mat-card-avatar] {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
+    .content {
+      padding: 20px;
     }
 
-    mat-card-actions button {
-      margin: 0 8px;
+    .warning-icon {
+      font-size: 64px;
+      color: #ff9800;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 16px;
     }
   `]
 })
 export class UnauthorizedComponent {
   constructor(private router: Router) {}
-
-  goBack() {
-    window.history.back();
-  }
 
   goToDashboard() {
     this.router.navigate(['/dashboard']);

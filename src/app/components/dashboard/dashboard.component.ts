@@ -1,145 +1,135 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthService, User } from '../../services/auth.service';
+import { MatButtonModule } from '@angular/material/button';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatGridListModule, MatIconModule],
+  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule, RouterModule],
   template: `
     <div class="dashboard-container">
-      <h1>Welcome to Financial Management System</h1>
-      <p *ngIf="currentUser" class="welcome-message">
-        Hello, {{currentUser.firstName}} {{currentUser.lastName}}! 
-        You are logged in as {{getUserRoleDisplay()}}.
-      </p>
+      <h1>Dashboard</h1>
       
-      <mat-grid-list cols="{{getColumns()}}" rowHeight="200px" gutterSize="16px">
-        <mat-grid-tile>
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>account_balance</mat-icon>
-              <mat-card-title>Accounts</mat-card-title>
-              <mat-card-subtitle>Manage account ledgers</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <p>View and manage account balances, ledgers, and financial statements.</p>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-        
-        <mat-grid-tile>
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>receipt</mat-icon>
-              <mat-card-title>Transactions</mat-card-title>
-              <mat-card-subtitle>Record transactions</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <p>Handle deposits, payments, and loan transactions efficiently.</p>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-        
-        <mat-grid-tile>
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>assessment</mat-icon>
-              <mat-card-title>Reports</mat-card-title>
-              <mat-card-subtitle>Generate reports</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <p>Create comprehensive financial reports and statements.</p>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-        
-        <mat-grid-tile *ngIf="!isMember()">
-          <mat-card class="dashboard-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>settings</mat-icon>
-              <mat-card-title>Master Data</mat-card-title>
-              <mat-card-subtitle>Configure system</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <p>Manage member details, schemes, and system configuration.</p>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-      </mat-grid-list>
+      <div class="stats-grid">
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>people</mat-icon>
+            <mat-card-title>Total Members</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-number">1,234</div>
+            <div class="stat-label">Active Members</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>account_balance</mat-icon>
+            <mat-card-title>Total Deposits</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-number">₹45,67,890</div>
+            <div class="stat-label">Current Balance</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>credit_card</mat-icon>
+            <mat-card-title>Active Loans</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-number">₹12,34,567</div>
+            <div class="stat-label">Outstanding Amount</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>trending_up</mat-icon>
+            <mat-card-title>Monthly Interest</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-number">₹2,34,567</div>
+            <div class="stat-label">This Month</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+          <button mat-raised-button color="primary" routerLink="/master/member-details">
+            <mat-icon>person_add</mat-icon>
+            Add Member
+          </button>
+          <button mat-raised-button color="accent" routerLink="/transaction/deposit-receipt">
+            <mat-icon>add</mat-icon>
+            New Deposit
+          </button>
+          <button mat-raised-button color="warn" routerLink="/transaction/loan-taken">
+            <mat-icon>money</mat-icon>
+            Process Loan
+          </button>
+          <button mat-raised-button routerLink="/accounts/voucher">
+            <mat-icon>receipt</mat-icon>
+            Create Voucher
+          </button>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
     .dashboard-container {
-      padding: 24px;
       max-width: 1200px;
       margin: 0 auto;
     }
-    
-    h1 {
-      text-align: center;
-      margin-bottom: 16px;
-      color: #333;
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
     }
-    
-    .welcome-message {
+
+    .stat-card {
       text-align: center;
-      margin-bottom: 32px;
-      font-size: 16px;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1976d2;
+      margin: 10px 0;
+    }
+
+    .stat-label {
       color: #666;
+      font-size: 0.9rem;
     }
-    
-    .dashboard-card {
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-      transition: transform 0.2s ease-in-out;
+
+    .quick-actions {
+      margin-top: 40px;
     }
-    
-    .dashboard-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
     }
-    
-    mat-grid-list {
-      margin-top: 24px;
-    }
-    
-    mat-icon[mat-card-avatar] {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
+
+    .actions-grid button {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
   `]
 })
-export class DashboardComponent implements OnInit {
-  currentUser: User | null = null;
-
-  constructor(private authService: AuthService) {}
-
-  ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-    });
-  }
-
-  getColumns(): number {
-    return window.innerWidth > 768 ? 3 : 1;
-  }
-
-  isMember(): boolean {
-    return this.currentUser?.role === 'MEMBER';
-  }
-
-  getUserRoleDisplay(): string {
-    if (!this.currentUser) return '';
-    return this.currentUser.role
-      .replace('_', ' ')
-      .toLowerCase()
-      .replace(/\b\w/g, l => l.toUpperCase());
-  }
-}
+export class DashboardComponent {}

@@ -1,7 +1,6 @@
-
-import { Component, OnInit, OnDestroy, HostListener, Inject, PLATFORM_ID } from '@angular/core';
-import { RouterOutlet, Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,9 +8,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDividerModule } from '@angular/material/divider';
-import { Subscription, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
 import { AuthService, User, UserRole } from './services/auth.service';
 
 @Component({
@@ -19,8 +15,8 @@ import { AuthService, User, UserRole } from './services/auth.service';
   standalone: true,
   imports: [
     RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
+    RouterLink,           // 👈 Add this
+    RouterLinkActive,     // 👈 And this
     CommonModule,
     MatSidenavModule,
     MatToolbarModule,
@@ -28,72 +24,32 @@ import { AuthService, User, UserRole } from './services/auth.service';
     MatIconModule,
     MatListModule,
     MatExpansionModule,
-    MatMenuModule,
-    MatDividerModule
+    MatMenuModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   title = 'Financial Management System';
   currentUser: User | null = null;
   currentUserName = '';
-  isMobile = false;
-  isLoginPage = false;
-  isUserLoggedIn = false;
-  private subscriptions: Subscription[] = [];
-  private destroy$ = new Subject<void>();
-  private isBrowser: boolean;
 
   constructor(
     private authService: AuthService,
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    this.isBrowser = isPlatformBrowser(this.platformId);
-    this.checkScreenSize();
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
-    this.checkScreenSize();
-  }
-
-  private checkScreenSize() {
-    if (this.isBrowser) {
-      this.isMobile = window.innerWidth < 768;
-    }
-  }
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    const userSub = this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       this.currentUserName = user ? `${user.firstName} ${user.lastName}` : 'Guest';
     });
 
-    const loginSub = this.authService.isLoggedIn$.subscribe(isLoggedIn => {
-      this.isUserLoggedIn = isLoggedIn;
+    this.authService.isLoggedIn$.subscribe(isLoggedIn => {
       if (!isLoggedIn && this.router.url !== '/login') {
         this.router.navigate(['/login']);
       }
     });
-
-    this.subscriptions.push(userSub, loginSub);
-
-    this.router.events
-      .pipe(
-        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(event => {
-        this.isLoginPage = event.url === '/login';
-      });
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   logout() {
@@ -101,7 +57,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   isLoggedIn(): boolean {
-    return this.authService.isLoggedIn();
+    return !!this.currentUser;
   }
 
   isSuperAdmin(): boolean {
@@ -149,7 +105,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   canAccessReports(): boolean {
-    return true;
+    return true; // All users can view reports (with filtered data)
   }
 
   canAccessAdmin(): boolean {
@@ -162,9 +118,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   getUserRoleDisplayName(): string {
     if (!this.currentUser) return '';
-    return this.currentUser.role
-      .replace('_', ' ')
-      .toLowerCase()
-      .replace(/\b\w/g, l => l.toUpperCase());
+    return this.currentUser.role.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   }
 }
