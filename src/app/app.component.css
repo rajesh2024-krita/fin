@@ -1,138 +1,107 @@
 .app-container {
-  height: 100vh;
-  display: flex;
+  @apply h-screen flex;
 }
 
 .app-sidenav {
-  width: 280px;
-  background: #f5f5f5;
-  border-right: 1px solid #ddd;
+  @apply w-72 bg-gray-50 border-r border-gray-200;
 }
 
 .sidenav-header {
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  text-align: center;
+  @apply p-5 bg-gradient-to-br from-blue-600 to-purple-700 text-white text-center;
 }
 
 .sidenav-header .app-icon {
-  font-size: 40px;
-  width: 40px;
-  height: 40px;
-  margin-bottom: 10px;
+  @apply text-4xl w-10 h-10 mb-2;
 }
 
 .sidenav-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 500;
+  @apply m-0 text-lg font-medium;
 }
 
 .nav-list {
-  padding: 0;
+  @apply p-0;
 }
 
 .nav-panel {
-  margin: 0;
-  box-shadow: none !important;
-  border-bottom: 1px solid #e0e0e0;
+  @apply m-0 shadow-none border-b border-gray-200;
 }
 
 .nav-panel mat-expansion-panel-header {
-  padding: 0 16px;
-  height: 48px;
+  @apply px-4 h-12;
 }
 
 .nav-panel mat-panel-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 500;
+  @apply flex items-center gap-3 font-medium;
 }
 
 .submenu {
-  padding-left: 16px;
+  @apply pl-4;
 }
 
 .sub-panel {
-  margin: 8px 0;
-  box-shadow: none !important;
+  @apply my-2 shadow-none;
 }
 
 .sub-submenu {
-  padding-left: 20px;
+  @apply pl-5;
 }
 
 .submenu a, .sub-submenu a {
-  padding-left: 24px;
-  font-size: 14px;
-  height: 40px;
+  @apply pl-6 text-sm h-10;
 }
 
 .nav-list a[mat-list-item] {
-  border-bottom: 1px solid #e0e0e0;
-  transition: background-color 0.2s;
+  @apply border-b border-gray-200 transition-colors duration-200;
 }
 
 .nav-list a[mat-list-item]:hover {
-  background-color: #e3f2fd;
+  @apply bg-blue-50;
 }
 
 .nav-list a[mat-list-item].active {
-  background-color: #2196f3;
-  color: white;
+  @apply bg-blue-600 text-white;
 }
 
 .app-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  @apply flex-1 flex flex-col;
 }
 
 .app-toolbar {
-  z-index: 2;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  @apply z-10 shadow-md;
 }
 
 .toolbar-spacer {
-  flex: 1 1 auto;
+  @apply flex-1;
 }
 
 .user-info {
-  margin-right: 16px;
-  font-size: 0.9em;
-  color: rgba(255, 255, 255, 0.7);
+  @apply mr-4 text-sm text-gray-300;
 }
 
 .content-wrapper {
-  flex: 1;
-  padding: 20px;
-  background: #fafafa;
-  overflow-y: auto;
+  @apply flex-1 p-5 bg-gray-50 overflow-y-auto;
 }
 
 /* Material Panel Overrides */
 ::ng-deep .mat-expansion-panel-body {
-  padding: 0 !important;
+  @apply p-0 !important;
 }
 
 ::ng-deep .nav-panel .mat-expansion-panel-header {
-  font-weight: 500;
+  @apply font-medium;
 }
 
 ::ng-deep .sub-panel .mat-expansion-panel-header {
-  height: 40px !important;
-  font-size: 14px;
+  @apply h-10 !important text-sm;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-sidenav {
-    width: 240px;
+    @apply w-64;
   }
 
   .content-wrapper {
-    padding: 10px;
+    @apply p-2;
   }
 }
