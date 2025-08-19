@@ -92,12 +92,31 @@ export class MemberDetailsComponent implements OnInit {
   filteredMembers: Member[] = [];
   displayedColumns = ['memberNo', 'name', 'mobile', 'branch', 'dojSociety', 'status', 'actions'];
   editingMember: Member | null = null;
+  currentMember: Member | null = null;
   nextMemberNo = 1001;
   canCreateMembers = false;
   canEditMembers = false;
   currentUser: any = null;
   photoPreview: string | null = null;
   signaturePreview: string | null = null;
+  showMemberForm = false;
+  activeTab = 0;
+  searchTerm = '';
+  statusFilter = 'all';
+  
+  stats = {
+    total: 0,
+    active: 0,
+    inactive: 0,
+    pending: 0
+  };
+
+  tabs = [
+    { title: 'General' },
+    { title: 'Photo & Opening Balance' },
+    { title: 'Monthly Deduction' },
+    { title: 'Photo' }
+  ];
   
   @ViewChild('memberFormSidenav') memberFormSidenav!: any;
 
@@ -115,6 +134,7 @@ export class MemberDetailsComponent implements OnInit {
     this.checkPermissions();
     this.loadSampleData();
     this.generateMemberNo();
+    this.updateStats();
   }
 
   checkPermissions() {
@@ -132,7 +152,7 @@ export class MemberDetailsComponent implements OnInit {
       // General Tab
       memberNo: [''],
       name: ['', Validators.required],
-      fatherHusbandName: ['', Validators.required],
+      fhName: ['', Validators.required],
       officeAddress: [''],
       city: ['', Validators.required],
       phoneOffice: [''],
@@ -151,18 +171,18 @@ export class MemberDetailsComponent implements OnInit {
       
       // Photo & Opening Balance Tab
       openingBalanceShare: [0],
-      openingBalanceCR: [0],
+      openingBalanceCr: [0],
       bankName: [''],
-      bankPayableAt: [''],
-      bankAccountNo: [''],
-      status: ['Active', Validators.required],
-      statusDate: [new Date(), Validators.required],
+      payableAt: [''],
+      accountNo: [''],
+      status: ['active', Validators.required],
+      date: [new Date(), Validators.required],
       
       // Monthly Deduction Tab
       deductionShare: [0],
       deductionWithdrawal: [0],
-      deductionGLoanInstalment: [0],
-      deductionELoanInstalment: [0]
+      gLoanInstalment: [0],
+      eLoanInstalment: [0]
     });
   }
 
@@ -330,5 +350,279 @@ export class MemberDetailsComponent implements OnInit {
 
   scrollToForm() {
     this.openMemberForm();
+  }
+
+  // Tab navigation methods
+  setActiveTab(index: number) {
+    this.activeTab = index;
+  }
+
+  // File handling methods
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onPhotoDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.handlePhotoFile(files[0]);
+    }
+  }
+
+  onSignatureDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.handleSignatureFile(files[0]);
+    }
+  }
+
+  onPhotoSelect(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.handlePhotoFile(file);
+    }
+  }
+
+  onSignatureSelect(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.handleSignatureFile(file);
+    }
+  }
+
+  private handlePhotoFile(file: File) {
+    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+      this.snackBar.open('Photo file size should be less than 2MB', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.photoPreview = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private handleSignatureFile(file: File) {
+    if (file.size > 1 * 1024 * 1024) { // 1MB limit
+      this.snackBar.open('Signature file size should be less than 1MB', 'Close', { duration: 3000 });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.signaturePreview = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removePhoto() {
+    this.photoPreview = null;
+  }
+
+  removeSignature() {
+    this.signaturePreview = null;
+  }
+
+  // Search and filter methods
+  filterMembers() {
+    let filtered = this.members;
+
+    // Apply text search
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(member =>
+        member.name.toLowerCase().includes(term) ||
+        member.memberNo.toLowerCase().includes(term) ||
+        member.mobile.includes(term) ||
+        member.email.toLowerCase().includes(term)
+      );
+    }
+
+    // Apply status filter
+    if (this.statusFilter !== 'all') {
+      filtered = filtered.filter(member => member.status === this.statusFilter);
+    }
+
+    this.filteredMembers = filtered;
+  }
+
+  setStatusFilter(status: string) {
+    this.statusFilter = status;
+    this.filterMembers();
+  }
+
+  // Update statistics
+  updateStats() {
+    this.stats.total = this.members.length;
+    this.stats.active = this.members.filter(m => m.status === 'active').length;
+    this.stats.inactive = this.members.filter(m => m.status === 'inactive').length;
+    this.stats.pending = this.members.filter(m => m.status === 'pending').length;
+  }
+
+  // Override existing methods to work with new form structure
+  openMemberForm() {
+    this.resetForm();
+    this.showMemberForm = true;
+  }
+
+  closeMemberForm() {
+    this.showMemberForm = false;
+    this.resetForm();
+  }
+
+  editMember(member: Member) {
+    this.currentMember = member;
+    this.editingMember = member;
+    this.memberForm.patchValue({
+      memberNo: member.memberNo,
+      name: member.name,
+      fhName: member.fatherHusbandName,
+      mobile: member.mobile,
+      email: member.email,
+      branch: member.branch,
+      phoneOffice: member.phoneOffice,
+      phoneResidence: member.phoneResidence,
+      designation: member.designation,
+      officeAddress: member.officeAddress,
+      residenceAddress: member.residenceAddress,
+      city: member.city,
+      dob: member.dob,
+      dojSociety: member.dojSociety,
+      doj: member.doj,
+      dor: member.dor,
+      nominee: member.nominee,
+      nomineeRelation: member.nomineeRelation,
+      openingBalanceShare: member.openingBalanceShare,
+      openingBalanceCr: member.openingBalanceCR,
+      bankName: member.bankName,
+      payableAt: member.bankPayableAt,
+      accountNo: member.bankAccountNo,
+      status: member.status,
+      date: member.statusDate,
+      deductionShare: member.deductionShare,
+      deductionWithdrawal: member.deductionWithdrawal,
+      gLoanInstalment: member.deductionGLoanInstalment,
+      eLoanInstalment: member.deductionELoanInstalment
+    });
+    this.photoPreview = member.photo;
+    this.signaturePreview = member.signature;
+    this.showMemberForm = true;
+  }
+
+  saveMember() {
+    if (this.memberForm.valid) {
+      const formValue = this.memberForm.value;
+      
+      if (this.editingMember) {
+        // Update existing member
+        const index = this.members.findIndex(m => m.id === this.editingMember!.id);
+        this.members[index] = { 
+          ...this.editingMember,
+          memberNo: formValue.memberNo,
+          name: formValue.name,
+          fatherHusbandName: formValue.fhName,
+          mobile: formValue.mobile,
+          email: formValue.email,
+          branch: formValue.branch,
+          phoneOffice: formValue.phoneOffice,
+          phoneResidence: formValue.phoneResidence,
+          designation: formValue.designation,
+          officeAddress: formValue.officeAddress,
+          residenceAddress: formValue.residenceAddress,
+          city: formValue.city,
+          dob: formValue.dob,
+          dojSociety: formValue.dojSociety,
+          doj: formValue.doj,
+          dor: formValue.dor,
+          nominee: formValue.nominee,
+          nomineeRelation: formValue.nomineeRelation,
+          openingBalanceShare: formValue.openingBalanceShare,
+          openingBalanceCR: formValue.openingBalanceCr,
+          bankName: formValue.bankName,
+          bankPayableAt: formValue.payableAt,
+          bankAccountNo: formValue.accountNo,
+          status: formValue.status,
+          statusDate: formValue.date,
+          deductionShare: formValue.deductionShare,
+          deductionWithdrawal: formValue.deductionWithdrawal,
+          deductionGLoanInstalment: formValue.gLoanInstalment,
+          deductionELoanInstalment: formValue.eLoanInstalment,
+          photo: this.photoPreview,
+          signature: this.signaturePreview
+        };
+        this.snackBar.open('Member updated successfully', 'Close', { duration: 3000 });
+      } else {
+        // Add new member
+        const newMember: Member = {
+          id: Date.now(),
+          memberNo: formValue.memberNo,
+          name: formValue.name,
+          fatherHusbandName: formValue.fhName,
+          mobile: formValue.mobile,
+          email: formValue.email,
+          branch: formValue.branch,
+          phoneOffice: formValue.phoneOffice,
+          phoneResidence: formValue.phoneResidence,
+          designation: formValue.designation,
+          officeAddress: formValue.officeAddress,
+          residenceAddress: formValue.residenceAddress,
+          city: formValue.city,
+          dob: formValue.dob,
+          dojSociety: formValue.dojSociety,
+          doj: formValue.doj,
+          dor: formValue.dor,
+          nominee: formValue.nominee,
+          nomineeRelation: formValue.nomineeRelation,
+          openingBalanceShare: formValue.openingBalanceShare,
+          openingBalanceCR: formValue.openingBalanceCr,
+          bankName: formValue.bankName,
+          bankPayableAt: formValue.payableAt,
+          bankAccountNo: formValue.accountNo,
+          status: formValue.status,
+          statusDate: formValue.date,
+          deductionShare: formValue.deductionShare,
+          deductionWithdrawal: formValue.deductionWithdrawal,
+          deductionGLoanInstalment: formValue.gLoanInstalment,
+          deductionELoanInstalment: formValue.eLoanInstalment,
+          photo: this.photoPreview,
+          signature: this.signaturePreview
+        };
+        this.members.push(newMember);
+        this.nextMemberNo++;
+        this.snackBar.open('Member added successfully', 'Close', { duration: 3000 });
+      }
+      
+      this.updateStats();
+      this.filterMembers();
+      this.closeMemberForm();
+    }
+  }
+
+  resetForm() {
+    this.currentMember = null;
+    this.editingMember = null;
+    this.memberForm.reset();
+    this.photoPreview = null;
+    this.signaturePreview = null;
+    this.activeTab = 0;
+    this.memberForm.patchValue({
+      dojSociety: new Date(),
+      doj: new Date(),
+      date: new Date(),
+      status: 'active',
+      openingBalanceShare: 0,
+      openingBalanceCr: 0,
+      deductionShare: 0,
+      deductionWithdrawal: 0,
+      gLoanInstalment: 0,
+      eLoanInstalment: 0
+    });
+    this.generateMemberNo();
   }
 }
