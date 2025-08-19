@@ -1,153 +1,159 @@
-<mat-sidenav-container class="app-container" hasBackdrop="false">
-  <mat-sidenav #sidenav mode="side" opened="true" class="app-sidenav">
-    <div class="sidenav-header">
-      <mat-icon class="app-icon">account_balance</mat-icon>
-      <h2>Financial Management</h2>
+<mat-sidenav-container class="flex h-screen">
+  <mat-sidenav #sidenav mode="side" opened="true" class="w-72 bg-gray-50 border-r border-gray-200">
+    <div class="p-5 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-center">
+      <mat-icon class="text-4xl w-10 h-10 mb-2">account_balance</mat-icon>
+      <h2 class="text-lg font-medium m-0">Financial Management System</h2>
     </div>
 
-    <mat-nav-list class="nav-list">
+    <mat-nav-list class="p-0">
       <!-- User Management (for admins) -->
-      <a mat-list-item routerLink="/user-management" *ngIf="canAccessUserManagement()">
+      <a mat-list-item routerLink="/user-management" *ngIf="canAccessUserManagement()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
         <mat-icon matListItemIcon>people</mat-icon>
         <span matListItemTitle>User Management</span>
       </a>
 
       <!-- File Menu -->
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title>
+      <mat-expansion-panel class="shadow-none border-b border-gray-200 m-0">
+        <mat-expansion-panel-header class="px-4 h-12">
+          <mat-panel-title class="flex items-center gap-3 font-medium">
             <mat-icon>folder</mat-icon>
             File
           </mat-panel-title>
         </mat-expansion-panel-header>
-        <mat-nav-list>
-          <a mat-list-item routerLink="/file/society">Society</a>
-          <mat-expansion-panel class="nested-panel">
-            <mat-expansion-panel-header>
-              <mat-panel-title>Security</mat-panel-title>
+        <div class="pl-4">
+          <mat-expansion-panel class="shadow-none my-2">
+            <mat-expansion-panel-header class="px-4 h-12">
+              <mat-panel-title class="flex items-center gap-3 font-medium">
+                <mat-icon>security</mat-icon>
+                Security
+              </mat-panel-title>
             </mat-expansion-panel-header>
-            <mat-nav-list>
-              <a mat-list-item routerLink="/file/security/authority" *ngIf="isSuperAdmin()">Authority</a>
-              <a mat-list-item routerLink="/file/security/my-rights">My Rights</a>
-              <a mat-list-item routerLink="/file/security/new-user" *ngIf="canCreateUsers()">New User</a>
-              <a mat-list-item routerLink="/file/security/retrieve-password">Retrieve Password</a>
-              <a mat-list-item routerLink="/file/security/change-password">Change Password</a>
-              <a mat-list-item routerLink="/file/security/admin-handover" *ngIf="isSuperAdmin()">Admin Handover</a>
-            </mat-nav-list>
+            <div class="pl-5">
+              <a mat-list-item routerLink="/file/security/authority" *ngIf="isSuperAdmin()" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">Authority</a>
+              <a mat-list-item routerLink="/file/security/my-rights" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">My Rights</a>
+              <a mat-list-item routerLink="/file/security/new-user" *ngIf="canCreateUsers()" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">New User</a>
+              <a mat-list-item routerLink="/file/security/retrieve-password" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">Retrieve Password</a>
+              <a mat-list-item routerLink="/file/security/change-password" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">Change Password</a>
+              <a mat-list-item routerLink="/file/security/admin-handover" *ngIf="isSuperAdmin()" class="pl-6 text-sm h-10 border-b border-gray-200 hover:bg-blue-50 transition-colors">Admin Handover</a>
+            </div>
           </mat-expansion-panel>
-          <a mat-list-item routerLink="/file/create-new-year" *ngIf="canManageFinancialYear()">Create New Year</a>
-          <a mat-list-item routerLink="/file/edit-opening-balance" *ngIf="canEditOpeningBalance()">Edit Opening Balance</a>
-        </mat-nav-list>
+          <a mat-list-item routerLink="/file/society" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Society</a>
+          <a mat-list-item routerLink="/file/create-new-year" *ngIf="canManageFinancialYear()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Create New Year</a>
+          <a mat-list-item routerLink="/file/edit-opening-balance" *ngIf="canEditOpeningBalance()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Edit Opening Balance</a>
+        </div>
       </mat-expansion-panel>
 
       <!-- Master Menu -->
-      <mat-expansion-panel *ngIf="canAccessMaster()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
+      <mat-expansion-panel *ngIf="canAccessMaster()" class="shadow-none border-b border-gray-200 m-0">
+        <mat-expansion-panel-header class="px-4 h-12">
+          <mat-panel-title class="flex items-center gap-3 font-medium">
             <mat-icon>storage</mat-icon>
             Master
           </mat-panel-title>
         </mat-expansion-panel-header>
-        <mat-nav-list>
-          <a mat-list-item routerLink="/master/member-details">Member Details</a>
-          <a mat-list-item routerLink="/master/table">Table</a>
-          <a mat-list-item routerLink="/master/deposit-scheme" *ngIf="isSuperAdmin() || isSocietyAdmin()">Deposit Scheme</a>
-          <a mat-list-item routerLink="/master/interest-master" *ngIf="isSuperAdmin() || isSocietyAdmin()">Interest Master</a>
-        </mat-nav-list>
+        <div class="pl-4">
+          <a mat-list-item routerLink="/master/member-details" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Member Details</a>
+          <a mat-list-item routerLink="/master/table" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Table</a>
+          <a mat-list-item routerLink="/master/deposit-scheme" *ngIf="isSuperAdmin() || isSocietyAdmin()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Scheme</a>
+          <a mat-list-item routerLink="/master/interest-master" *ngIf="isSuperAdmin() || isSocietyAdmin()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Interest Master</a>
+        </div>
       </mat-expansion-panel>
 
       <!-- Transaction Menu -->
-      <mat-expansion-panel *ngIf="canAccessTransactions()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
+      <mat-expansion-panel *ngIf="canAccessTransactions()" class="shadow-none border-b border-gray-200 m-0">
+        <mat-expansion-panel-header class="px-4 h-12">
+          <mat-panel-title class="flex items-center gap-3 font-medium">
             <mat-icon>receipt</mat-icon>
             Transaction
           </mat-panel-title>
         </mat-expansion-panel-header>
-        <mat-nav-list>
-          <a mat-list-item routerLink="/transaction/loan-taken">Loan Taken</a>
-          <a mat-list-item routerLink="/transaction/demand-process">Demand Process</a>
-          <a mat-list-item routerLink="/transaction/account-closure" *ngIf="isSuperAdmin() || isSocietyAdmin()">Account Closure</a>
-          <a mat-list-item routerLink="/transaction/deposit-receipt">Deposit Receipt</a>
-          <a mat-list-item routerLink="/transaction/deposit-renew">Deposit Renew</a>
-          <a mat-list-item routerLink="/transaction/deposit-slip">Deposit Slip</a>
-          <a mat-list-item routerLink="/transaction/deposit-payment">Deposit Payment</a>
-        </mat-nav-list>
+
+        <div class="pl-4">
+          <a mat-list-item routerLink="/transaction/loan-taken" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Loan Taken</a>
+          <a mat-list-item routerLink="/transaction/demand-process" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Demand Process</a>
+          <a mat-list-item routerLink="/transaction/account-closure" *ngIf="isSuperAdmin() || isSocietyAdmin()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Account Closure</a>
+          <a mat-list-item routerLink="/transaction/deposit-receipt" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Receipt</a>
+          <a mat-list-item routerLink="/transaction/deposit-renew" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Renew</a>
+          <a mat-list-item routerLink="/transaction/deposit-slip" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Slip</a>
+          <a mat-list-item routerLink="/transaction/deposit-payment" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Deposit Payment</a>
+        </div>
       </mat-expansion-panel>
 
       <!-- Accounts Menu -->
-      <mat-expansion-panel *ngIf="canAccessAccounts()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
+      <mat-expansion-panel *ngIf="canAccessAccounts()" class="shadow-none border-b border-gray-200 m-0">
+        <mat-expansion-panel-header class="px-4 h-12">
+          <mat-panel-title class="flex items-center gap-3 font-medium">
             <mat-icon>account_balance</mat-icon>
             Accounts
           </mat-panel-title>
         </mat-expansion-panel-header>
-        <mat-nav-list>
-          <a mat-list-item routerLink="/accounts/group">Group</a>
-          <a mat-list-item routerLink="/accounts/ledger">Ledger</a>
-          <a mat-list-item routerLink="/accounts/cash-book">Cash Book</a>
-          <a mat-list-item routerLink="/accounts/day-book">Day Book</a>
-          <a mat-list-item routerLink="/accounts/voucher">Voucher</a>
-          <a mat-list-item routerLink="/accounts/loan-receipt">Loan Receipt</a>
-          <a mat-list-item routerLink="/accounts/trial-balance">Trial Balance</a>
-          <a mat-list-item routerLink="/accounts/balance-sheet">Balance Sheet</a>
-          <a mat-list-item routerLink="/accounts/profit-loss">Profit & Loss</a>
-          <a mat-list-item routerLink="/accounts/receipt-payment">Receipt & Payment</a>
-        </mat-nav-list>
+
+        <div class="pl-4">
+          <a mat-list-item routerLink="/accounts/group" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Group</a>
+          <a mat-list-item routerLink="/accounts/ledger" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Ledger</a>
+          <a mat-list-item routerLink="/accounts/cash-book" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Cash Book</a>
+          <a mat-list-item routerLink="/accounts/day-book" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Day Book</a>
+          <a mat-list-item routerLink="/accounts/voucher" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Voucher</a>
+          <a mat-list-item routerLink="/accounts/loan-receipt" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Loan Receipt</a>
+          <a mat-list-item routerLink="/accounts/trial-balance" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Trial Balance</a>
+          <a mat-list-item routerLink="/accounts/balance-sheet" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Balance Sheet</a>
+          <a mat-list-item routerLink="/accounts/profit-loss" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Profit & Loss</a>
+          <a mat-list-item routerLink="/accounts/receipt-payment" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Receipt & Payment</a>
+        </div>
       </mat-expansion-panel>
 
       <!-- Reports Menu -->
-      <mat-expansion-panel *ngIf="canAccessReports()">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
+      <mat-expansion-panel *ngIf="canAccessReports()" class="shadow-none border-b border-gray-200 m-0">
+        <mat-expansion-panel-header class="px-4 h-12">
+          <mat-panel-title class="flex items-center gap-3 font-medium">
             <mat-icon>assessment</mat-icon>
             Reports
           </mat-panel-title>
         </mat-expansion-panel-header>
-        <mat-nav-list>
-          <a mat-list-item routerLink="/reports/employees">Employees</a>
-          <a mat-list-item routerLink="/reports/voucher">Voucher</a>
-          <a mat-list-item routerLink="/reports/opening-balance">Opening Balance</a>
-          <a mat-list-item routerLink="/reports/closing-balance">Closing Balance</a>
-          <a mat-list-item routerLink="/reports/loan">Loan</a>
-        </mat-nav-list>
+
+        <div class="pl-4">
+          <a mat-list-item routerLink="/reports/employees" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Employees</a>
+          <a mat-list-item routerLink="/reports/voucher" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Voucher</a>
+          <a mat-list-item routerLink="/reports/opening-balance" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Opening Balance</a>
+          <a mat-list-item routerLink="/reports/closing-balance" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Closing Balance</a>
+          <a mat-list-item routerLink="/reports/loan" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">Loan</a>
+        </div>
       </mat-expansion-panel>
 
       <!-- Other Menu Items -->
-      <a mat-list-item routerLink="/statement">
+      <a mat-list-item routerLink="/statement" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
         <mat-icon matListItemIcon>description</mat-icon>
         <span matListItemTitle>Statement</span>
       </a>
-      <a mat-list-item routerLink="/backup" *ngIf="canAccessBackup()">
+      <a mat-list-item routerLink="/backup" *ngIf="canAccessBackup()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
         <mat-icon matListItemIcon>backup</mat-icon>
         <span matListItemTitle>Backup</span>
       </a>
-      <a mat-list-item routerLink="/admin" *ngIf="canAccessAdmin()">
+      <a mat-list-item routerLink="/admin" *ngIf="canAccessAdmin()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
         <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
         <span matListItemTitle>Admin</span>
       </a>
-      <a mat-list-item routerLink="/new-year" *ngIf="canManageFinancialYear()">
+      <a mat-list-item routerLink="/new-year" *ngIf="canManageFinancialYear()" class="border-b border-gray-200 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium px-4 h-12">
         <mat-icon matListItemIcon>calendar_today</mat-icon>
         <span matListItemTitle>New Year</span>
       </a>
 
-      <a mat-list-item routerLink="/login">
+      <a mat-list-item routerLink="/login" class="flex items-center gap-3 font-medium px-4 h-12 hover:bg-red-500 hover:text-white transition-colors">
         <mat-icon>exit_to_app</mat-icon>
         Exit
       </a>
     </mat-nav-list>
   </mat-sidenav>
 
-  <mat-sidenav-content class="app-content">
-    <mat-toolbar color="primary" class="app-toolbar">
+  <mat-sidenav-content class="flex-1 flex flex-col">
+    <mat-toolbar color="primary" class="z-10 shadow-md">
       <button mat-icon-button (click)="sidenav.toggle()">
         <mat-icon>menu</mat-icon>
       </button>
       <span>Financial Management System</span>
       <span class="toolbar-spacer"></span>
-      <span class="user-info" *ngIf="isLoggedIn()">
-        {{ currentUser?.societyName ? currentUser?.societyName + ' - ' : '' }}{{ getUserRoleDisplayName() }}
+      <span class="user-info mr-4 text-sm text-gray-200" *ngIf="isLoggedIn()">
+        {{ currentUser?.societyName ? currentUser.societyName + ' - ' : '' }}{{ getUserRoleDisplayName() }}
       </span>
       <button mat-icon-button [matMenuTriggerFor]="userMenu" *ngIf="isLoggedIn()">
         <mat-icon>account_circle</mat-icon>
@@ -168,7 +174,7 @@
       </mat-menu>
     </mat-toolbar>
 
-    <div class="content-wrapper">
+    <div class="flex-1 overflow-auto p-4">
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>
