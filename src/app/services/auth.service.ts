@@ -1,4 +1,3 @@
-
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
@@ -120,30 +119,41 @@ export class AuthService {
     this.loadUserFromStorage();
   }
 
-  login(username: string, password: string): boolean {
-    // Demo credentials from the login component
-    const validCredentials = [
-      { username: 'admin@demo.com', password: 'admin123', userData: this.users[0] },
-      { username: 'society@demo.com', password: 'society123', userData: this.users[1] },
-      { username: 'accountant@demo.com', password: 'acc123', userData: this.users[2] },
-      { username: 'member@demo.com', password: 'member123', userData: this.users[3] }
+  login(email: string, password: string, rememberMe: boolean = false): boolean {
+    // Mock authentication logic
+    const mockUsers = [
+      { email: 'admin@demo.com', password: 'password', role: UserRole.SUPER_ADMIN, firstName: 'Super', lastName: 'Admin' },
+      { email: 'society@demo.com', password: 'password', role: UserRole.SOCIETY_ADMIN, firstName: 'Society', lastName: 'Admin' },
+      { email: 'accountant@demo.com', password: 'password', role: UserRole.ACCOUNTANT, firstName: 'John', lastName: 'Accountant' },
+      { email: 'member@demo.com', password: 'password', role: UserRole.MEMBER, firstName: 'Jane', lastName: 'Member' }
     ];
 
-    const credential = validCredentials.find(c => c.username === username && c.password === password);
-    
-    if (credential) {
-      const user = credential.userData;
-      user.lastLogin = new Date();
-      this.currentUserSubject.next(user);
+    const user = mockUsers.find(u => u.email === email && u.password === password);
+    if (user) {
+      const currentUser: User = {
+        id: '1',
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        societyName: 'ABC Credit Society',
+        isActive: true,
+        lastLogin: new Date()
+      };
+
+      this.currentUserSubject.next(currentUser);
       this.isLoggedInSubject.next(true);
 
-      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-        localStorage.setItem('currentUser', JSON.stringify(user));
+      // Store user data based on remember me preference
+      if (rememberMe) {
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
       }
 
       return true;
     }
-    
     return false;
   }
 
@@ -155,6 +165,10 @@ export class AuthService {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       localStorage.removeItem('currentUser');
     }
+    if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem('currentUser');
+    }
+    sessionStorage.removeItem('rememberMe');
     this.currentUserSubject.next(null);
     this.isLoggedInSubject.next(false);
     this.router.navigate(['/login']);
@@ -263,7 +277,12 @@ export class AuthService {
   private loadUserFromStorage(): void {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       const userData = localStorage.getItem('currentUser');
-      if (userData) {
+      const rememberMe = localStorage.getItem('rememberMe');
+      if (userData && rememberMe === 'true') {
+        const user = JSON.parse(userData);
+        this.currentUserSubject.next(user);
+        this.isLoggedInSubject.next(true);
+      } else if (userData) { // If rememberMe is not true, check sessionStorage
         const user = JSON.parse(userData);
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);

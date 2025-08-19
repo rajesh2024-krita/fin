@@ -1,31 +1,25 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { AuthService, UserRole } from '../../../../services/auth.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 
-interface MenuPermission {
+interface Permission {
   module: string;
   menuName: string;
   category: string;
-  view: boolean;
-  edit: boolean;
-  create: boolean;
-  delete: boolean;
-}
-
-interface RolePermissions {
-  role: UserRole;
-  roleName: string;
-  permissions: MenuPermission[];
+  permissions: {
+    read: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+  };
 }
 
 @Component({
@@ -33,475 +27,203 @@ interface RolePermissions {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    MatCardModule, 
-    MatTableModule, 
-    MatCheckboxModule, 
+    MatCardModule,
     MatButtonModule,
+    MatCheckboxModule,
     MatTabsModule,
+    MatTableModule,
     MatIconModule,
-    MatSnackBarModule,
-    MatExpansionModule
+    MatFormFieldModule,
+    MatSelectModule,
+    ReactiveFormsModule
   ],
   template: `
-    <div class="authority-container">
-      <mat-card class="header-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>security</mat-icon>
-            Authority Management
-          </mat-card-title>
-          <mat-card-subtitle>Manage permissions for different user roles</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-actions>
-          <button mat-raised-button color="primary" (click)="saveAllPermissions()">
-            <mat-icon>save</mat-icon>
-            Save All Changes
-          </button>
-          <button mat-button (click)="resetToDefault()">
-            <mat-icon>refresh</mat-icon>
-            Reset to Default
-          </button>
-        </mat-card-actions>
-      </mat-card>
+    <div class="min-h-screen bg-gray-50 p-4">
+      <div class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h1 class="text-3xl font-bold text-gray-800 mb-6">Authority & Permissions Management</h1>
 
-      <mat-tab-group class="role-tabs">
-        <mat-tab *ngFor="let rolePermission of rolePermissions" [label]="rolePermission.roleName">
-          <div class="tab-content">
-            <div class="role-actions">
-              <button mat-button color="primary" (click)="selectAllForRole(rolePermission)">
-                <mat-icon>select_all</mat-icon>
-                Select All
-              </button>
-              <button mat-button color="warn" (click)="deselectAllForRole(rolePermission)">
-                <mat-icon>deselect</mat-icon>
-                Deselect All
-              </button>
-              <button mat-raised-button color="accent" (click)="saveRolePermissions(rolePermission)">
-                <mat-icon>save</mat-icon>
-                Save {{ rolePermission.roleName }}
-              </button>
+          <form [formGroup]="authorityForm" class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <mat-form-field appearance="outline">
+                <mat-label>Select Role</mat-label>
+                <mat-select formControlName="selectedRole">
+                  <mat-option value="SUPER_ADMIN">Super Admin</mat-option>
+                  <mat-option value="SOCIETY_ADMIN">Society Admin</mat-option>
+                  <mat-option value="ACCOUNTANT">Accountant</mat-option>
+                  <mat-option value="MEMBER">Member</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <div class="flex items-center space-x-4">
+                <button mat-raised-button color="primary" class="bg-blue-600 hover:bg-blue-700">
+                  Load Permissions
+                </button>
+                <button mat-raised-button color="accent" class="bg-green-600 hover:bg-green-700">
+                  Save Changes
+                </button>
+              </div>
             </div>
+          </form>
 
-            <mat-accordion>
-              <mat-expansion-panel *ngFor="let category of getCategories()" [expanded]="true">
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    <mat-icon>{{ getCategoryIcon(category) }}</mat-icon>
-                    {{ category }}
-                  </mat-panel-title>
-                  <mat-panel-description>
-                    {{ getCategoryPermissions(rolePermission, category).length }} menus
-                  </mat-panel-description>
-                </mat-expansion-panel-header>
+          <mat-tab-group class="mb-6">
+            <mat-tab *ngFor="let category of categories" [label]="category">
+              <div class="p-4">
+                <div class="grid grid-cols-1 gap-4">
+                  <div *ngFor="let permission of getPermissionsByCategory(category)"
+                       class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
+                      <h3 class="text-lg font-semibold text-gray-700">{{ permission.menuName }}</h3>
+                      <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">{{ permission.module }}</span>
+                    </div>
 
-                <div class="permissions-table">
-                  <table mat-table [dataSource]="getCategoryPermissions(rolePermission, category)" class="permissions-mat-table">
-                    <!-- Menu Name Column -->
-                    <ng-container matColumnDef="menuName">
-                      <th mat-header-cell *matHeaderCellDef>Menu</th>
-                      <td mat-cell *matCellDef="let permission" class="menu-name">
-                        <mat-icon>{{ getMenuIcon(permission.module) }}</mat-icon>
-                        {{ permission.menuName }}
-                      </td>
-                    </ng-container>
-
-                    <!-- View Permission Column -->
-                    <ng-container matColumnDef="view">
-                      <th mat-header-cell *matHeaderCellDef class="permission-header">
-                        <mat-icon>visibility</mat-icon>
-                        View
-                      </th>
-                      <td mat-cell *matCellDef="let permission" class="permission-cell">
-                        <mat-checkbox 
-                          [(ngModel)]="permission.view"
-                          (change)="onPermissionChange(rolePermission, permission)"
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div class="flex items-center space-x-2">
+                        <mat-checkbox
+                          [(ngModel)]="permission.permissions.read"
                           color="primary">
                         </mat-checkbox>
-                      </td>
-                    </ng-container>
+                        <span class="text-sm text-gray-600">Read</span>
+                        <mat-icon class="text-green-500 text-sm">visibility</mat-icon>
+                      </div>
 
-                    <!-- Edit Permission Column -->
-                    <ng-container matColumnDef="edit">
-                      <th mat-header-cell *matHeaderCellDef class="permission-header">
-                        <mat-icon>edit</mat-icon>
-                        Edit
-                      </th>
-                      <td mat-cell *matCellDef="let permission" class="permission-cell">
-                        <mat-checkbox 
-                          [(ngModel)]="permission.edit"
-                          (change)="onPermissionChange(rolePermission, permission)"
-                          color="accent">
-                        </mat-checkbox>
-                      </td>
-                    </ng-container>
-
-                    <!-- Create Permission Column -->
-                    <ng-container matColumnDef="create">
-                      <th mat-header-cell *matHeaderCellDef class="permission-header">
-                        <mat-icon>add</mat-icon>
-                        Create
-                      </th>
-                      <td mat-cell *matCellDef="let permission" class="permission-cell">
-                        <mat-checkbox 
-                          [(ngModel)]="permission.create"
-                          (change)="onPermissionChange(rolePermission, permission)"
+                      <div class="flex items-center space-x-2">
+                        <mat-checkbox
+                          [(ngModel)]="permission.permissions.create"
                           color="primary">
                         </mat-checkbox>
-                      </td>
-                    </ng-container>
+                        <span class="text-sm text-gray-600">Create</span>
+                        <mat-icon class="text-blue-500 text-sm">add_circle</mat-icon>
+                      </div>
 
-                    <!-- Delete Permission Column -->
-                    <ng-container matColumnDef="delete">
-                      <th mat-header-cell *matHeaderCellDef class="permission-header">
-                        <mat-icon>delete</mat-icon>
-                        Delete
-                      </th>
-                      <td mat-cell *matCellDef="let permission" class="permission-cell">
-                        <mat-checkbox 
-                          [(ngModel)]="permission.delete"
-                          (change)="onPermissionChange(rolePermission, permission)"
-                          color="warn">
+                      <div class="flex items-center space-x-2">
+                        <mat-checkbox
+                          [(ngModel)]="permission.permissions.update"
+                          color="primary">
                         </mat-checkbox>
-                      </td>
-                    </ng-container>
+                        <span class="text-sm text-gray-600">Update</span>
+                        <mat-icon class="text-orange-500 text-sm">edit</mat-icon>
+                      </div>
 
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                  </table>
+                      <div class="flex items-center space-x-2">
+                        <mat-checkbox
+                          [(ngModel)]="permission.permissions.delete"
+                          color="primary">
+                        </mat-checkbox>
+                        <span class="text-sm text-gray-600">Delete</span>
+                        <mat-icon class="text-red-500 text-sm">delete</mat-icon>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </mat-expansion-panel>
-            </mat-accordion>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+
+          <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white">
+            <h3 class="text-xl font-semibold mb-4">Permission Summary</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="text-center">
+                <div class="text-2xl font-bold">{{ getTotalPermissions() }}</div>
+                <div class="text-sm">Total Modules</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold">{{ getActivePermissions('read') }}</div>
+                <div class="text-sm">Read Access</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold">{{ getActivePermissions('create') }}</div>
+                <div class="text-sm">Create Access</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold">{{ getActivePermissions('delete') }}</div>
+                <div class="text-sm">Delete Access</div>
+              </div>
+            </div>
           </div>
-        </mat-tab>
-      </mat-tab-group>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
-    .authority-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
+    ::ng-deep .mat-mdc-tab-body-wrapper {
+      flex-grow: 1;
     }
-
-    .header-card {
-      margin-bottom: 24px;
-    }
-
-    .header-card mat-card-header {
-      display: flex;
-      align-items: center;
-    }
-
-    .header-card mat-card-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .role-tabs {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .tab-content {
-      padding: 24px;
-    }
-
-    .role-actions {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-
-    .permissions-table {
-      margin-top: 16px;
-    }
-
-    .permissions-mat-table {
-      width: 100%;
-      background: #fafafa;
-      border-radius: 8px;
-    }
-
-    .menu-name {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 500;
-      min-width: 200px;
-    }
-
-    .permission-header {
-      text-align: center;
-      font-weight: 600;
-      width: 100px;
-    }
-
-    .permission-header mat-icon {
-      vertical-align: middle;
-      margin-right: 4px;
-    }
-
-    .permission-cell {
-      text-align: center;
-      padding: 8px;
-    }
-
-    mat-expansion-panel {
-      margin-bottom: 16px;
-      border-radius: 8px !important;
-    }
-
-    mat-expansion-panel-header {
-      background: #f5f5f5;
-    }
-
-    mat-panel-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    @media (max-width: 768px) {
-      .authority-container {
-        padding: 12px;
-      }
-      
-      .role-actions {
-        flex-direction: column;
-      }
-      
-      .role-actions button {
-        width: 100%;
-      }
-      
-      .permissions-mat-table {
-        font-size: 12px;
-      }
-      
-      .menu-name {
-        min-width: 150px;
-      }
-      
-      .permission-header {
-        width: 80px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header-card mat-card-title {
-        font-size: 18px;
-      }
-      
-      .tab-content {
-        padding: 12px;
-      }
-      
-      .permissions-mat-table {
-        font-size: 11px;
-      }
+    ::ng-deep .mat-mdc-tab-group {
+      height: auto;
     }
   `]
 })
 export class AuthorityComponent implements OnInit {
-  displayedColumns: string[] = ['menuName', 'view', 'edit', 'create', 'delete'];
-  rolePermissions: RolePermissions[] = [];
-  hasChanges = false;
+  authorityForm: FormGroup;
+  categories = ['Master', 'Transaction', 'Accounts', 'Reports', 'File', 'Security'];
 
-  private allMenus: Omit<MenuPermission, 'view' | 'edit' | 'create' | 'delete'>[] = [
-    // File Menu
-    { module: 'society', menuName: 'Society', category: 'File' },
-    { module: 'authority', menuName: 'Authority', category: 'File - Security' },
-    { module: 'my-rights', menuName: 'My Rights', category: 'File - Security' },
-    { module: 'new-user', menuName: 'New User', category: 'File - Security' },
-    { module: 'retrieve-password', menuName: 'Retrieve Password', category: 'File - Security' },
-    { module: 'change-password', menuName: 'Change Password', category: 'File - Security' },
-    { module: 'admin-handover', menuName: 'Admin Handover', category: 'File - Security' },
-    { module: 'create-new-year', menuName: 'Create New Year', category: 'File' },
-    { module: 'edit-opening-balance', menuName: 'Edit Opening Balance', category: 'File' },
-
+  permissions: Permission[] = [
     // Master Menu
-    { module: 'member-details', menuName: 'Member Details', category: 'Master' },
-    { module: 'table', menuName: 'Table', category: 'Master' },
-    { module: 'deposit-scheme', menuName: 'Deposit Scheme', category: 'Master' },
-    { module: 'interest-master', menuName: 'Interest Master', category: 'Master' },
+    { module: 'member-details', menuName: 'Member Details', category: 'Master', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'table', menuName: 'Table Management', category: 'Master', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'deposit-scheme', menuName: 'Deposit Scheme', category: 'Master', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'interest-master', menuName: 'Interest Master', category: 'Master', permissions: { read: true, create: true, update: true, delete: false } },
 
     // Transaction Menu
-    { module: 'deposit-receipt', menuName: 'Deposit Receipt', category: 'Transaction' },
-    { module: 'deposit-payment', menuName: 'Deposit Payment', category: 'Transaction' },
-    { module: 'deposit-slip', menuName: 'Deposit Slip', category: 'Transaction' },
-    { module: 'deposit-renew', menuName: 'Deposit Renew', category: 'Transaction' },
-    { module: 'account-closure', menuName: 'Account Closure', category: 'Transaction' },
-    { module: 'loan-taken', menuName: 'Loan Taken', category: 'Transaction' },
-    { module: 'demand-process', menuName: 'Demand Process', category: 'Transaction' },
+    { module: 'deposit-receipt', menuName: 'Deposit Receipt', category: 'Transaction', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'deposit-payment', menuName: 'Deposit Payment', category: 'Transaction', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'deposit-slip', menuName: 'Deposit Slip', category: 'Transaction', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'deposit-renew', menuName: 'Deposit Renew', category: 'Transaction', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'account-closure', menuName: 'Account Closure', category: 'Transaction', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'loan-taken', menuName: 'Loan Taken', category: 'Transaction', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'demand-process', menuName: 'Demand Process', category: 'Transaction', permissions: { read: true, create: true, update: true, delete: false } },
 
     // Accounts Menu
-    { module: 'cash-book', menuName: 'Cash Book', category: 'Accounts' },
-    { module: 'day-book', menuName: 'Day Book', category: 'Accounts' },
-    { module: 'ledger', menuName: 'Ledger', category: 'Accounts' },
-    { module: 'group', menuName: 'Group', category: 'Accounts' },
-    { module: 'trial-balance', menuName: 'Trial Balance', category: 'Accounts' },
-    { module: 'balance-sheet', menuName: 'Balance Sheet', category: 'Accounts' },
-    { module: 'profit-loss', menuName: 'Profit & Loss', category: 'Accounts' },
-    { module: 'receipt-payment', menuName: 'Receipt & Payment', category: 'Accounts' },
-    { module: 'voucher', menuName: 'Voucher', category: 'Accounts' },
-    { module: 'loan-receipt', menuName: 'Loan Receipt', category: 'Accounts' },
+    { module: 'cash-book', menuName: 'Cash Book', category: 'Accounts', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'day-book', menuName: 'Day Book', category: 'Accounts', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'ledger', menuName: 'Ledger', category: 'Accounts', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'group', menuName: 'Group', category: 'Accounts', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'trial-balance', menuName: 'Trial Balance', category: 'Accounts', permissions: { read: true, create: false, update: false, delete: false } },
+    { module: 'balance-sheet', menuName: 'Balance Sheet', category: 'Accounts', permissions: { read: true, create: false, update: false, delete: false } },
+    { module: 'profit-loss', menuName: 'Profit & Loss', category: 'Accounts', permissions: { read: true, create: false, update: false, delete: false } },
+    { module: 'receipt-payment', menuName: 'Receipt & Payment', category: 'Accounts', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'voucher', menuName: 'Voucher', category: 'Accounts', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'loan-receipt', menuName: 'Loan Receipt', category: 'Accounts', permissions: { read: true, create: true, update: true, delete: false } },
 
     // Reports Menu
-    { module: 'opening-balance', menuName: 'Opening Balance', category: 'Reports' },
-    { module: 'closing-balance', menuName: 'Closing Balance', category: 'Reports' },
-    { module: 'employees', menuName: 'Employees', category: 'Reports' },
-    { module: 'loan', menuName: 'Loan', category: 'Reports' },
-    { module: 'voucher-report', menuName: 'Voucher Report', category: 'Reports' },
+    { module: 'employees-report', menuName: 'Employee Reports', category: 'Reports', permissions: { read: true, create: false, update: false, delete: false } },
+    { module: 'voucher-report', menuName: 'Voucher Reports', category: 'Reports', permissions: { read: true, create: false, update: false, delete: false } },
+    { module: 'opening-balance-report', menuName: 'Opening Balance Report', category: 'Reports', permissions: { read: true, create: false, update: false, delete: false } },
+    { module: 'closing-balance-report', menuName: 'Closing Balance Report', category: 'Reports', permissions: { read: true, create: false, update: false, delete: false } },
+    { module: 'loan-report', menuName: 'Loan Reports', category: 'Reports', permissions: { read: true, create: false, update: false, delete: false } },
 
-    // Other
-    { module: 'statement', menuName: 'Statement', category: 'Other' },
-    { module: 'backup', menuName: 'Backup', category: 'System' },
-    { module: 'user-management', menuName: 'User Management', category: 'System' }
+    // File Menu
+    { module: 'society', menuName: 'Society Management', category: 'File', permissions: { read: true, create: false, update: true, delete: false } },
+    { module: 'create-new-year', menuName: 'Create New Year', category: 'File', permissions: { read: true, create: true, update: false, delete: false } },
+    { module: 'edit-opening-balance', menuName: 'Edit Opening Balance', category: 'File', permissions: { read: true, create: false, update: true, delete: false } },
+
+    // Security Menu
+    { module: 'authority', menuName: 'Authority Management', category: 'Security', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'my-rights', menuName: 'My Rights', category: 'Security', permissions: { read: true, create: false, update: false, delete: false } },
+    { module: 'new-user', menuName: 'New User', category: 'Security', permissions: { read: true, create: true, update: true, delete: false } },
+    { module: 'retrieve-password', menuName: 'Retrieve Password', category: 'Security', permissions: { read: true, create: false, update: true, delete: false } },
+    { module: 'change-password', menuName: 'Change Password', category: 'Security', permissions: { read: true, create: false, update: true, delete: false } },
+    { module: 'admin-handover', menuName: 'Admin Handover', category: 'Security', permissions: { read: true, create: true, update: true, delete: false } }
   ];
 
-  constructor(
-    private authService: AuthService,
-    private snackBar: MatSnackBar
-  ) {}
-
-  ngOnInit() {
-    this.initializeRolePermissions();
-  }
-
-  initializeRolePermissions() {
-    const roles = [
-      { role: UserRole.SOCIETY_ADMIN, roleName: 'Society Admin' },
-      { role: UserRole.ACCOUNTANT, roleName: 'Accountant' },
-      { role: UserRole.MEMBER, roleName: 'Member' }
-    ];
-
-    this.rolePermissions = roles.map(roleInfo => ({
-      role: roleInfo.role,
-      roleName: roleInfo.roleName,
-      permissions: this.allMenus.map(menu => ({
-        ...menu,
-        ...this.getDefaultPermissions(roleInfo.role, menu.module)
-      }))
-    }));
-  }
-
-  getDefaultPermissions(role: UserRole, module: string): Pick<MenuPermission, 'view' | 'edit' | 'create' | 'delete'> {
-    switch (role) {
-      case UserRole.SOCIETY_ADMIN:
-        return { view: true, edit: true, create: true, delete: true };
-      case UserRole.ACCOUNTANT:
-        if (['member-details', 'user-management', 'authority', 'admin-handover'].includes(module)) {
-          return { view: false, edit: false, create: false, delete: false };
-        }
-        return { view: true, edit: true, create: true, delete: false };
-      case UserRole.MEMBER:
-        if (['cash-book', 'statement'].includes(module)) {
-          return { view: true, edit: false, create: false, delete: false };
-        }
-        return { view: false, edit: false, create: false, delete: false };
-      default:
-        return { view: false, edit: false, create: false, delete: false };
-    }
-  }
-
-  getCategories(): string[] {
-    const categories = new Set(this.allMenus.map(menu => menu.category));
-    return Array.from(categories).sort();
-  }
-
-  getCategoryPermissions(rolePermission: RolePermissions, category: string): MenuPermission[] {
-    return rolePermission.permissions.filter(p => p.category === category);
-  }
-
-  getCategoryIcon(category: string): string {
-    const icons: { [key: string]: string } = {
-      'File': 'folder',
-      'File - Security': 'security',
-      'Master': 'storage',
-      'Transaction': 'swap_horiz',
-      'Accounts': 'account_balance',
-      'Reports': 'assessment',
-      'Other': 'more_horiz',
-      'System': 'settings'
-    };
-    return icons[category] || 'menu';
-  }
-
-  getMenuIcon(module: string): string {
-    const icons: { [key: string]: string } = {
-      'society': 'business',
-      'authority': 'admin_panel_settings',
-      'my-rights': 'verified_user',
-      'new-user': 'person_add',
-      'member-details': 'people',
-      'deposit-receipt': 'receipt',
-      'cash-book': 'account_balance_wallet',
-      'backup': 'backup',
-      'user-management': 'manage_accounts'
-    };
-    return icons[module] || 'description';
-  }
-
-  onPermissionChange(rolePermission: RolePermissions, permission: MenuPermission) {
-    this.hasChanges = true;
-  }
-
-  selectAllForRole(rolePermission: RolePermissions) {
-    rolePermission.permissions.forEach(permission => {
-      permission.view = true;
-      permission.edit = true;
-      permission.create = true;
-      permission.delete = true;
+  constructor(private fb: FormBuilder) {
+    this.authorityForm = this.fb.group({
+      selectedRole: ['SUPER_ADMIN']
     });
-    this.hasChanges = true;
   }
 
-  deselectAllForRole(rolePermission: RolePermissions) {
-    rolePermission.permissions.forEach(permission => {
-      permission.view = false;
-      permission.edit = false;
-      permission.create = false;
-      permission.delete = false;
-    });
-    this.hasChanges = true;
+  ngOnInit() {}
+
+  getPermissionsByCategory(category: string): Permission[] {
+    return this.permissions.filter(p => p.category === category);
   }
 
-  saveRolePermissions(rolePermission: RolePermissions) {
-    // Here you would typically save to a backend service
-    console.log(`Saving permissions for ${rolePermission.roleName}:`, rolePermission.permissions);
-    
-    this.snackBar.open(
-      `Permissions saved for ${rolePermission.roleName}`,
-      'Close',
-      { duration: 3000, panelClass: ['success-snackbar'] }
-    );
+  getTotalPermissions(): number {
+    return this.permissions.length;
   }
 
-  saveAllPermissions() {
-    // Here you would typically save all role permissions to a backend service
-    console.log('Saving all permissions:', this.rolePermissions);
-    
-    this.snackBar.open(
-      'All permissions saved successfully',
-      'Close',
-      { duration: 3000, panelClass: ['success-snackbar'] }
-    );
-    
-    this.hasChanges = false;
-  }
-
-  resetToDefault() {
-    this.initializeRolePermissions();
-    this.hasChanges = false;
-    
-    this.snackBar.open(
-      'Permissions reset to default values',
-      'Close',
-      { duration: 3000, panelClass: ['info-snackbar'] }
-    );
+  getActivePermissions(type: 'read' | 'create' | 'update' | 'delete'): number {
+    return this.permissions.filter(p => p.permissions[type]).length;
   }
 }

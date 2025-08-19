@@ -1,129 +1,219 @@
 
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
-/* Global utility classes */
-.page-container {
-  max-width: 7xl;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.text-center {
-  text-align: center;
-}
-
-/* Custom Material overrides */
-.mat-expansion-panel {
-  box-shadow: none !important;
-}
-
-.mat-expansion-panel-header {
-  padding: 0 16px !important;
-}
-
-/* Loading and utility styles */
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-}
-
-.error {
-  color: #f44336;
-  text-align: center;
-  padding: 20px;
-}
-
-.success {
-  color: #4caf50;
-  text-align: center;
-  padding: 20px;
+/* Material Design custom theme colors */
+:root {
+  --mdc-theme-primary: #2563eb;
+  --mdc-theme-secondary: #7c3aed;
+  --mdc-theme-surface: #ffffff;
+  --mdc-theme-background: #f9fafb;
+  --mdc-theme-error: #dc2626;
+  --mdc-theme-on-primary: #ffffff;
+  --mdc-theme-on-secondary: #ffffff;
+  --mdc-theme-on-surface: #1f2937;
+  --mdc-theme-on-background: #1f2937;
+  --mdc-theme-on-error: #ffffff;
 }
 
 /* Custom component styles */
-@layer components {
-  .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-  }
+.success-snackbar {
+  background-color: #10b981 !important;
+  color: white !important;
+}
 
-  .btn-secondary {
-    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-  }
+.error-snackbar {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
 
-  .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-  }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
 
-  .btn-success {
-    @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-  }
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
 
-  .card {
-    @apply bg-white rounded-lg shadow-md border border-gray-200;
-  }
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
 
-  .form-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 
-  .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
-  }
+/* Material Design form field customization */
+.mat-mdc-form-field-appearance-outline .mat-mdc-form-field-outline {
+  border-radius: 8px;
+}
 
-  .table-header {
-    @apply bg-gray-50 text-gray-700 font-medium text-sm uppercase tracking-wider;
-  }
+.mat-mdc-form-field-appearance-outline.mat-focused .mat-mdc-form-field-outline-thick {
+  border-color: #2563eb;
+}
 
-  .table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
-  }
+/* Custom card hover effects */
+.hover-card {
+  transition: all 0.3s ease;
+}
 
-  .status-badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
+.hover-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
 
-  .status-active {
-    @apply bg-green-100 text-green-800;
-  }
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-  .status-inactive {
-    @apply bg-red-100 text-red-800;
-  }
+/* Custom button styles */
+.btn-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+}
 
-  .status-pending {
-    @apply bg-yellow-100 text-yellow-800;
-  }
+.btn-gradient:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Material table customization */
+.mat-mdc-table {
+  box-shadow: none;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mat-mdc-header-row {
+  background-color: #f8fafc;
+  min-height: 48px;
+}
+
+.mat-mdc-row {
+  min-height: 60px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.mat-mdc-row:last-child {
+  border-bottom: none;
+}
+
+/* Loading spinner customization */
+.mat-mdc-progress-spinner circle {
+  stroke: #2563eb;
+}
+
+/* Chip customization */
+.mat-mdc-chip {
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+}
+
+/* Tab customization */
+.mat-mdc-tab-group {
+  background: transparent;
+}
+
+.mat-mdc-tab {
+  min-width: 120px;
+}
+
+.mat-mdc-tab-label {
+  font-weight: 500;
+}
+
+/* Menu customization */
+.mat-mdc-menu-panel {
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Sidenav customization */
+.mat-drawer-container {
+  background-color: #f9fafb;
+}
+
+.mat-drawer {
+  border-right: 1px solid #e5e7eb;
+}
+
+/* Progress bar customization */
+.mat-mdc-progress-bar {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mat-mdc-progress-bar .mdc-linear-progress__bar-inner {
+  border-radius: 4px;
+}
+
+/* Expansion panel customization */
+.mat-expansion-panel {
+  box-shadow: none;
+  border-radius: 8px;
+  margin: 4px 0;
+  background: transparent;
+}
+
+.mat-expansion-panel-header {
+  padding: 0 16px;
+  height: 48px;
+}
+
+.mat-expansion-panel-body {
+  padding: 0;
 }
 
 /* Responsive utilities */
-@layer utilities {
-  .container-responsive {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
   }
-
-  .grid-responsive {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  
+  .mobile-full-width {
+    width: 100% !important;
   }
+}
 
-  .flex-responsive {
-    @apply flex flex-col sm:flex-row items-start sm:items-center gap-4;
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .text-responsive {
-    @apply text-sm sm:text-base lg:text-lg;
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-after: always;
   }
 }

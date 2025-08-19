@@ -451,3 +451,99 @@ export class DepositReceiptComponent implements OnInit {
     );
   }
 }
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-deposit-receipt',
+  standalone: true,
+  imports: [
+    CommonModule, 
+    MatCardModule, 
+    MatFormFieldModule, 
+    MatInputModule, 
+    MatSelectModule, 
+    MatButtonModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    ReactiveFormsModule
+  ],
+  template: `
+    <div class="min-h-screen bg-gray-50 p-4">
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h1 class="text-3xl font-bold text-gray-800 mb-6">Deposit Receipt</h1>
+          
+          <form [formGroup]="depositForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <mat-form-field appearance="outline">
+                <mat-label>Member ID</mat-label>
+                <input matInput formControlName="memberId" placeholder="Enter member ID">
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Member Name</mat-label>
+                <input matInput formControlName="memberName" placeholder="Member name" readonly>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Deposit Amount</mat-label>
+                <input matInput type="number" formControlName="amount" placeholder="0.00">
+                <span matPrefix>₹&nbsp;</span>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Deposit Type</mat-label>
+                <mat-select formControlName="depositType">
+                  <mat-option value="FD">Fixed Deposit</mat-option>
+                  <mat-option value="RD">Recurring Deposit</mat-option>
+                  <mat-option value="SD">Savings Deposit</mat-option>
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Deposit Date</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="depositDate">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Interest Rate</mat-label>
+                <input matInput type="number" formControlName="interestRate" placeholder="0.00">
+                <span matSuffix>%</span>
+              </mat-form-field>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+              <button mat-button type="button">Cancel</button>
+              <button mat-raised-button color="primary" type="submit">Generate Receipt</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `
+})
+export class DepositReceiptComponent {
+  depositForm: FormGroup;
+
+  constructor(private fb: FormBuilder) {
+    this.depositForm = this.fb.group({
+      memberId: ['', Validators.required],
+      memberName: [''],
+      amount: ['', [Validators.required, Validators.min(1)]],
+      depositType: ['', Validators.required],
+      depositDate: [new Date(), Validators.required],
+      interestRate: ['', Validators.required]
+    });
+  }
+}
