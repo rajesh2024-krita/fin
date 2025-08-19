@@ -41,7 +41,7 @@ interface QuickAction {
           Welcome back, {{ currentUser?.firstName }}!
         </h1>
         <p class="text-gray-600">
-          {{ currentUser?.societyName ? currentUser.societyName + ' - ' : '' }}
+          {{ currentUser?.societyName ? currentUser?.societyName + ' - ' : '' }}
           {{ getUserRoleDisplayName() }}
         </p>
       </div>

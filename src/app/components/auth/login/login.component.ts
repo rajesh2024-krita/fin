@@ -109,19 +109,19 @@ import { AuthService } from '../../../services/auth.service';
             <div class="space-y-1 text-xs text-gray-600">
               <div class="flex justify-between">
                 <span>Super Admin:</span>
-                <span>admin@demo.com / admin123</span>
+                <span>admin&#64;demo.com / admin123</span>
               </div>
               <div class="flex justify-between">
                 <span>Society Admin:</span>
-                <span>society@demo.com / society123</span>
+                <span>society&#64;demo.com / society123</span>
               </div>
               <div class="flex justify-between">
                 <span>Accountant:</span>
-                <span>accountant@demo.com / acc123</span>
+                <span>accountant&#64;demo.com / acc123</span>
               </div>
               <div class="flex justify-between">
                 <span>Member:</span>
-                <span>member@demo.com / member123</span>
+                <span>member&#64;demo.com / member123</span>
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,11 +40,14 @@ export class AppComponent implements OnInit, OnDestroy {
   isUserLoggedIn = false;
   private subscriptions: Subscription[] = [];
   private destroy$ = new Subject<void>();
+  private isBrowser: boolean;
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
     this.checkScreenSize();
   }
 
@@ -54,7 +57,9 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private checkScreenSize() {
-    this.isMobile = window.innerWidth < 768;
+    if (this.isBrowser) {
+      this.isMobile = window.innerWidth < 768;
+    }
   }
 
   ngOnInit() {
@@ -72,13 +77,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(userSub, loginSub);
 
-    // Listen to route changes to track if we're on login page
     this.router.events
       .pipe(
-        filter(event => event instanceof NavigationEnd),
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntil(this.destroy$)
       )
-      .subscribe((event: NavigationEnd) => {
+      .subscribe(event => {
         this.isLoginPage = event.url === '/login';
       });
   }
@@ -155,6 +159,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   getUserRoleDisplayName(): string {
     if (!this.currentUser) return '';
-    return this.currentUser.role.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    return this.currentUser.role
+      .replace('_', ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, l => l.toUpperCase());
   }
 }

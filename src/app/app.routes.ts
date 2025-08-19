@@ -214,7 +214,7 @@ export const routes: Routes = [
   },
   { 
     path: 'reports/voucher', 
-    loadComponent: () => import('./components/reports/voucher/voucher.component').then(m => m.VoucherComponent),
+    loadComponent: () => import('./components/reports/voucher/voucher.component').then(m => m.VoucherReportComponent),
     canActivate: [AuthGuard]
   },
   { 
@@ -229,7 +229,7 @@ export const routes: Routes = [
   },
   { 
     path: 'reports/loan', 
-    loadComponent: () => import('./components/reports/loan/loan.component').then(m => m.LoanComponent),
+    loadComponent: () => import('./components/reports/loan/loan.component').then(m => m.LoanReportComponent),
     canActivate: [AuthGuard]
   },
   

@@ -96,7 +96,7 @@
 
 /* Material Panel Overrides */
 ::ng-deep .mat-expansion-panel-body {
-  @apply p-0 !important;
+  @apply p-0;
 }
 
 ::ng-deep .nav-panel .mat-expansion-panel-header {
@@ -104,7 +104,7 @@
 }
 
 ::ng-deep .sub-panel .mat-expansion-panel-header {
-  @apply h-10 !important text-sm;
+  @apply h-10 text-sm;
 }
 
 /* Responsive adjustments */
