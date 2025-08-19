@@ -14,21 +14,49 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { AuthService, UserRole } from '../../../services/auth.service';
 
 interface Member {
   id: number;
+  // General Tab
   memberNo: string;
   name: string;
-  fatherName: string;
-  address: string;
-  phone: string;
+  fatherHusbandName: string;
+  officeAddress: string;
+  city: string;
+  phoneOffice: string;
+  branch: string;
+  phoneResidence: string;
+  designation: string;
+  mobile: string;
+  residenceAddress: string;
+  dob: Date;
+  dojSociety: Date;
   email: string;
-  aadharNo: string;
-  panNo: string;
-  dateOfJoining: Date;
-  membershipFee: number;
+  doj: Date;
+  dor: Date | null;
+  nominee: string;
+  nomineeRelation: string;
+  
+  // Photo & Opening Balance Tab
+  openingBalanceShare: number;
+  openingBalanceCR: number;
+  bankName: string;
+  bankPayableAt: string;
+  bankAccountNo: string;
   status: string;
+  statusDate: Date;
+  photo: string | null;
+  signature: string | null;
+  
+  // Monthly Deduction Tab
+  deductionShare: number;
+  deductionWithdrawal: number;
+  deductionGLoanInstalment: number;
+  deductionELoanInstalment: number;
 }
 
 @Component({
@@ -48,7 +76,10 @@ interface Member {
     MatDatepickerModule,
     MatNativeDateModule,
     MatDialogModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatTabsModule,
+    MatCheckboxModule,
+    MatSlideToggleModule
   ],
   template: `
     <div class="page-container">
@@ -85,69 +116,242 @@ interface Member {
         </mat-card-header>
         <mat-card-content>
           <form [formGroup]="memberForm" (ngSubmit)="saveMember()">
-            <div class="form-grid">
-              <mat-form-field appearance="outline">
-                <mat-label>Member No</mat-label>
-                <input matInput formControlName="memberNo" placeholder="Auto-generated" readonly>
-              </mat-form-field>
+            <mat-tab-group class="member-tabs">
               
-              <mat-form-field appearance="outline">
-                <mat-label>Full Name</mat-label>
-                <input matInput formControlName="name" required>
-                <mat-error *ngIf="memberForm.get('name')?.hasError('required')">Name is required</mat-error>
-              </mat-form-field>
+              <!-- General Tab -->
+              <mat-tab label="General">
+                <div class="tab-content">
+                  <div class="form-grid">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Member No</mat-label>
+                      <input matInput formControlName="memberNo" readonly>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Name</mat-label>
+                      <input matInput formControlName="name" required>
+                      <mat-error *ngIf="memberForm.get('name')?.hasError('required')">Name is required</mat-error>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>F/H Name</mat-label>
+                      <input matInput formControlName="fatherHusbandName" required>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Office Address</mat-label>
+                      <textarea matInput formControlName="officeAddress" rows="2"></textarea>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>City</mat-label>
+                      <input matInput formControlName="city" required>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Phone (Off.)</mat-label>
+                      <input matInput formControlName="phoneOffice">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Branch</mat-label>
+                      <mat-select formControlName="branch">
+                        <mat-option value="Main Branch">Main Branch</mat-option>
+                        <mat-option value="Branch A">Branch A</mat-option>
+                        <mat-option value="Branch B">Branch B</mat-option>
+                        <mat-option value="Branch C">Branch C</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Phone (Res.)</mat-label>
+                      <input matInput formControlName="phoneResidence">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Designation</mat-label>
+                      <input matInput formControlName="designation">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Mobile</mat-label>
+                      <input matInput formControlName="mobile" required>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Residence Address</mat-label>
+                      <textarea matInput formControlName="residenceAddress" rows="2" required></textarea>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Date of Birth</mat-label>
+                      <input matInput [matDatepicker]="dobPicker" formControlName="dob">
+                      <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #dobPicker></mat-datepicker>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>DOJ Society</mat-label>
+                      <input matInput [matDatepicker]="dojSocietyPicker" formControlName="dojSociety">
+                      <mat-datepicker-toggle matSuffix [for]="dojSocietyPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #dojSocietyPicker></mat-datepicker>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Email</mat-label>
+                      <input matInput type="email" formControlName="email">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>DOJ</mat-label>
+                      <input matInput [matDatepicker]="dojPicker" formControlName="doj">
+                      <mat-datepicker-toggle matSuffix [for]="dojPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #dojPicker></mat-datepicker>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>DOR</mat-label>
+                      <input matInput [matDatepicker]="dorPicker" formControlName="dor">
+                      <mat-datepicker-toggle matSuffix [for]="dorPicker"></mat-datepicker-toggle>
+                      <mat-datepicker #dorPicker></mat-datepicker>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Nominee</mat-label>
+                      <input matInput formControlName="nominee">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Nominee Relation</mat-label>
+                      <mat-select formControlName="nomineeRelation">
+                        <mat-option value="Spouse">Spouse</mat-option>
+                        <mat-option value="Son">Son</mat-option>
+                        <mat-option value="Daughter">Daughter</mat-option>
+                        <mat-option value="Father">Father</mat-option>
+                        <mat-option value="Mother">Mother</mat-option>
+                        <mat-option value="Brother">Brother</mat-option>
+                        <mat-option value="Sister">Sister</mat-option>
+                        <mat-option value="Other">Other</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-tab>
               
-              <mat-form-field appearance="outline">
-                <mat-label>Father's Name</mat-label>
-                <input matInput formControlName="fatherName" required>
-              </mat-form-field>
+              <!-- Photo & Opening Balance Tab -->
+              <mat-tab label="Photo & Opening Balance">
+                <div class="tab-content">
+                  <div class="form-grid">
+                    <div class="photo-upload-section full-width">
+                      <h3>Photo & Signature</h3>
+                      <div class="upload-row">
+                        <div class="upload-item">
+                          <label>Member Photo</label>
+                          <div class="image-upload-area" (click)="photoInput.click()">
+                            <img *ngIf="photoPreview" [src]="photoPreview" alt="Member Photo" class="preview-image">
+                            <div *ngIf="!photoPreview" class="upload-placeholder">
+                              <mat-icon>add_a_photo</mat-icon>
+                              <span>Click to upload photo</span>
+                            </div>
+                          </div>
+                          <input #photoInput type="file" accept="image/*" (change)="onPhotoSelected($event)" style="display: none">
+                        </div>
+                        
+                        <div class="upload-item">
+                          <label>Signature</label>
+                          <div class="image-upload-area" (click)="signatureInput.click()">
+                            <img *ngIf="signaturePreview" [src]="signaturePreview" alt="Signature" class="preview-image">
+                            <div *ngIf="!signaturePreview" class="upload-placeholder">
+                              <mat-icon>edit</mat-icon>
+                              <span>Click to upload signature</span>
+                            </div>
+                          </div>
+                          <input #signatureInput type="file" accept="image/*" (change)="onSignatureSelected($event)" style="display: none">
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="section-divider full-width"></div>
+                    
+                    <h3 class="full-width">Opening Balance</h3>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Opening Balance (Share)</mat-label>
+                      <input matInput type="number" formControlName="openingBalanceShare">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Opening Balance (CR)</mat-label>
+                      <input matInput type="number" formControlName="openingBalanceCR">
+                    </mat-form-field>
+                    
+                    <h3 class="full-width">Bank Details</h3>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Bank Name</mat-label>
+                      <input matInput formControlName="bankName">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Payable At</mat-label>
+                      <input matInput formControlName="bankPayableAt">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Account No</mat-label>
+                      <input matInput formControlName="bankAccountNo">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Status</mat-label>
+                      <mat-select formControlName="status">
+                        <mat-option value="Active">Active</mat-option>
+                        <mat-option value="Inactive">Inactive</mat-option>
+                        <mat-option value="Suspended">Suspended</mat-option>
+                        <mat-option value="Closed">Closed</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Status Date</mat-label>
+                      <input matInput [matDatepicker]="statusDatePicker" formControlName="statusDate">
+                      <mat-datepicker-toggle matSuffix [for]="statusDatePicker"></mat-datepicker-toggle>
+                      <mat-datepicker #statusDatePicker></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-tab>
               
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Address</mat-label>
-                <textarea matInput formControlName="address" rows="3" required></textarea>
-              </mat-form-field>
+              <!-- Monthly Deduction Tab -->
+              <mat-tab label="Monthly Deduction">
+                <div class="tab-content">
+                  <div class="form-grid">
+                    <h3 class="full-width">Monthly Deductions</h3>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Share Deduction</mat-label>
+                      <input matInput type="number" formControlName="deductionShare">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>Withdrawal Deduction</mat-label>
+                      <input matInput type="number" formControlName="deductionWithdrawal">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>G Loan Instalment</mat-label>
+                      <input matInput type="number" formControlName="deductionGLoanInstalment">
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline">
+                      <mat-label>E Loan Instalment</mat-label>
+                      <input matInput type="number" formControlName="deductionELoanInstalment">
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-tab>
               
-              <mat-form-field appearance="outline">
-                <mat-label>Phone Number</mat-label>
-                <input matInput formControlName="phone" required>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Email</mat-label>
-                <input matInput type="email" formControlName="email">
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Aadhar Number</mat-label>
-                <input matInput formControlName="aadharNo" required>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>PAN Number</mat-label>
-                <input matInput formControlName="panNo">
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Date of Joining</mat-label>
-                <input matInput [matDatepicker]="picker" formControlName="dateOfJoining">
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Membership Fee</mat-label>
-                <input matInput type="number" formControlName="membershipFee" required>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Status</mat-label>
-                <mat-select formControlName="status">
-                  <mat-option value="Active">Active</mat-option>
-                  <mat-option value="Inactive">Inactive</mat-option>
-                  <mat-option value="Suspended">Suspended</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
+            </mat-tab-group>
             
             <div class="form-actions">
               <button mat-raised-button color="primary" type="submit" 
@@ -201,14 +405,19 @@ interface Member {
                 <td mat-cell *matCellDef="let member">{{member.name}}</td>
               </ng-container>
               
-              <ng-container matColumnDef="phone">
-                <th mat-header-cell *matHeaderCellDef>Phone</th>
-                <td mat-cell *matCellDef="let member">{{member.phone}}</td>
+              <ng-container matColumnDef="mobile">
+                <th mat-header-cell *matHeaderCellDef>Mobile</th>
+                <td mat-cell *matCellDef="let member">{{member.mobile}}</td>
               </ng-container>
               
-              <ng-container matColumnDef="dateOfJoining">
-                <th mat-header-cell *matHeaderCellDef>Joining Date</th>
-                <td mat-cell *matCellDef="let member">{{member.dateOfJoining | date}}</td>
+              <ng-container matColumnDef="branch">
+                <th mat-header-cell *matHeaderCellDef>Branch</th>
+                <td mat-cell *matCellDef="let member">{{member.branch}}</td>
+              </ng-container>
+              
+              <ng-container matColumnDef="dojSociety">
+                <th mat-header-cell *matHeaderCellDef>DOJ Society</th>
+                <td mat-cell *matCellDef="let member">{{member.dojSociety | date}}</td>
               </ng-container>
               
               <ng-container matColumnDef="status">
@@ -262,11 +471,15 @@ interface Member {
               <div class="member-card-content">
                 <div class="info-row">
                   <mat-icon>phone</mat-icon>
-                  <span>{{member.phone}}</span>
+                  <span>{{member.mobile}}</span>
+                </div>
+                <div class="info-row">
+                  <mat-icon>business</mat-icon>
+                  <span>{{member.branch}}</span>
                 </div>
                 <div class="info-row">
                   <mat-icon>calendar_today</mat-icon>
-                  <span>{{member.dateOfJoining | date}}</span>
+                  <span>{{member.dojSociety | date}}</span>
                 </div>
                 <div class="info-row">
                   <mat-icon>email</mat-icon>
@@ -343,6 +556,14 @@ interface Member {
       width: 100%;
     }
     
+    .member-tabs {
+      margin-bottom: 24px;
+    }
+    
+    .tab-content {
+      padding: 24px 0;
+    }
+    
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -354,11 +575,71 @@ interface Member {
       grid-column: 1 / -1;
     }
     
+    .section-divider {
+      height: 1px;
+      background-color: #e0e0e0;
+      margin: 20px 0;
+    }
+    
+    .photo-upload-section {
+      margin-bottom: 20px;
+    }
+    
+    .upload-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 16px;
+    }
+    
+    .upload-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .upload-item label {
+      font-weight: 500;
+      color: #666;
+    }
+    
+    .image-upload-area {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.3s;
+      overflow: hidden;
+    }
+    
+    .image-upload-area:hover {
+      border-color: #2196f3;
+    }
+    
+    .upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+      text-align: center;
+    }
+    
+    .preview-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+    
     .form-actions {
       display: flex;
       gap: 12px;
       justify-content: flex-end;
       flex-wrap: wrap;
+      margin-top: 24px;
     }
     
     .submit-btn {
@@ -411,6 +692,11 @@ interface Member {
     .status-suspended {
       background-color: #ffebee;
       color: #d32f2f;
+    }
+    
+    .status-closed {
+      background-color: #f5f5f5;
+      color: #424242;
     }
     
     .access-denied {
@@ -540,6 +826,10 @@ interface Member {
         gap: 16px;
       }
       
+      .upload-row {
+        grid-template-columns: 1fr;
+      }
+      
       .form-actions {
         justify-content: stretch;
       }
@@ -621,12 +911,14 @@ export class MemberDetailsComponent implements OnInit {
   memberForm: FormGroup;
   members: Member[] = [];
   filteredMembers: Member[] = [];
-  displayedColumns = ['memberNo', 'name', 'phone', 'dateOfJoining', 'status', 'actions'];
+  displayedColumns = ['memberNo', 'name', 'mobile', 'branch', 'dojSociety', 'status', 'actions'];
   editingMember: Member | null = null;
   nextMemberNo = 1001;
   canCreateMembers = false;
   canEditMembers = false;
   currentUser: any = null;
+  photoPreview: string | null = null;
+  signaturePreview: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -656,17 +948,40 @@ export class MemberDetailsComponent implements OnInit {
 
   createForm(): FormGroup {
     return this.fb.group({
+      // General Tab
       memberNo: [''],
       name: ['', Validators.required],
-      fatherName: ['', Validators.required],
-      address: ['', Validators.required],
-      phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      fatherHusbandName: ['', Validators.required],
+      officeAddress: [''],
+      city: ['', Validators.required],
+      phoneOffice: [''],
+      branch: ['', Validators.required],
+      phoneResidence: [''],
+      designation: [''],
+      mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      residenceAddress: ['', Validators.required],
+      dob: [''],
+      dojSociety: [new Date(), Validators.required],
       email: ['', [Validators.email]],
-      aadharNo: ['', [Validators.required, Validators.pattern(/^\d{12}$/)]],
-      panNo: ['', [Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)]],
-      dateOfJoining: [new Date(), Validators.required],
-      membershipFee: [500, [Validators.required, Validators.min(0)]],
-      status: ['Active', Validators.required]
+      doj: [new Date(), Validators.required],
+      dor: [''],
+      nominee: [''],
+      nomineeRelation: [''],
+      
+      // Photo & Opening Balance Tab
+      openingBalanceShare: [0],
+      openingBalanceCR: [0],
+      bankName: [''],
+      bankPayableAt: [''],
+      bankAccountNo: [''],
+      status: ['Active', Validators.required],
+      statusDate: [new Date(), Validators.required],
+      
+      // Monthly Deduction Tab
+      deductionShare: [0],
+      deductionWithdrawal: [0],
+      deductionGLoanInstalment: [0],
+      deductionELoanInstalment: [0]
     });
   }
 
@@ -676,35 +991,63 @@ export class MemberDetailsComponent implements OnInit {
     });
   }
 
+  onPhotoSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.photoPreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onSignatureSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.signaturePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   loadSampleData() {
     this.members = [
       {
         id: 1,
         memberNo: 'MEM1001',
         name: 'John Doe',
-        fatherName: 'Robert Doe',
-        address: '123 Main Street, City, State',
-        phone: '9876543210',
+        fatherHusbandName: 'Robert Doe',
+        officeAddress: '123 Business Street, City',
+        city: 'Mumbai',
+        phoneOffice: '022-12345678',
+        branch: 'Main Branch',
+        phoneResidence: '022-87654321',
+        designation: 'Manager',
+        mobile: '9876543210',
+        residenceAddress: '123 Main Street, City, State',
+        dob: new Date('1985-05-15'),
+        dojSociety: new Date('2024-01-15'),
         email: 'john.doe@email.com',
-        aadharNo: '123456789012',
-        panNo: 'ABCDE1234F',
-        dateOfJoining: new Date('2024-01-15'),
-        membershipFee: 500,
-        status: 'Active'
-      },
-      {
-        id: 2,
-        memberNo: 'MEM1002',
-        name: 'Jane Smith',
-        fatherName: 'Michael Smith',
-        address: '456 Oak Avenue, City, State',
-        phone: '9876543211',
-        email: 'jane.smith@email.com',
-        aadharNo: '123456789013',
-        panNo: 'ABCDE1234G',
-        dateOfJoining: new Date('2024-01-20'),
-        membershipFee: 500,
-        status: 'Active'
+        doj: new Date('2024-01-15'),
+        dor: null,
+        nominee: 'Jane Doe',
+        nomineeRelation: 'Spouse',
+        openingBalanceShare: 1000,
+        openingBalanceCR: 500,
+        bankName: 'State Bank of India',
+        bankPayableAt: 'Mumbai Branch',
+        bankAccountNo: '123456789',
+        status: 'Active',
+        statusDate: new Date('2024-01-15'),
+        photo: null,
+        signature: null,
+        deductionShare: 100,
+        deductionWithdrawal: 0,
+        deductionGLoanInstalment: 200,
+        deductionELoanInstalment: 150
       }
     ];
     this.filteredMembers = [...this.members];
@@ -718,13 +1061,20 @@ export class MemberDetailsComponent implements OnInit {
       if (this.editingMember) {
         // Update existing member
         const index = this.members.findIndex(m => m.id === this.editingMember!.id);
-        this.members[index] = { ...this.editingMember, ...formValue };
+        this.members[index] = { 
+          ...this.editingMember, 
+          ...formValue,
+          photo: this.photoPreview,
+          signature: this.signaturePreview
+        };
         this.snackBar.open('Member updated successfully', 'Close', { duration: 3000 });
       } else {
         // Add new member
         const newMember: Member = {
           id: Date.now(),
-          ...formValue
+          ...formValue,
+          photo: this.photoPreview,
+          signature: this.signaturePreview
         };
         this.members.push(newMember);
         this.nextMemberNo++;
@@ -739,6 +1089,9 @@ export class MemberDetailsComponent implements OnInit {
   editMember(member: Member) {
     this.editingMember = member;
     this.memberForm.patchValue(member);
+    this.photoPreview = member.photo;
+    this.signaturePreview = member.signature;
+    this.scrollToForm();
   }
 
   deleteMember(id: number) {
@@ -757,10 +1110,19 @@ export class MemberDetailsComponent implements OnInit {
   resetForm() {
     this.editingMember = null;
     this.memberForm.reset();
+    this.photoPreview = null;
+    this.signaturePreview = null;
     this.memberForm.patchValue({
-      dateOfJoining: new Date(),
-      membershipFee: 500,
-      status: 'Active'
+      dojSociety: new Date(),
+      doj: new Date(),
+      statusDate: new Date(),
+      status: 'Active',
+      openingBalanceShare: 0,
+      openingBalanceCR: 0,
+      deductionShare: 0,
+      deductionWithdrawal: 0,
+      deductionGLoanInstalment: 0,
+      deductionELoanInstalment: 0
     });
     this.generateMemberNo();
   }
@@ -769,8 +1131,9 @@ export class MemberDetailsComponent implements OnInit {
     const filterValue = (event.target as HTMLInputElement).value.toLowerCase();
     this.filteredMembers = this.members.filter(member =>
       member.name.toLowerCase().includes(filterValue) ||
-      member.phone.includes(filterValue) ||
-      member.memberNo.toLowerCase().includes(filterValue)
+      member.mobile.includes(filterValue) ||
+      member.memberNo.toLowerCase().includes(filterValue) ||
+      member.branch.toLowerCase().includes(filterValue)
     );
   }
 
