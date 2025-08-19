@@ -1,6 +1,5 @@
-
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
-import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -9,7 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import { AuthService, User, UserRole } from './services/auth.service';
 
 @Component({
@@ -36,7 +36,10 @@ export class AppComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   currentUserName = '';
   isMobile = false;
+  isLoginPage = false;
+  isUserLoggedIn = false;
   private subscriptions: Subscription[] = [];
+  private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
@@ -61,16 +64,29 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     const loginSub = this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+      this.isUserLoggedIn = isLoggedIn;
       if (!isLoggedIn && this.router.url !== '/login') {
         this.router.navigate(['/login']);
       }
     });
 
     this.subscriptions.push(userSub, loginSub);
+
+    // Listen to route changes to track if we're on login page
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event: NavigationEnd) => {
+        this.isLoginPage = event.url === '/login';
+      });
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   logout() {
@@ -78,7 +94,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   isLoggedIn(): boolean {
-    return !!this.currentUser;
+    return this.authService.isLoggedIn();
   }
 
   isSuperAdmin(): boolean {

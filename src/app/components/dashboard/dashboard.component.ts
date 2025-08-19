@@ -1,12 +1,11 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { RouterLink } from '@angular/router';
-import { AuthService, User } from '../../services/auth.service';
+import { RouterLink, Router } from '@angular/router';
+import { AuthService, User, UserRole } from '../../services/auth.service';
 
 interface DashboardCard {
   title: string;
@@ -49,8 +48,8 @@ interface QuickAction {
 
       <!-- Statistics Cards -->
       <div class="grid-responsive mb-6 sm:mb-8">
-        <mat-card 
-          *ngFor="let card of dashboardCards" 
+        <mat-card
+          *ngFor="let card of dashboardCards"
           class="card p-4 sm:p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
           [routerLink]="card.route">
           <div class="flex items-center justify-between">
@@ -67,7 +66,7 @@ interface QuickAction {
       <div class="mb-6 sm:mb-8">
         <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-          <button 
+          <button
             *ngFor="let action of quickActions"
             mat-raised-button
             [routerLink]="action.route"
@@ -84,13 +83,13 @@ interface QuickAction {
         <mat-card class="card p-4 sm:p-6">
           <h3 class="text-lg font-semibold mb-4">Recent Transactions</h3>
           <div class="space-y-3">
-            <div *ngFor="let transaction of recentTransactions" 
+            <div *ngFor="let transaction of recentTransactions"
                  class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
               <div>
                 <p class="font-medium text-sm sm:text-base">{{ transaction.description }}</p>
                 <p class="text-xs sm:text-sm text-gray-600">{{ transaction.date }}</p>
               </div>
-              <span class="font-semibold" 
+              <span class="font-semibold"
                     [ngClass]="transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'">
                 {{ transaction.type === 'credit' ? '+' : '-' }}₹{{ transaction.amount }}
               </span>
@@ -102,7 +101,7 @@ interface QuickAction {
         <mat-card class="card p-4 sm:p-6">
           <h3 class="text-lg font-semibold mb-4">Pending Tasks</h3>
           <div class="space-y-3">
-            <div *ngFor="let task of pendingTasks" 
+            <div *ngFor="let task of pendingTasks"
                  class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
               <div class="flex items-center">
                 <mat-icon class="text-orange-500 mr-2 text-sm">{{ task.icon }}</mat-icon>
@@ -120,8 +119,66 @@ interface QuickAction {
     </div>
   `,
   styles: [`
-    .dashboard-card {
-      @apply transform hover:scale-105 transition-transform duration-200;
+    .container-responsive {
+      padding: 1rem;
+    }
+    .grid-responsive {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .btn-primary { background-color: #3b82f6; color: white; }
+    .btn-success { background-color: #10b981; color: white; }
+    .btn-secondary { background-color: #64748b; color: white; }
+    .btn-danger { background-color: #ef4444; color: white; }
+    .status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+    }
+    .status-pending {
+      background-color: #fbbfa0;
+      color: #d9770e;
+    }
+    /* Responsive adjustments */
+    @media (min-width: 640px) {
+      .container-responsive {
+        padding: 2rem;
+      }
+      .grid-responsive {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+      }
+      .card {
+        padding: 1.5rem;
+      }
+    }
+    @media (min-width: 768px) {
+      .grid-responsive {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+    }
+    @media (min-width: 1024px) {
+      .grid-responsive {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+     @media (min-width: 1280px) {
+      .grid-responsive {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+    }
+
+    /* Specific styles for the dashboard cards */
+    .card.p-4 { padding: 1rem; }
+    .card.p-6 { padding: 1.5rem; }
+    @media (min-width: 640px) {
+      .card.p-4 { padding: 1.5rem; }
+      .card.p-6 { padding: 2rem; }
     }
   `]
 })
@@ -182,16 +239,23 @@ export class DashboardComponent implements OnInit {
     { title: 'System Backup', description: 'Scheduled database backup', icon: 'backup', priority: 'High' }
   ];
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
+
+    // Fix for login issue: Check if user is logged in, if not, redirect to login
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+    }
   }
 
   getUserRoleDisplayName(): string {
     if (!this.currentUser) return '';
-    return this.currentUser.role.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    // Explicitly cast to UserRole if possible or handle potential undefined roles
+    const role = this.currentUser.role as UserRole;
+    return role.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   }
 }

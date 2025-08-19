@@ -120,26 +120,35 @@ export class AuthService {
     this.loadUserFromStorage();
   }
 
-  login(username: string, password: string): Observable<boolean> {
-    return new Observable(observer => {
-      setTimeout(() => {
-        const user = this.users.find(u => u.username === username && u.isActive);
-        if (user && password === 'password') {
-          user.lastLogin = new Date();
-          this.currentUserSubject.next(user);
-          this.isLoggedInSubject.next(true);
+  login(username: string, password: string): boolean {
+    // Demo credentials from the login component
+    const validCredentials = [
+      { username: 'admin@demo.com', password: 'admin123', userData: this.users[0] },
+      { username: 'society@demo.com', password: 'society123', userData: this.users[1] },
+      { username: 'accountant@demo.com', password: 'acc123', userData: this.users[2] },
+      { username: 'member@demo.com', password: 'member123', userData: this.users[3] }
+    ];
 
-          if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-          }
+    const credential = validCredentials.find(c => c.username === username && c.password === password);
+    
+    if (credential) {
+      const user = credential.userData;
+      user.lastLogin = new Date();
+      this.currentUserSubject.next(user);
+      this.isLoggedInSubject.next(true);
 
-          observer.next(true);
-        } else {
-          observer.next(false);
-        }
-        observer.complete();
-      }, 1000);
-    });
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+      }
+
+      return true;
+    }
+    
+    return false;
+  }
+
+  isLoggedIn(): boolean {
+    return this.isLoggedInSubject.value;
   }
 
   logout(): void {

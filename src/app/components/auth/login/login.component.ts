@@ -172,7 +172,7 @@ export class LoginComponent implements OnInit {
 
     this.loading = true;
 
-    // Simulate API call
+    // Simulate API call delay
     setTimeout(() => {
       const success = this.authService.login(this.loginData.username, this.loginData.password);
       

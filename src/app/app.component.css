@@ -1,4 +1,3 @@
-
 .app-container {
   @apply h-screen flex;
 }
@@ -113,12 +112,18 @@
   .content-wrapper {
     @apply p-2;
   }
-  
+
   .sidenav-header h2 {
     @apply text-base;
   }
-  
+
   .nav-list a[mat-list-item] {
     @apply text-sm;
   }
+}
+
+/* Added login container styles */
+.login-container {
+  height: 100vh;
+  width: 100vw;
 }
