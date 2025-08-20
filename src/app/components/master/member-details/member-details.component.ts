@@ -1,5 +1,5 @@
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -14,50 +14,23 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { Router } from '@angular/router';
 import { AuthService, UserRole } from '../../../services/auth.service';
 
 interface Member {
   id: number;
-  // General Tab
   memberNo: string;
-  name: string;
-  fatherHusbandName: string;
-  officeAddress: string;
-  city: string;
-  phoneOffice: string;
-  branch: string;
-  phoneResidence: string;
-  designation: string;
-  mobile: string;
-  residenceAddress: string;
-  dob: Date;
-  dojSociety: Date;
+  firstName: string;
+  lastName: string;
   email: string;
-  doj: Date;
-  dor: Date | null;
-  nominee: string;
-  nomineeRelation: string;
-  
-  // Photo & Opening Balance Tab
-  openingBalanceShare: number;
-  openingBalanceCR: number;
-  bankName: string;
-  bankPayableAt: string;
-  bankAccountNo: string;
+  phone: string;
+  role: string;
+  society: string;
+  joinDate: Date;
   status: string;
-  statusDate: Date;
-  photo: string | null;
-  signature: string | null;
-  
-  // Monthly Deduction Tab
-  deductionShare: number;
-  deductionWithdrawal: number;
-  deductionGLoanInstalment: number;
-  deductionELoanInstalment: number;
+  address?: string;
+  city?: string;
+  state?: string;
 }
 
 @Component({
@@ -77,11 +50,7 @@ interface Member {
     MatDatepickerModule,
     MatNativeDateModule,
     MatDialogModule,
-    MatTooltipModule,
-    MatTabsModule,
-    MatCheckboxModule,
-    MatSlideToggleModule,
-    MatSidenavModule
+    MatTooltipModule
   ],
   templateUrl: './member-details.component.html',
   styleUrls: ['./member-details.component.css']
@@ -90,22 +59,28 @@ export class MemberDetailsComponent implements OnInit {
   memberForm: FormGroup;
   members: Member[] = [];
   filteredMembers: Member[] = [];
-  displayedColumns = ['memberNo', 'name', 'mobile', 'branch', 'dojSociety', 'status', 'actions'];
   editingMember: Member | null = null;
   nextMemberNo = 1001;
+  showMemberForm = false;
+  
+  // Filter properties
+  searchTerm = '';
+  selectedRole = '';
+  selectedSociety = '';
+  selectedStatus = '';
+  
+  // Permission properties
   canCreateMembers = false;
   canEditMembers = false;
+  canDeleteMembers = false;
   currentUser: any = null;
-  photoPreview: string | null = null;
-  signaturePreview: string | null = null;
-  
-  @ViewChild('memberFormSidenav') memberFormSidenav!: any;
 
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     this.memberForm = this.createForm();
   }
@@ -118,51 +93,30 @@ export class MemberDetailsComponent implements OnInit {
   }
 
   checkPermissions() {
-    this.canCreateMembers = this.authService.hasPermission('members', 'create');
-    this.canEditMembers = this.authService.hasPermission('members', 'update');
-    
-    // Only Super Admin and Society Admin can create members
     const userRole = this.currentUser?.role;
+    
+    // Super Admin and Society Admin can create and edit members
     this.canCreateMembers = userRole === UserRole.SUPER_ADMIN || userRole === UserRole.SOCIETY_ADMIN;
-    this.canEditMembers = this.canCreateMembers;
+    this.canEditMembers = userRole === UserRole.SUPER_ADMIN || userRole === UserRole.SOCIETY_ADMIN;
+    
+    // Only Super Admin can delete members
+    this.canDeleteMembers = userRole === UserRole.SUPER_ADMIN;
   }
 
   createForm(): FormGroup {
     return this.fb.group({
-      // General Tab
       memberNo: [''],
-      name: ['', Validators.required],
-      fatherHusbandName: ['', Validators.required],
-      officeAddress: [''],
-      city: ['', Validators.required],
-      phoneOffice: [''],
-      branch: ['', Validators.required],
-      phoneResidence: [''],
-      designation: [''],
-      mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      residenceAddress: ['', Validators.required],
-      dob: [''],
-      dojSociety: [new Date(), Validators.required],
-      email: ['', [Validators.email]],
-      doj: [new Date(), Validators.required],
-      dor: [''],
-      nominee: [''],
-      nomineeRelation: [''],
-      
-      // Photo & Opening Balance Tab
-      openingBalanceShare: [0],
-      openingBalanceCR: [0],
-      bankName: [''],
-      bankPayableAt: [''],
-      bankAccountNo: [''],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      role: ['', Validators.required],
+      society: ['', Validators.required],
+      joinDate: [new Date(), Validators.required],
       status: ['Active', Validators.required],
-      statusDate: [new Date(), Validators.required],
-      
-      // Monthly Deduction Tab
-      deductionShare: [0],
-      deductionWithdrawal: [0],
-      deductionGLoanInstalment: [0],
-      deductionELoanInstalment: [0]
+      address: [''],
+      city: [''],
+      state: ['']
     });
   }
 
@@ -172,67 +126,105 @@ export class MemberDetailsComponent implements OnInit {
     });
   }
 
-  onPhotoSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.photoPreview = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  onSignatureSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.signaturePreview = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
   loadSampleData() {
     this.members = [
       {
         id: 1,
         memberNo: 'MEM1001',
-        name: 'John Doe',
-        fatherHusbandName: 'Robert Doe',
-        officeAddress: '123 Business Street, City',
-        city: 'Mumbai',
-        phoneOffice: '022-12345678',
-        branch: 'Main Branch',
-        phoneResidence: '022-87654321',
-        designation: 'Manager',
-        mobile: '9876543210',
-        residenceAddress: '123 Main Street, City, State',
-        dob: new Date('1985-05-15'),
-        dojSociety: new Date('2024-01-15'),
+        firstName: 'John',
+        lastName: 'Doe',
         email: 'john.doe@email.com',
-        doj: new Date('2024-01-15'),
-        dor: null,
-        nominee: 'Jane Doe',
-        nomineeRelation: 'Spouse',
-        openingBalanceShare: 1000,
-        openingBalanceCR: 500,
-        bankName: 'State Bank of India',
-        bankPayableAt: 'Mumbai Branch',
-        bankAccountNo: '123456789',
+        phone: '9876543210',
+        role: 'Member',
+        society: 'Main Branch',
+        joinDate: new Date('2024-01-15'),
         status: 'Active',
-        statusDate: new Date('2024-01-15'),
-        photo: null,
-        signature: null,
-        deductionShare: 100,
-        deductionWithdrawal: 0,
-        deductionGLoanInstalment: 200,
-        deductionELoanInstalment: 150
+        address: '123 Main Street',
+        city: 'Mumbai',
+        state: 'Maharashtra'
+      },
+      {
+        id: 2,
+        memberNo: 'MEM1002',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane.smith@email.com',
+        phone: '9876543211',
+        role: 'Executive',
+        society: 'North Branch',
+        joinDate: new Date('2024-02-20'),
+        status: 'Active',
+        address: '456 Oak Avenue',
+        city: 'Delhi',
+        state: 'Delhi'
+      },
+      {
+        id: 3,
+        memberNo: 'MEM1003',
+        firstName: 'Mike',
+        lastName: 'Johnson',
+        email: 'mike.johnson@email.com',
+        phone: '9876543212',
+        role: 'Board Member',
+        society: 'South Branch',
+        joinDate: new Date('2023-12-10'),
+        status: 'Inactive',
+        address: '789 Pine Road',
+        city: 'Bangalore',
+        state: 'Karnataka'
       }
     ];
     this.filteredMembers = [...this.members];
     this.nextMemberNo = Math.max(...this.members.map(m => parseInt(m.memberNo.slice(3)))) + 1;
+  }
+
+  applyFilters() {
+    this.filteredMembers = this.members.filter(member => {
+      const searchMatch = !this.searchTerm || 
+        member.firstName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        member.lastName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        member.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        member.phone.includes(this.searchTerm) ||
+        member.memberNo.toLowerCase().includes(this.searchTerm.toLowerCase());
+      
+      const roleMatch = !this.selectedRole || member.role === this.selectedRole;
+      const societyMatch = !this.selectedSociety || member.society === this.selectedSociety;
+      const statusMatch = !this.selectedStatus || member.status === this.selectedStatus;
+      
+      return searchMatch && roleMatch && societyMatch && statusMatch;
+    });
+  }
+
+  clearFilters() {
+    this.searchTerm = '';
+    this.selectedRole = '';
+    this.selectedSociety = '';
+    this.selectedStatus = '';
+    this.filteredMembers = [...this.members];
+  }
+
+  getInitials(firstName: string, lastName: string): string {
+    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+  }
+
+  openMemberForm() {
+    this.resetForm();
+    this.showMemberForm = true;
+  }
+
+  closeMemberForm() {
+    this.showMemberForm = false;
+    this.resetForm();
+  }
+
+  resetForm() {
+    this.editingMember = null;
+    this.memberForm.reset();
+    this.memberForm.patchValue({
+      joinDate: new Date(),
+      status: 'Active'
+    });
+    this.generateMemberNo();
   }
 
   saveMember() {
@@ -244,91 +236,106 @@ export class MemberDetailsComponent implements OnInit {
         const index = this.members.findIndex(m => m.id === this.editingMember!.id);
         this.members[index] = { 
           ...this.editingMember, 
-          ...formValue,
-          photo: this.photoPreview,
-          signature: this.signaturePreview
+          ...formValue
         };
         this.snackBar.open('Member updated successfully', 'Close', { duration: 3000 });
       } else {
         // Add new member
         const newMember: Member = {
           id: Date.now(),
-          ...formValue,
-          photo: this.photoPreview,
-          signature: this.signaturePreview
+          ...formValue
         };
         this.members.push(newMember);
         this.nextMemberNo++;
         this.snackBar.open('Member added successfully', 'Close', { duration: 3000 });
       }
       
-      this.filteredMembers = [...this.members];
+      this.applyFilters();
       this.closeMemberForm();
+    } else {
+      this.snackBar.open('Please fill all required fields correctly', 'Close', { duration: 3000 });
     }
   }
 
   editMember(member: Member) {
     this.editingMember = member;
     this.memberForm.patchValue(member);
-    this.photoPreview = member.photo;
-    this.signaturePreview = member.signature;
-    this.memberFormSidenav.open();
+    this.showMemberForm = true;
   }
 
   deleteMember(id: number) {
     if (confirm('Are you sure you want to delete this member?')) {
       this.members = this.members.filter(m => m.id !== id);
-      this.filteredMembers = [...this.members];
+      this.applyFilters();
       this.snackBar.open('Member deleted successfully', 'Close', { duration: 3000 });
     }
   }
 
   viewMember(member: Member) {
-    // Implementation for viewing member details
-    this.snackBar.open(`Viewing details for ${member.name}`, 'Close', { duration: 2000 });
+    // Navigate to member details page
+    this.router.navigate(['/member-details', member.id]);
   }
 
-  resetForm() {
-    this.editingMember = null;
-    this.memberForm.reset();
-    this.photoPreview = null;
-    this.signaturePreview = null;
-    this.memberForm.patchValue({
-      dojSociety: new Date(),
-      doj: new Date(),
-      statusDate: new Date(),
-      status: 'Active',
-      openingBalanceShare: 0,
-      openingBalanceCR: 0,
-      deductionShare: 0,
-      deductionWithdrawal: 0,
-      deductionGLoanInstalment: 0,
-      deductionELoanInstalment: 0
+  // Export functions
+  exportToCSV() {
+    const csvData = this.convertToCSV(this.filteredMembers);
+    this.downloadFile(csvData, 'members.csv', 'text/csv');
+    this.snackBar.open('Members exported to CSV', 'Close', { duration: 2000 });
+  }
+
+  exportToExcel() {
+    // For Excel export, we'll use CSV format as a simple implementation
+    const csvData = this.convertToCSV(this.filteredMembers);
+    this.downloadFile(csvData, 'members.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    this.snackBar.open('Members exported to Excel', 'Close', { duration: 2000 });
+  }
+
+  exportToPDF() {
+    // Simple PDF export implementation
+    const pdfContent = this.convertToPDF(this.filteredMembers);
+    this.downloadFile(pdfContent, 'members.pdf', 'application/pdf');
+    this.snackBar.open('Members exported to PDF', 'Close', { duration: 2000 });
+  }
+
+  private convertToCSV(data: Member[]): string {
+    const headers = ['Member No', 'First Name', 'Last Name', 'Email', 'Phone', 'Role', 'Society', 'Join Date', 'Status'];
+    const csvContent = [
+      headers.join(','),
+      ...data.map(member => [
+        member.memberNo,
+        member.firstName,
+        member.lastName,
+        member.email,
+        member.phone,
+        member.role,
+        member.society,
+        member.joinDate.toLocaleDateString(),
+        member.status
+      ].join(','))
+    ].join('\n');
+    
+    return csvContent;
+  }
+
+  private convertToPDF(data: Member[]): string {
+    // Simple text-based PDF content (in real implementation, use a PDF library)
+    let content = 'Members Report\n\n';
+    content += 'Member No\tFirst Name\tLast Name\tEmail\tPhone\tRole\tSociety\tJoin Date\tStatus\n';
+    
+    data.forEach(member => {
+      content += `${member.memberNo}\t${member.firstName}\t${member.lastName}\t${member.email}\t${member.phone}\t${member.role}\t${member.society}\t${member.joinDate.toLocaleDateString()}\t${member.status}\n`;
     });
-    this.generateMemberNo();
+    
+    return content;
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value.toLowerCase();
-    this.filteredMembers = this.members.filter(member =>
-      member.name.toLowerCase().includes(filterValue) ||
-      member.mobile.includes(filterValue) ||
-      member.memberNo.toLowerCase().includes(filterValue) ||
-      member.branch.toLowerCase().includes(filterValue)
-    );
-  }
-
-  openMemberForm() {
-    this.resetForm();
-    this.memberFormSidenav.open();
-  }
-
-  closeMemberForm() {
-    this.memberFormSidenav.close();
-    this.resetForm();
-  }
-
-  scrollToForm() {
-    this.openMemberForm();
+  private downloadFile(content: string, filename: string, contentType: string) {
+    const blob = new Blob([content], { type: contentType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    window.URL.revokeObjectURL(url);
   }
 }

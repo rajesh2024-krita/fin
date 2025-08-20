@@ -4,13 +4,13 @@
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Member Details</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Member Management</h1>
         <p class="text-gray-600 dark:text-gray-400">Manage society members and their information</p>
       </div>
       <button 
         *ngIf="canCreateMembers"
         (click)="openMemberForm()"
-        class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200"
+        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200"
       >
         <mat-icon class="mr-2">person_add</mat-icon>
         Add New Member
@@ -20,27 +20,107 @@
 
   <!-- Search and Filters -->
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-    <div class="flex flex-col lg:flex-row lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
-      <div class="flex-1">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <!-- Search Bar -->
+      <div class="lg:col-span-4">
         <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search Members</label>
-        <input
-          id="search"
-          type="text"
-          placeholder="Search by name, mobile, member number, or branch..."
-          (keyup)="applyFilter($event)"
-          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200"
+        <div class="relative">
+          <mat-icon class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</mat-icon>
+          <input
+            id="search"
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="applyFilters()"
+            placeholder="Search by name, email, phone, member number..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors duration-200"
+          >
+        </div>
+      </div>
+
+      <!-- Role Filter -->
+      <div class="lg:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
+        <select 
+          [(ngModel)]="selectedRole"
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
         >
+          <option value="">All Roles</option>
+          <option value="Member">Member</option>
+          <option value="Executive">Executive</option>
+          <option value="Board Member">Board Member</option>
+        </select>
       </div>
-      <div class="flex space-x-2">
-        <button class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
-          <mat-icon class="mr-1">filter_list</mat-icon>
-          Filter
-        </button>
-        <button class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
-          <mat-icon class="mr-1">download</mat-icon>
-          Export
-        </button>
+
+      <!-- Society Filter -->
+      <div class="lg:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Society</label>
+        <select 
+          [(ngModel)]="selectedSociety"
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+        >
+          <option value="">All Societies</option>
+          <option value="Main Branch">Main Branch</option>
+          <option value="North Branch">North Branch</option>
+          <option value="South Branch">South Branch</option>
+        </select>
       </div>
+
+      <!-- Status Filter -->
+      <div class="lg:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+        <select 
+          [(ngModel)]="selectedStatus"
+          (change)="applyFilters()"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+        >
+          <option value="">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+
+      <!-- Export Actions -->
+      <div class="lg:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Export</label>
+        <div class="flex space-x-2">
+          <button 
+            (click)="exportToCSV()"
+            class="flex-1 px-3 py-2 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 transition-colors duration-200 text-sm"
+            title="Export to CSV"
+          >
+            CSV
+          </button>
+          <button 
+            (click)="exportToExcel()"
+            class="flex-1 px-3 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors duration-200 text-sm"
+            title="Export to Excel"
+          >
+            Excel
+          </button>
+          <button 
+            (click)="exportToPDF()"
+            class="flex-1 px-3 py-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-800 transition-colors duration-200 text-sm"
+            title="Export to PDF"
+          >
+            PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clear Filters -->
+    <div class="mt-4 flex justify-between items-center">
+      <button 
+        (click)="clearFilters()"
+        class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 underline"
+      >
+        Clear all filters
+      </button>
+      <span class="text-sm text-gray-600 dark:text-gray-400">
+        Showing {{filteredMembers.length}} of {{members.length}} members
+      </span>
     </div>
   </div>
 
@@ -48,7 +128,6 @@
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
       <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Members List</h2>
-      <p class="text-sm text-gray-600 dark:text-gray-400">{{filteredMembers.length}} members found</p>
     </div>
     
     <!-- Desktop Table -->
@@ -58,7 +137,8 @@
           <tr>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Member Info</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact</th>
-            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Branch</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Society</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Join Date</th>
             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
             <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
@@ -68,21 +148,26 @@
           <tr *ngFor="let member of filteredMembers" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
             <td class="px-6 py-4">
               <div class="flex items-center">
-                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-4">
-                  <span class="text-sm font-medium text-primary-600 dark:text-primary-300">{{member.name.charAt(0).toUpperCase()}}</span>
+                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-4">
+                  <span class="text-sm font-medium text-blue-600 dark:text-blue-300">{{getInitials(member.firstName, member.lastName)}}</span>
                 </div>
                 <div>
-                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{member.name}}</div>
+                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{member.firstName}} {{member.lastName}}</div>
                   <div class="text-sm text-gray-500 dark:text-gray-400">{{member.memberNo}}</div>
                 </div>
               </div>
             </td>
             <td class="px-6 py-4">
-              <div class="text-sm text-gray-900 dark:text-white">{{member.mobile}}</div>
+              <div class="text-sm text-gray-900 dark:text-white">{{member.phone}}</div>
               <div class="text-sm text-gray-500 dark:text-gray-400">{{member.email}}</div>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{member.branch}}</td>
-            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{member.dojSociety | date:'dd/MM/yyyy'}}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                {{member.role}}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{member.society}}</td>
+            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{member.joinDate | date:'dd/MM/yyyy'}}</td>
             <td class="px-6 py-4">
               <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                     [class]="member.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'">
@@ -107,7 +192,7 @@
                   <mat-icon class="text-sm">edit</mat-icon>
                 </button>
                 <button 
-                  *ngIf="canEditMembers"
+                  *ngIf="canDeleteMembers"
                   (click)="deleteMember(member.id)"
                   class="p-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors duration-200"
                   title="Delete Member"
@@ -126,11 +211,11 @@
       <div *ngFor="let member of filteredMembers" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center">
-            <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3">
-              <span class="text-sm font-medium text-primary-600 dark:text-primary-300">{{member.name.charAt(0).toUpperCase()}}</span>
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-3">
+              <span class="text-sm font-medium text-blue-600 dark:text-blue-300">{{getInitials(member.firstName, member.lastName)}}</span>
             </div>
             <div>
-              <div class="text-sm font-medium text-gray-900 dark:text-white">{{member.name}}</div>
+              <div class="text-sm font-medium text-gray-900 dark:text-white">{{member.firstName}} {{member.lastName}}</div>
               <div class="text-xs text-gray-500 dark:text-gray-400">{{member.memberNo}}</div>
             </div>
           </div>
@@ -143,15 +228,23 @@
         <div class="space-y-2 text-sm">
           <div class="flex items-center text-gray-600 dark:text-gray-400">
             <mat-icon class="mr-2 text-sm">phone</mat-icon>
-            {{member.mobile}}
+            {{member.phone}}
+          </div>
+          <div class="flex items-center text-gray-600 dark:text-gray-400">
+            <mat-icon class="mr-2 text-sm">email</mat-icon>
+            {{member.email}}
           </div>
           <div class="flex items-center text-gray-600 dark:text-gray-400">
             <mat-icon class="mr-2 text-sm">business</mat-icon>
-            {{member.branch}}
+            {{member.society}}
+          </div>
+          <div class="flex items-center text-gray-600 dark:text-gray-400">
+            <mat-icon class="mr-2 text-sm">person</mat-icon>
+            {{member.role}}
           </div>
           <div class="flex items-center text-gray-600 dark:text-gray-400">
             <mat-icon class="mr-2 text-sm">calendar_today</mat-icon>
-            {{member.dojSociety | date:'dd/MM/yyyy'}}
+            {{member.joinDate | date:'dd/MM/yyyy'}}
           </div>
         </div>
         
@@ -170,7 +263,7 @@
             <mat-icon class="text-sm">edit</mat-icon>
           </button>
           <button 
-            *ngIf="canEditMembers"
+            *ngIf="canDeleteMembers"
             (click)="deleteMember(member.id)"
             class="p-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors duration-200"
           >
@@ -184,137 +277,184 @@
     <div *ngIf="filteredMembers.length === 0" class="p-12 text-center">
       <mat-icon class="text-6xl text-gray-400 dark:text-gray-500 mb-4">people_outline</mat-icon>
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No members found</h3>
-      <p class="text-gray-500 dark:text-gray-400">Get started by adding your first member to the system.</p>
+      <p class="text-gray-500 dark:text-gray-400">Try adjusting your search criteria or add a new member.</p>
     </div>
   </div>
 </div>
 
-<!-- Member Form Sidebar -->
-<mat-sidenav-container class="fixed inset-0 z-50" *ngIf="memberFormSidenav" [hasBackdrop]="true">
-  <mat-sidenav #memberFormSidenav mode="over" position="end" class="w-full max-w-2xl">
-    <div class="h-full bg-white dark:bg-gray-800 flex flex-col">
-      <!-- Form Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-          {{editingMember ? 'Edit Member' : 'Add New Member'}}
-        </h2>
-        <button 
-          (click)="closeMemberForm()"
-          class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+<!-- Member Form Off-canvas -->
+<div *ngIf="showMemberForm" class="fixed inset-0 z-50 overflow-hidden">
+  <div class="absolute inset-0 bg-black bg-opacity-50" (click)="closeMemberForm()"></div>
+  
+  <!-- Off-canvas Panel -->
+  <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out"
+       [class.translate-x-0]="showMemberForm"
+       [class.translate-x-full]="!showMemberForm">
+    
+    <!-- Form Header -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+        {{editingMember ? 'Edit Member' : 'Add New Member'}}
+      </h2>
+      <button 
+        (click)="closeMemberForm()"
+        class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
 
-      <!-- Form Content -->
-      <div class="flex-1 overflow-y-auto p-6">
-        <form [formGroup]="memberForm" (ngSubmit)="saveMember()" class="space-y-6">
-          <!-- Basic Information -->
-          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Basic Information</h3>
+    <!-- Form Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <form [formGroup]="memberForm" (ngSubmit)="saveMember()" class="space-y-6">
+        
+        <!-- Basic Information -->
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Basic Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member Number</label>
+              <input 
+                formControlName="memberNo" 
+                readonly
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name *</label>
+              <input 
+                formControlName="firstName" 
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+              <div *ngIf="memberForm.get('firstName')?.invalid && memberForm.get('firstName')?.touched" class="text-red-500 text-xs mt-1">
+                First name is required
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name *</label>
+              <input 
+                formControlName="lastName" 
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+              <div *ngIf="memberForm.get('lastName')?.invalid && memberForm.get('lastName')?.touched" class="text-red-500 text-xs mt-1">
+                Last name is required
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email *</label>
+              <input 
+                formControlName="email" 
+                type="email"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+              <div *ngIf="memberForm.get('email')?.invalid && memberForm.get('email')?.touched" class="text-red-500 text-xs mt-1">
+                Please enter a valid email address
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone *</label>
+              <input 
+                formControlName="phone" 
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+              <div *ngIf="memberForm.get('phone')?.invalid && memberForm.get('phone')?.touched" class="text-red-500 text-xs mt-1">
+                Please enter a valid 10-digit phone number
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role *</label>
+              <select 
+                formControlName="role" 
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="">Select Role</option>
+                <option value="Member">Member</option>
+                <option value="Executive">Executive</option>
+                <option value="Board Member">Board Member</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Society *</label>
+              <select 
+                formControlName="society" 
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="">Select Society</option>
+                <option value="Main Branch">Main Branch</option>
+                <option value="North Branch">North Branch</option>
+                <option value="South Branch">South Branch</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Join Date *</label>
+              <input 
+                formControlName="joinDate" 
+                type="date"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+              <select 
+                formControlName="status" 
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Information -->
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Address Information</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Address</label>
+              <textarea 
+                formControlName="address" 
+                rows="3"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              ></textarea>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member Number</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City</label>
                 <input 
-                  formControlName="memberNo" 
-                  readonly
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white"
+                  formControlName="city" 
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name *</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">State</label>
                 <input 
-                  formControlName="name" 
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+                  formControlName="state" 
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Father/Husband Name *</label>
-                <input 
-                  formControlName="fatherHusbandName" 
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-                >
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mobile Number *</label>
-                <input 
-                  formControlName="mobile" 
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-                >
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
-                <input 
-                  formControlName="email" 
-                  type="email"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-                >
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Branch *</label>
-                <select 
-                  formControlName="branch" 
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-                >
-                  <option value="">Select Branch</option>
-                  <option value="Main Branch">Main Branch</option>
-                  <option value="North Branch">North Branch</option>
-                  <option value="South Branch">South Branch</option>
-                </select>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Address Information -->
-          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Address Information</h3>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Residence Address *</label>
-                <textarea 
-                  formControlName="residenceAddress" 
-                  rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-                ></textarea>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City *</label>
-                  <input 
-                    formControlName="city" 
-                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-                  >
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Office Address</label>
-                  <input 
-                    formControlName="officeAddress" 
-                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <button 
-              type="button" 
-              (click)="closeMemberForm()"
-              class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              [disabled]="memberForm.invalid"
-              class="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200"
-            >
-              {{editingMember ? 'Update Member' : 'Add Member'}}
-            </button>
-          </div>
-        </form>
-      </div>
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <button 
+            type="button" 
+            (click)="closeMemberForm()"
+            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            [disabled]="memberForm.invalid"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200"
+          >
+            {{editingMember ? 'Update Member' : 'Add Member'}}
+          </button>
+        </div>
+      </form>
     </div>
-  </mat-sidenav>
-</mat-sidenav-container>
+  </div>
+</div>

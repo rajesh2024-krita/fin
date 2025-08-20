@@ -1,4 +1,3 @@
-
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
@@ -8,13 +7,13 @@ export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'login', loadComponent: () => import('./components/auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'unauthorized', loadComponent: () => import('./components/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent) },
-  
+
   { 
     path: 'dashboard', 
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [AuthGuard]
   },
-  
+
   // User Management
   { 
     path: 'user-management', 
@@ -74,13 +73,19 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: [UserRole.SUPER_ADMIN, UserRole.SOCIETY_ADMIN, UserRole.ACCOUNTANT] }
   },
-  
+
   // Master Menu
   { 
     path: 'master/member-details', 
     loadComponent: () => import('./components/master/member-details/member-details.component').then(m => m.MemberDetailsComponent),
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: [UserRole.SUPER_ADMIN, UserRole.SOCIETY_ADMIN, UserRole.ACCOUNTANT] }
+    data: { roles: [UserRole.SUPER_ADMIN, UserRole.SOCIETY_ADMIN, UserRole.BRANCH_ADMIN, UserRole.OPERATOR] }
+  },
+  { 
+    path: 'master/member-details/:id', 
+    loadComponent: () => import('./components/member-details-view/member-details-view.component').then(m => m.MemberDetailsViewComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: [UserRole.SUPER_ADMIN, UserRole.SOCIETY_ADMIN, UserRole.BRANCH_ADMIN, UserRole.OPERATOR] }
   },
   { 
     path: 'master/table', 
@@ -100,7 +105,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: [UserRole.SUPER_ADMIN, UserRole.SOCIETY_ADMIN] }
   },
-  
+
   // Transaction Menu
   { 
     path: 'transaction/loan-taken', 
@@ -144,7 +149,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: [UserRole.SUPER_ADMIN, UserRole.SOCIETY_ADMIN, UserRole.ACCOUNTANT] }
   },
-  
+
   // Accounts Menu
   { 
     path: 'accounts/group', 
@@ -171,14 +176,14 @@ export const routes: Routes = [
   { path: 'accounts/balance-sheet', loadComponent: () => import('./components/accounts/balance-sheet/balance-sheet.component').then(m => m.BalanceSheetComponent) },
   { path: 'accounts/profit-loss', loadComponent: () => import('./components/accounts/profit-loss/profit-loss.component').then(m => m.ProfitLossComponent) },
   { path: 'accounts/receipt-payment', loadComponent: () => import('./components/accounts/receipt-payment/receipt-payment.component').then(m => m.ReceiptPaymentComponent) },
-  
+
   // Reports Menu
   { path: 'reports/employees', loadComponent: () => import('./components/reports/employees/employees.component').then(m => m.EmployeesComponent) },
   { path: 'reports/voucher', loadComponent: () => import('./components/reports/voucher/voucher.component').then(m => m.VoucherReportComponent) },
   { path: 'reports/opening-balance', loadComponent: () => import('./components/reports/opening-balance/opening-balance.component').then(m => m.OpeningBalanceComponent) },
   { path: 'reports/closing-balance', loadComponent: () => import('./components/reports/closing-balance/closing-balance.component').then(m => m.ClosingBalanceComponent) },
   { path: 'reports/loan', loadComponent: () => import('./components/reports/loan/loan.component').then(m => m.LoanReportComponent) },
-  
+
   // Other routes
   { 
     path: 'statement', 
@@ -203,6 +208,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: [UserRole.SUPER_ADMIN, UserRole.SOCIETY_ADMIN] }
   },
-  
+
   { path: '**', redirectTo: '/dashboard' }
 ];
