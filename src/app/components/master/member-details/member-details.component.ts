@@ -273,7 +273,7 @@ export class MemberDetailsComponent implements OnInit {
 
   viewMember(member: Member) {
     // Navigate to member details page
-    this.router.navigate(['/member-details', member.id]);
+    this.router.navigate(['/master/member-details', member.id]);
   }
 
   // Export functions

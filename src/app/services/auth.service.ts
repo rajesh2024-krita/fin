@@ -1,4 +1,3 @@
-
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
@@ -19,10 +18,12 @@ export interface User {
 }
 
 export enum UserRole {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  SOCIETY_ADMIN = 'SOCIETY_ADMIN',
-  ACCOUNTANT = 'ACCOUNTANT',
-  MEMBER = 'MEMBER'
+  SUPER_ADMIN = 'super_admin',
+  SOCIETY_ADMIN = 'society_admin',
+  BRANCH_ADMIN = 'branch_admin',
+  ACCOUNTANT = 'accountant',
+  OPERATOR = 'operator',
+  MEMBER = 'member'
 }
 
 export interface Permission {

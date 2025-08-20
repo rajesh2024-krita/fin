@@ -1,4 +1,3 @@
-
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';

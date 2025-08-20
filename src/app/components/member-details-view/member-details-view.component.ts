@@ -276,12 +276,12 @@ export class MemberDetailsViewComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/member-details']);
+    this.router.navigate(['/master/member-details']);
   }
 
   editMember() {
     // Navigate back to member list with edit mode
-    this.router.navigate(['/member-details'], { 
+    this.router.navigate(['/master/member-details'], { 
       queryParams: { edit: this.member?.id } 
     });
   }
