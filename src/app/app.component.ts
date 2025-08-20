@@ -104,6 +104,11 @@ export class AppComponent implements OnInit {
     this.isMobileSidebarOpen = false;
   }
 
+  // Check if current route is login page
+  isLoginPage(): boolean {
+    return this.router.url === '/login';
+  }
+
   // Menu toggle methods
   toggleFileMenu() {
     this.isFileMenuOpen = !this.isFileMenuOpen;
