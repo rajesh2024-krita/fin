@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -181,9 +181,10 @@ export class LoginComponent implements OnInit {
   }
 
   loginWithDemo(username: string) {
+    console.log(username)
     this.loginForm.patchValue({
       username: username,
-      password: 'demo123'
+      password: 'password'
     });
     this.onSubmit();
   }
@@ -193,9 +194,10 @@ export class LoginComponent implements OnInit {
 
     this.loading = true;
     const { username, password } = this.loginForm.value;
-
+    console.log('username == ', username)
+    console.log('password == ', password)
     this.authService.login(username, password).subscribe({
-      next: (success) => {
+      next: (success:any) => {
         this.loading = false;
         if (success) {
           const user = this.authService.getCurrentUser();

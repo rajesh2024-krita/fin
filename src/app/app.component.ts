@@ -1,7 +1,7 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,7 +34,7 @@ export class AppComponent implements OnInit {
   title = 'Financial Management System';
   currentUser: User | null = null;
   currentUserName = '';
-  
+
   // Menu states
   isMobileSidebarOpen = false;
   isFileMenuOpen = false;
@@ -43,16 +43,21 @@ export class AppComponent implements OnInit {
   isTransactionMenuOpen = false;
   isAccountsMenuOpen = false;
   isReportsMenuOpen = false;
-  
+
   // Theme state
   isDarkMode = false;
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     // Initialize theme from localStorage
-    this.isDarkMode = localStorage.getItem('theme') === 'dark';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      this.isDarkMode = localStorage.getItem('theme') === 'dark';
+    } else {
+      this.isDarkMode = false;
+    }
     this.applyTheme();
   }
 
@@ -72,17 +77,23 @@ export class AppComponent implements OnInit {
   // Theme management
   toggleTheme() {
     this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+    }
     this.applyTheme();
   }
 
+
   private applyTheme() {
-    if (this.isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    if (isPlatformBrowser(this.platformId)) {
+      if (this.isDarkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
   }
+
 
   // Mobile sidebar management
   toggleMobileSidebar() {
