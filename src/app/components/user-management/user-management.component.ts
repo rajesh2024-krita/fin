@@ -183,7 +183,7 @@ interface User {
                           {{user.firstName}} {{user.lastName}}
                         </div>
                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                          @{{user.username}}
+                          {{ '@' + user.username }}
                         </div>
                       </div>
                     </div>
