@@ -1,4 +1,3 @@
-
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 @tailwind base;
@@ -18,7 +17,7 @@
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-info: #06b6d4;
-  
+
   /* Light Theme Gradients - Professional & Subtle */
   --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #10b981 100%);
@@ -27,7 +26,7 @@
   --gradient-card: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
   --gradient-sidebar: linear-gradient(180deg, #1e293b 0%, #334155 100%);
   --gradient-header: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
-  
+
   /* Light Theme Colors */
   --color-text-primary: #1e293b;
   --color-text-secondary: #64748b;
@@ -52,7 +51,7 @@
   --color-warning: #fbbf24;
   --color-danger: #f87171;
   --color-info: #22d3ee;
-  
+
   --gradient-primary: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
   --gradient-secondary: linear-gradient(135deg, #22d3ee 0%, #34d399 100%);
   --gradient-accent: linear-gradient(135deg, #34d399 0%, #10b981 100%);
@@ -60,7 +59,7 @@
   --gradient-card: linear-gradient(145deg, #1e293b 0%, #334155 100%);
   --gradient-sidebar: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
   --gradient-header: linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%);
-  
+
   --color-text-primary: #f1f5f9;
   --color-text-secondary: #cbd5e1;
   --color-text-muted: #94a3b8;
@@ -126,24 +125,24 @@ body {
     box-shadow: var(--shadow-sm);
     transition: all 0.2s ease;
   }
-  
+
   .card-professional:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-1px);
   }
-  
+
   .gradient-primary {
     background: var(--gradient-primary);
   }
-  
+
   .gradient-secondary {
     background: var(--gradient-secondary);
   }
-  
+
   .gradient-header {
     background: var(--gradient-header);
   }
-  
+
   .btn-primary {
     background: var(--gradient-primary);
     color: white !important;
@@ -158,13 +157,13 @@ body {
     align-items: center;
     gap: 8px;
   }
-  
+
   .btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
     filter: brightness(1.05);
   }
-  
+
   .btn-secondary {
     background: var(--color-bg-primary);
     color: var(--color-text-primary);
@@ -179,42 +178,42 @@ body {
     align-items: center;
     gap: 8px;
   }
-  
+
   .btn-secondary:hover {
     background: var(--color-bg-secondary);
     border-color: var(--color-primary);
     transform: translateY(-1px);
   }
-  
+
   .sidebar-professional {
     background: var(--gradient-sidebar);
     backdrop-filter: blur(10px);
     border-right: 1px solid var(--color-border);
   }
-  
+
   .header-professional {
     background: var(--color-bg-primary);
     border-bottom: 1px solid var(--color-border);
     backdrop-filter: blur(10px);
   }
-  
+
   .content-professional {
     background: var(--color-bg-secondary);
     min-height: calc(100vh - 64px);
   }
-  
+
   .spacing-standard {
     gap: 16px;
   }
-  
+
   .padding-section {
     padding: 16px;
   }
-  
+
   .padding-card {
     padding: 12px;
   }
-  
+
   .padding-field {
     padding: 8px;
   }
@@ -445,6 +444,118 @@ body {
   }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+/* Approval Workflow Styles */
+.approval-progress {
+  background: var(--gradient-primary);
+  border-radius: 10px;
+  height: 8px;
+  transition: all 0.3s ease;
+}
+
+.approval-user-item {
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.approval-user-item:hover {
+  background: var(--color-bg-secondary);
+}
+
+.approval-badge {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.approval-badge.approved {
+  animation: none;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.approval-badge.pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.approval-badge.rejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Professional Tab Styles */
+.professional-tabs .mat-mdc-tab-group {
+  --mdc-secondary-navigation-tab-container-height: 48px;
+}
+
+.professional-tabs .mat-mdc-tab {
+  min-width: 120px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.professional-tabs .mat-mdc-tab.mdc-tab--active {
+  color: var(--color-primary);
+}
+
+.professional-tabs .mat-mdc-tab-header {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.professional-tabs .mat-mdc-tab-body-content {
+  padding: 0;
+}
+
+/* Society Form Enhancements */
+.society-form-section {
+  background: var(--color-bg-primary);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.society-form-section:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.society-stats-card {
+  background: var(--gradient-card);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.society-stats-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Dark theme adjustments for society component */
+.dark .society-form-section {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+}
+
+.dark .approval-user-item {
+  border: 1px solid var(--color-border-light);
+}
+
+.dark .approval-user-item:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -482,15 +593,15 @@ body {
   .text-page-title {
     font-size: 18px;
   }
-  
+
   .text-section-header {
     font-size: 15px;
   }
-  
+
   .padding-section {
     padding: 12px;
   }
-  
+
   .spacing-standard {
     gap: 12px;
   }
