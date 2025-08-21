@@ -276,53 +276,53 @@ export class SocietyApprovalDialogComponent {
               
               <!-- Basic Information Tab -->
               <mat-tab label="Basic Information">
-                <div class="py-6 space-y-4">
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-section-content">
+                  <div class="form-grid form-grid-2">
                     <mat-form-field appearance="outline">
-                      <mat-label>Society Name</mat-label>
-                      <input matInput formControlName="name" [readonly]="!isEditing">
+                      <mat-label>Society Name *</mat-label>
+                      <input matInput formControlName="name" [readonly]="!isEditing" placeholder="Enter society name">
                       <mat-icon matSuffix>business</mat-icon>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Registration Number</mat-label>
-                      <input matInput formControlName="registrationNo" [readonly]="!isEditing">
+                      <mat-label>Registration Number *</mat-label>
+                      <input matInput formControlName="registrationNo" [readonly]="!isEditing" placeholder="Enter registration number">
                       <mat-icon matSuffix>assignment</mat-icon>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="md:col-span-2">
-                      <mat-label>Address</mat-label>
-                      <textarea matInput formControlName="address" rows="2" [readonly]="!isEditing"></textarea>
+                      <mat-label>Address *</mat-label>
+                      <textarea matInput formControlName="address" rows="3" [readonly]="!isEditing" placeholder="Enter complete address"></textarea>
                       <mat-icon matSuffix>location_on</mat-icon>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>City</mat-label>
-                      <input matInput formControlName="city" [readonly]="!isEditing">
+                      <mat-label>City *</mat-label>
+                      <input matInput formControlName="city" [readonly]="!isEditing" placeholder="Enter city name">
                       <mat-icon matSuffix>location_city</mat-icon>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Phone</mat-label>
-                      <input matInput formControlName="phone" [readonly]="!isEditing">
+                      <mat-label>Phone Number *</mat-label>
+                      <input matInput formControlName="phone" [readonly]="!isEditing" placeholder="Enter phone number">
                       <mat-icon matSuffix>phone</mat-icon>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Fax</mat-label>
-                      <input matInput formControlName="fax" [readonly]="!isEditing">
+                      <mat-label>Fax Number</mat-label>
+                      <input matInput formControlName="fax" [readonly]="!isEditing" placeholder="Enter fax number">
                       <mat-icon matSuffix>fax</mat-icon>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Email</mat-label>
-                      <input matInput type="email" formControlName="email" [readonly]="!isEditing">
+                      <mat-label>Email Address *</mat-label>
+                      <input matInput type="email" formControlName="email" [readonly]="!isEditing" placeholder="Enter email address">
                       <mat-icon matSuffix>email</mat-icon>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="md:col-span-2">
-                      <mat-label>Website</mat-label>
-                      <input matInput formControlName="website" [readonly]="!isEditing">
+                      <mat-label>Website URL</mat-label>
+                      <input matInput formControlName="website" [readonly]="!isEditing" placeholder="Enter website URL">
                       <mat-icon matSuffix>web</mat-icon>
                     </mat-form-field>
                   </div>
@@ -331,100 +331,127 @@ export class SocietyApprovalDialogComponent {
 
               <!-- Interest Rates Tab -->
               <mat-tab label="Interest Rates">
-                <div class="py-6 space-y-4">
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="form-section-content">
+                  <div class="mb-6">
+                    <h4 class="text-section-header text-gray-700 dark:text-gray-300 mb-4">Configure Interest Rates (%)</h4>
+                    <p class="text-body-sm text-gray-500 mb-6">Set the annual interest rates for different financial products</p>
+                  </div>
+                  <div class="form-grid form-grid-3">
                     <mat-form-field appearance="outline">
-                      <mat-label>Dividend (%)</mat-label>
-                      <input matInput type="number" formControlName="dividend" [readonly]="!isEditing">
+                      <mat-label>Dividend Rate (%)</mat-label>
+                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="dividend" [readonly]="!isEditing" placeholder="0.0">
                       <mat-icon matSuffix>trending_up</mat-icon>
+                      <mat-hint>Annual dividend rate</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>OD (%)</mat-label>
-                      <input matInput type="number" formControlName="od" [readonly]="!isEditing">
+                      <mat-label>Overdraft Rate (%)</mat-label>
+                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="od" [readonly]="!isEditing" placeholder="0.0">
                       <mat-icon matSuffix>account_balance</mat-icon>
+                      <mat-hint>OD interest rate</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>CD (%)</mat-label>
-                      <input matInput type="number" formControlName="cd" [readonly]="!isEditing">
+                      <mat-label>Certificate Deposit (%)</mat-label>
+                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="cd" [readonly]="!isEditing" placeholder="0.0">
                       <mat-icon matSuffix>savings</mat-icon>
+                      <mat-hint>CD interest rate</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Loan (%)</mat-label>
-                      <input matInput type="number" formControlName="loan" [readonly]="!isEditing">
+                      <mat-label>Regular Loan (%)</mat-label>
+                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="loan" [readonly]="!isEditing" placeholder="0.0">
                       <mat-icon matSuffix>money</mat-icon>
+                      <mat-hint>Standard loan rate</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
                       <mat-label>Emergency Loan (%)</mat-label>
-                      <input matInput type="number" formControlName="emergencyLoan" [readonly]="!isEditing">
+                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="emergencyLoan" [readonly]="!isEditing" placeholder="0.0">
                       <mat-icon matSuffix>emergency</mat-icon>
+                      <mat-hint>Emergency loan rate</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>LAS (%)</mat-label>
-                      <input matInput type="number" formControlName="las" [readonly]="!isEditing">
+                      <mat-label>LAS Rate (%)</mat-label>
+                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="las" [readonly]="!isEditing" placeholder="0.0">
                       <mat-icon matSuffix>assessment</mat-icon>
+                      <mat-hint>Loan against shares</mat-hint>
                     </mat-form-field>
                   </div>
                 </div>
               </mat-tab>
 
               <!-- Limits Tab -->
-              <mat-tab label="Limits">
-                <div class="py-6 space-y-4">
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <mat-tab label="Financial Limits">
+                <div class="form-section-content">
+                  <div class="mb-6">
+                    <h4 class="text-section-header text-gray-700 dark:text-gray-300 mb-4">Configure Financial Limits</h4>
+                    <p class="text-body-sm text-gray-500 mb-6">Set maximum limits for different financial transactions</p>
+                  </div>
+                  <div class="form-grid form-grid-3">
                     <mat-form-field appearance="outline">
-                      <mat-label>Share Limit</mat-label>
-                      <input matInput type="number" formControlName="shareLimit" [readonly]="!isEditing">
+                      <mat-label>Share Limit (₹)</mat-label>
+                      <input matInput type="number" min="0" formControlName="shareLimit" [readonly]="!isEditing" placeholder="0">
                       <mat-icon matSuffix>share</mat-icon>
+                      <mat-hint>Maximum share amount</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Loan Limit</mat-label>
-                      <input matInput type="number" formControlName="loanLimit" [readonly]="!isEditing">
+                      <mat-label>Loan Limit (₹)</mat-label>
+                      <input matInput type="number" min="0" formControlName="loanLimit" [readonly]="!isEditing" placeholder="0">
                       <mat-icon matSuffix>account_balance_wallet</mat-icon>
+                      <mat-hint>Maximum loan amount</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Emergency Loan Limit</mat-label>
-                      <input matInput type="number" formControlName="emergencyLoanLimit" [readonly]="!isEditing">
+                      <mat-label>Emergency Loan Limit (₹)</mat-label>
+                      <input matInput type="number" min="0" formControlName="emergencyLoanLimit" [readonly]="!isEditing" placeholder="0">
                       <mat-icon matSuffix>emergency</mat-icon>
+                      <mat-hint>Maximum emergency loan</mat-hint>
                     </mat-form-field>
                   </div>
                 </div>
               </mat-tab>
 
               <!-- Charges Tab -->
-              <mat-tab label="Charges">
-                <div class="py-6 space-y-4">
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <mat-tab label="Charges & Fees">
+                <div class="form-section-content">
+                  <div class="mb-6">
+                    <h4 class="text-section-header text-gray-700 dark:text-gray-300 mb-4">Configure Charges & Fees</h4>
+                    <p class="text-body-sm text-gray-500 mb-6">Set various charges and bonus amounts for society operations</p>
+                  </div>
+                  <div class="form-grid form-grid-2">
                     <mat-form-field appearance="outline">
-                      <mat-label>Ch Bounce Charge</mat-label>
-                      <input matInput type="number" formControlName="chBounceCharge" [readonly]="!isEditing">
+                      <mat-label>Cheque Bounce Charge (₹)</mat-label>
+                      <input matInput type="number" min="0" formControlName="chBounceCharge" [readonly]="!isEditing" placeholder="0">
                       <mat-icon matSuffix>money_off</mat-icon>
+                      <mat-hint>Charge for bounced cheques</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Cheque Return Charge</mat-label>
+                      <mat-label>Cheque Return Charge Type</mat-label>
                       <mat-select formControlName="chequeReturnCharge" [disabled]="!isEditing">
+                        <mat-option value="">Select charge type</mat-option>
                         <mat-option value="fixed">Fixed Amount</mat-option>
-                        <mat-option value="percentage">Percentage</mat-option>
+                        <mat-option value="percentage">Percentage Based</mat-option>
                       </mat-select>
+                      <mat-icon matSuffix>receipt</mat-icon>
+                      <mat-hint>How cheque return charges are calculated</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Cash</mat-label>
-                      <input matInput type="number" formControlName="cash" [readonly]="!isEditing">
+                      <mat-label>Cash Handling Charge (₹)</mat-label>
+                      <input matInput type="number" min="0" formControlName="cash" [readonly]="!isEditing" placeholder="0">
                       <mat-icon matSuffix>payments</mat-icon>
+                      <mat-hint>Charge for cash transactions</mat-hint>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
-                      <mat-label>Bonus</mat-label>
-                      <input matInput type="number" formControlName="bonus" [readonly]="!isEditing">
+                      <mat-label>Annual Bonus (₹)</mat-label>
+                      <input matInput type="number" min="0" formControlName="bonus" [readonly]="!isEditing" placeholder="0">
                       <mat-icon matSuffix>card_giftcard</mat-icon>
+                      <mat-hint>Annual bonus amount for members</mat-hint>
                     </mat-form-field>
                   </div>
                 </div>

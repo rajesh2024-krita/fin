@@ -1,16 +1,12 @@
 
-/* All styles are now handled by Tailwind utility classes in the template */
-:host {
-  display: block;
+.app-container {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
-/* Custom utility classes for specific Material components */
-.toolbar-spacer {
-  flex: 1 1 auto;
-}
-
-/* Smooth transitions for theme switching */
-* {
-  transition-property: background-color, border-color, color;
-  transition-duration: 200ms;
+/* Ensure consistent theming */
+.app-container {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
 }
