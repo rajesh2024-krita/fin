@@ -1,453 +1,334 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-
-interface DepositReceipt {
-  id: number;
-  receiptNo: string;
-  memberNo: string;
-  memberName: string;
-  depositDate: Date;
-  depositScheme: string;
-  amount: number;
-  interestRate: number;
-  maturityDate: Date;
-  maturityAmount: number;
-  status: string;
-  nominee: string;
-}
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-deposit-receipt',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
-    MatTableModule,
-    MatIconModule,
     MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatSnackBarModule
+    MatButtonModule,
+    MatIconModule
   ],
   template: `
-    <div class="page-container">
-      <h1>Deposit Receipt Management</h1>
-      
-      <!-- Deposit Receipt Form -->
-      <mat-card class="form-card">
-        <mat-card-header>
-          <mat-card-title>{{editingReceipt ? 'Edit Deposit Receipt' : 'New Deposit Receipt'}}</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="receiptForm" (ngSubmit)="saveReceipt()">
-            <div class="form-grid">
-              <mat-form-field>
-                <mat-label>Receipt No</mat-label>
-                <input matInput formControlName="receiptNo" readonly>
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Member No</mat-label>
-                <mat-select formControlName="memberNo" (selectionChange)="onMemberSelect($event.value)">
-                  <mat-option *ngFor="let member of members" [value]="member.memberNo">
-                    {{member.memberNo}} - {{member.name}}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Member Name</mat-label>
-                <input matInput formControlName="memberName" readonly>
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Deposit Date</mat-label>
-                <input matInput [matDatepicker]="dpicker" formControlName="depositDate">
-                <mat-datepicker-toggle matSuffix [for]="dpicker"></mat-datepicker-toggle>
-                <mat-datepicker #dpicker></mat-datepicker>
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Deposit Scheme</mat-label>
-                <mat-select formControlName="depositScheme" (selectionChange)="onSchemeSelect($event.value)">
-                  <mat-option value="Fixed Deposit - 1 Year">Fixed Deposit - 1 Year (8.5%)</mat-option>
-                  <mat-option value="Fixed Deposit - 2 Years">Fixed Deposit - 2 Years (9%)</mat-option>
-                  <mat-option value="Fixed Deposit - 3 Years">Fixed Deposit - 3 Years (9.5%)</mat-option>
-                  <mat-option value="Recurring Deposit - 1 Year">Recurring Deposit - 1 Year (8%)</mat-option>
-                  <mat-option value="Recurring Deposit - 2 Years">Recurring Deposit - 2 Years (8.5%)</mat-option>
-                </mat-select>
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Deposit Amount</mat-label>
-                <input matInput type="number" formControlName="amount" (blur)="calculateMaturity()" min="1000">
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Interest Rate (%)</mat-label>
-                <input matInput type="number" formControlName="interestRate" readonly>
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Maturity Date</mat-label>
-                <input matInput [matDatepicker]="mpicker" formControlName="maturityDate" readonly>
-                <mat-datepicker-toggle matSuffix [for]="mpicker"></mat-datepicker-toggle>
-                <mat-datepicker #mpicker></mat-datepicker>
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Maturity Amount</mat-label>
-                <input matInput type="number" formControlName="maturityAmount" readonly>
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Nominee</mat-label>
-                <input matInput formControlName="nominee" required>
-              </mat-form-field>
-              
-              <mat-form-field>
-                <mat-label>Status</mat-label>
-                <mat-select formControlName="status">
-                  <mat-option value="Active">Active</mat-option>
-                  <mat-option value="Matured">Matured</mat-option>
-                  <mat-option value="Closed">Closed</mat-option>
-                </mat-select>
-              </mat-form-field>
+    <div class="page-container p-6 space-y-6">
+      <!-- Header -->
+      <div class="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-600 text-white shadow-xl">
+        <div class="absolute inset-0 bg-black/10"></div>
+        <div class="relative z-10">
+          <div class="flex items-center space-x-4">
+            <div class="p-3 bg-white/20 rounded-full backdrop-blur-sm">
+              <mat-icon class="text-2xl">receipt</mat-icon>
             </div>
-            
+            <div>
+              <h1 class="text-2xl font-bold">Deposit Receipt</h1>
+              <p class="text-cyan-100 text-sm">Create new deposit receipt transaction</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Member Information Section -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="flex items-center">
+            <mat-icon class="mr-2">person</mat-icon>
+            Member Information
+          </div>
+        </div>
+        <div class="form-section-content">
+          <form [formGroup]="depositForm">
+            <div class="form-field-group two-column">
+              <div class="form-field-container">
+                <label class="form-label required">Member ID</label>
+                <mat-form-field appearance="outline">
+                  <input matInput formControlName="memberId" placeholder="Enter member ID">
+                </mat-form-field>
+                <div class="form-error" *ngIf="depositForm.get('memberId')?.errors?.['required'] && depositForm.get('memberId')?.touched">
+                  Member ID is required
+                </div>
+              </div>
+
+              <div class="form-field-container">
+                <label class="form-label">Member Name</label>
+                <mat-form-field appearance="outline">
+                  <input matInput formControlName="memberName" readonly>
+                </mat-form-field>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Deposit Details Section -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="flex items-center">
+            <mat-icon class="mr-2">account_balance_wallet</mat-icon>
+            Deposit Details
+          </div>
+        </div>
+        <div class="form-section-content">
+          <form [formGroup]="depositForm" (ngSubmit)="onSubmit()">
+            <div class="form-field-group two-column">
+              <div class="form-field-container">
+                <label class="form-label required">Deposit Type</label>
+                <mat-form-field appearance="outline">
+                  <mat-select formControlName="depositType">
+                    <mat-option value="fixed">Fixed Deposit</mat-option>
+                    <mat-option value="recurring">Recurring Deposit</mat-option>
+                    <mat-option value="savings">Savings Account</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div class="form-error" *ngIf="depositForm.get('depositType')?.errors?.['required'] && depositForm.get('depositType')?.touched">
+                  Deposit type is required
+                </div>
+              </div>
+
+              <div class="form-field-container">
+                <label class="form-label required">Amount (₹)</label>
+                <mat-form-field appearance="outline">
+                  <input matInput type="number" formControlName="amount" (blur)="calculateMaturity()" min="1000" placeholder="0.00">
+                </mat-form-field>
+                <div class="form-error" *ngIf="depositForm.get('amount')?.errors?.['required'] && depositForm.get('amount')?.touched">
+                  Amount is required
+                </div>
+                <div class="form-error" *ngIf="depositForm.get('amount')?.errors?.['min'] && depositForm.get('amount')?.touched">
+                  Minimum amount is ₹1,000
+                </div>
+              </div>
+            </div>
+
+            <div class="form-field-group three-column">
+              <div class="form-field-container">
+                <label class="form-label">Interest Rate (%)</label>
+                <mat-form-field appearance="outline">
+                  <input matInput type="number" formControlName="interestRate" readonly>
+                </mat-form-field>
+              </div>
+
+              <div class="form-field-container">
+                <label class="form-label">Maturity Date</label>
+                <mat-form-field appearance="outline">
+                  <input matInput [matDatepicker]="mpicker" formControlName="maturityDate" readonly>
+                  <mat-datepicker-toggle matIconSuffix [for]="mpicker"></mat-datepicker-toggle>
+                  <mat-datepicker #mpicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <div class="form-field-container">
+                <label class="form-label">Maturity Amount (₹)</label>
+                <mat-form-field appearance="outline">
+                  <input matInput type="number" formControlName="maturityAmount" readonly>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="form-field-group two-column">
+              <div class="form-field-container">
+                <label class="form-label required">Nominee</label>
+                <mat-form-field appearance="outline">
+                  <input matInput formControlName="nominee" placeholder="Enter nominee name">
+                </mat-form-field>
+                <div class="form-error" *ngIf="depositForm.get('nominee')?.errors?.['required'] && depositForm.get('nominee')?.touched">
+                  Nominee is required
+                </div>
+              </div>
+
+              <div class="form-field-container">
+                <label class="form-label required">Status</label>
+                <mat-form-field appearance="outline">
+                  <mat-select formControlName="status">
+                    <mat-option value="Active">Active</mat-option>
+                    <mat-option value="Matured">Matured</mat-option>
+                    <mat-option value="Closed">Closed</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div class="form-error" *ngIf="depositForm.get('status')?.errors?.['required'] && depositForm.get('status')?.touched">
+                  Status is required
+                </div>
+              </div>
+            </div>
+
+            <div class="form-field-group">
+              <div class="form-field-container">
+                <label class="form-label">Remarks</label>
+                <mat-form-field appearance="outline">
+                  <textarea matInput formControlName="remarks" rows="3" placeholder="Enter any additional remarks"></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+
             <div class="form-actions">
-              <button mat-raised-button color="primary" type="submit" [disabled]="!receiptForm.valid">
-                {{editingReceipt ? 'Update Receipt' : 'Create Receipt'}}
+              <button mat-button type="button" (click)="resetForm()">
+                <mat-icon class="mr-1">clear</mat-icon>
+                Clear
               </button>
-              <button mat-button type="button" (click)="resetForm()" *ngIf="editingReceipt">
-                Cancel
-              </button>
-              <button mat-raised-button color="accent" type="button" (click)="printReceipt()" *ngIf="editingReceipt">
+              <button mat-button type="button">
+                <mat-icon class="mr-1">print</mat-icon>
                 Print Receipt
+              </button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="depositForm.invalid">
+                <mat-icon class="mr-1">save</mat-icon>
+                Save Receipt
               </button>
             </div>
           </form>
-        </mat-card-content>
-      </mat-card>
-      
-      <!-- Deposit Receipts List -->
-      <mat-card class="table-card">
-        <mat-card-header>
-          <mat-card-title>Deposit Receipts</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="table-controls">
-            <mat-form-field>
-              <mat-label>Search Receipts</mat-label>
-              <input matInput (keyup)="applyFilter($event)" placeholder="Search by receipt no, member no, or name">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-          </div>
-          
-          <div class="table-container">
-            <table mat-table [dataSource]="filteredReceipts" class="receipts-table">
-              <ng-container matColumnDef="receiptNo">
-                <th mat-header-cell *matHeaderCellDef>Receipt No</th>
-                <td mat-cell *matCellDef="let receipt">{{receipt.receiptNo}}</td>
-              </ng-container>
-              
-              <ng-container matColumnDef="memberDetails">
-                <th mat-header-cell *matHeaderCellDef>Member</th>
-                <td mat-cell *matCellDef="let receipt">
-                  {{receipt.memberNo}} - {{receipt.memberName}}
-                </td>
-              </ng-container>
-              
-              <ng-container matColumnDef="scheme">
-                <th mat-header-cell *matHeaderCellDef>Scheme</th>
-                <td mat-cell *matCellDef="let receipt">{{receipt.depositScheme}}</td>
-              </ng-container>
-              
-              <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef>Amount</th>
-                <td mat-cell *matCellDef="let receipt">₹{{receipt.amount | number}}</td>
-              </ng-container>
-              
-              <ng-container matColumnDef="maturityDate">
-                <th mat-header-cell *matHeaderCellDef>Maturity Date</th>
-                <td mat-cell *matCellDef="let receipt">{{receipt.maturityDate | date}}</td>
-              </ng-container>
-              
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let receipt">
-                  <span class="status-badge" [class]="'status-' + receipt.status.toLowerCase()">
-                    {{receipt.status}}
-                  </span>
-                </td>
-              </ng-container>
-              
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let receipt">
-                  <button mat-icon-button (click)="editReceipt(receipt)" color="primary">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="printReceipt(receipt)" color="accent">
-                    <mat-icon>print</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="deleteReceipt(receipt.id)" color="warn">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
-              
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-          </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
     .page-container {
-      max-width: 1400px;
+      max-width: 1000px;
       margin: 0 auto;
-      padding: 20px;
+      animation: fadeIn 0.6s ease-out;
     }
-    
-    .form-card, .table-card {
-      margin-bottom: 20px;
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
     }
-    
+
+    .form-section {
+      @apply bg-white p-6 rounded-lg shadow-md border border-gray-200;
+    }
+
+    .form-section-header {
+      @apply text-lg font-semibold mb-4 pb-2 border-b border-gray-300 flex items-center text-gray-700;
+    }
+
+    .form-section-content {
+      @apply space-y-6;
+    }
+
+    .form-field-group {
+      @apply grid gap-6;
+    }
+
+    .form-field-group.two-column {
+      @apply grid-cols-1 md:grid-cols-2;
+    }
+
+    .form-field-group.three-column {
+      @apply grid-cols-1 md:grid-cols-3;
+    }
+
+    .form-field-container {
+      @apply flex flex-col;
+    }
+
+    .form-label {
+      @apply block text-sm font-medium text-gray-700 mb-1;
+    }
+
+    .form-label.required::after {
+      content: ' *';
+      color: red;
+    }
+
+    mat-form-field {
+      @apply w-full;
+    }
+
+    .form-error {
+      @apply text-red-500 text-xs mt-1;
+    }
+
     .form-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-    
-    .table-controls {
-      margin-bottom: 20px;
-    }
-    
-    .table-container {
-      overflow-x: auto;
-    }
-    
-    .receipts-table {
-      width: 100%;
-    }
-    
-    .status-badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    
-    .status-active {
-      background-color: #4caf50;
-      color: white;
-    }
-    
-    .status-matured {
-      background-color: #ff9800;
-      color: white;
-    }
-    
-    .status-closed {
-      background-color: #f44336;
-      color: white;
+      @apply flex justify-end space-x-4 pt-6 border-t border-gray-200;
     }
   `]
 })
 export class DepositReceiptComponent implements OnInit {
-  receiptForm: FormGroup;
-  receipts: DepositReceipt[] = [];
-  filteredReceipts: DepositReceipt[] = [];
-  displayedColumns = ['receiptNo', 'memberDetails', 'scheme', 'amount', 'maturityDate', 'status', 'actions'];
-  editingReceipt: DepositReceipt | null = null;
-  nextReceiptNo = 1001;
-  
-  members = [
-    { memberNo: 'MEM1001', name: 'John Doe' },
-    { memberNo: 'MEM1002', name: 'Jane Smith' },
-    { memberNo: 'MEM1003', name: 'Bob Johnson' }
-  ];
+  depositForm!: FormGroup;
 
-  schemes = {
-    'Fixed Deposit - 1 Year': { rate: 8.5, tenure: 1 },
-    'Fixed Deposit - 2 Years': { rate: 9.0, tenure: 2 },
-    'Fixed Deposit - 3 Years': { rate: 9.5, tenure: 3 },
-    'Recurring Deposit - 1 Year': { rate: 8.0, tenure: 1 },
-    'Recurring Deposit - 2 Years': { rate: 8.5, tenure: 2 }
-  };
-
-  constructor(
-    private fb: FormBuilder,
-    private snackBar: MatSnackBar
-  ) {
-    this.receiptForm = this.createForm();
-  }
+  constructor(private fb: FormBuilder) {}
 
   ngOnInit() {
-    this.loadSampleData();
-    this.generateReceiptNo();
+    this.initializeForm();
   }
 
-  createForm(): FormGroup {
-    return this.fb.group({
-      receiptNo: [''],
-      memberNo: ['', Validators.required],
+  initializeForm() {
+    this.depositForm = this.fb.group({
+      memberId: ['', Validators.required],
       memberName: [''],
-      depositDate: [new Date(), Validators.required],
-      depositScheme: ['', Validators.required],
+      depositType: ['', Validators.required],
       amount: ['', [Validators.required, Validators.min(1000)]],
-      interestRate: [''],
-      maturityDate: [''],
-      maturityAmount: [''],
+      interestRate: [{ value: '', disabled: true }],
+      maturityDate: [{ value: '', disabled: true }],
+      maturityAmount: [{ value: '', disabled: true }],
       nominee: ['', Validators.required],
-      status: ['Active', Validators.required]
+      status: ['Active', Validators.required],
+      remarks: ['']
     });
-  }
-
-  generateReceiptNo() {
-    this.receiptForm.patchValue({
-      receiptNo: `DR${this.nextReceiptNo.toString().padStart(4, '0')}`
-    });
-  }
-
-  onMemberSelect(memberNo: string) {
-    const member = this.members.find(m => m.memberNo === memberNo);
-    if (member) {
-      this.receiptForm.patchValue({ memberName: member.name });
-    }
-  }
-
-  onSchemeSelect(scheme: string) {
-    const schemeDetails = this.schemes[scheme as keyof typeof this.schemes];
-    if (schemeDetails) {
-      this.receiptForm.patchValue({ interestRate: schemeDetails.rate });
-      this.calculateMaturity();
-    }
   }
 
   calculateMaturity() {
-    const amount = this.receiptForm.get('amount')?.value;
-    const depositDate = this.receiptForm.get('depositDate')?.value;
-    const scheme = this.receiptForm.get('depositScheme')?.value;
-    
-    if (amount && depositDate && scheme) {
-      const schemeDetails = this.schemes[scheme as keyof typeof this.schemes];
-      const maturityDate = new Date(depositDate);
-      maturityDate.setFullYear(maturityDate.getFullYear() + schemeDetails.tenure);
-      
-      const maturityAmount = amount * Math.pow(1 + (schemeDetails.rate / 100), schemeDetails.tenure);
-      
-      this.receiptForm.patchValue({
+    const amount = this.depositForm.get('amount')?.value;
+    const depositType = this.depositForm.get('depositType')?.value;
+
+    if (amount && depositType) {
+      // Mock calculation - in real app, this would call a service
+      let interestRate = 7.5;
+      let maturityMonths = 12;
+
+      switch (depositType) {
+        case 'fixed':
+          interestRate = 8.5;
+          maturityMonths = 24;
+          break;
+        case 'recurring':
+          interestRate = 7.0;
+          maturityMonths = 12;
+          break;
+        case 'savings':
+          interestRate = 4.0;
+          maturityMonths = 0;
+          break;
+      }
+
+      const maturityAmount = amount * (1 + (interestRate / 100) * (maturityMonths / 12));
+      const maturityDate = new Date();
+      maturityDate.setMonth(maturityDate.getMonth() + maturityMonths);
+
+      this.depositForm.patchValue({
+        interestRate: interestRate,
         maturityDate: maturityDate,
         maturityAmount: Math.round(maturityAmount)
       });
     }
   }
 
-  loadSampleData() {
-    this.receipts = [
-      {
-        id: 1,
-        receiptNo: 'DR1001',
-        memberNo: 'MEM1001',
-        memberName: 'John Doe',
-        depositDate: new Date('2024-01-15'),
-        depositScheme: 'Fixed Deposit - 2 Years',
-        amount: 50000,
-        interestRate: 9.0,
-        maturityDate: new Date('2026-01-15'),
-        maturityAmount: 59405,
-        status: 'Active',
-        nominee: 'Jane Doe'
-      }
-    ];
-    this.filteredReceipts = [...this.receipts];
-    this.nextReceiptNo = Math.max(...this.receipts.map(r => parseInt(r.receiptNo.slice(2))), 1000) + 1;
-  }
-
-  saveReceipt() {
-    if (this.receiptForm.valid) {
-      const formValue = this.receiptForm.value;
-      
-      if (this.editingReceipt) {
-        const index = this.receipts.findIndex(r => r.id === this.editingReceipt!.id);
-        this.receipts[index] = { ...this.editingReceipt, ...formValue };
-        this.snackBar.open('Receipt updated successfully', 'Close', { duration: 3000 });
-      } else {
-        const newReceipt: DepositReceipt = {
-          id: Date.now(),
-          ...formValue
-        };
-        this.receipts.push(newReceipt);
-        this.nextReceiptNo++;
-        this.snackBar.open('Receipt created successfully', 'Close', { duration: 3000 });
-      }
-      
-      this.filteredReceipts = [...this.receipts];
-      this.resetForm();
+  onSubmit() {
+    if (this.depositForm.valid) {
+      console.log('Deposit receipt created:', this.depositForm.value);
+      // Here you would typically call a service to save the data
     }
-  }
-
-  editReceipt(receipt: DepositReceipt) {
-    this.editingReceipt = receipt;
-    this.receiptForm.patchValue(receipt);
-  }
-
-  deleteReceipt(id: number) {
-    if (confirm('Are you sure you want to delete this receipt?')) {
-      this.receipts = this.receipts.filter(r => r.id !== id);
-      this.filteredReceipts = [...this.receipts];
-      this.snackBar.open('Receipt deleted successfully', 'Close', { duration: 3000 });
-    }
-  }
-
-  printReceipt(receipt?: DepositReceipt) {
-    this.snackBar.open('Print functionality will be implemented', 'Close', { duration: 2000 });
   }
 
   resetForm() {
-    this.editingReceipt = null;
-    this.receiptForm.reset();
-    this.receiptForm.patchValue({
-      depositDate: new Date(),
-      status: 'Active'
-    });
-    this.generateReceiptNo();
-  }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value.toLowerCase();
-    this.filteredReceipts = this.receipts.filter(receipt =>
-      receipt.receiptNo.toLowerCase().includes(filterValue) ||
-      receipt.memberNo.toLowerCase().includes(filterValue) ||
-      receipt.memberName.toLowerCase().includes(filterValue)
-    );
+    this.depositForm.reset();
+    this.depositForm.patchValue({ status: 'Active' });
   }
 }

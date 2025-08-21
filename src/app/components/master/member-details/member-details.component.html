@@ -1,99 +1,100 @@
 
-<div class="member-details-container p-6 space-y-8 page-content">
+<div class="member-details-container p-6 space-y-6">
   <!-- Enhanced Header -->
-  <div class="relative overflow-hidden rounded-3xl p-8 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white shadow-2xl">
+  <div class="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white shadow-xl">
     <div class="absolute inset-0 bg-black/10"></div>
     <div class="relative z-10">
       <div class="flex items-center justify-between">
-        <div class="space-y-2">
-          <div class="flex items-center space-x-4">
-            <div class="p-4 bg-white/20 rounded-full backdrop-blur-sm animate-float">
-              <mat-icon class="text-4xl">people</mat-icon>
-            </div>
-            <div>
-              <h1 class="text-4xl font-bold">Member Management</h1>
-              <p class="text-xl text-indigo-100">Manage member information and accounts</p>
-            </div>
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-white/20 rounded-full backdrop-blur-sm">
+            <mat-icon class="text-2xl">people</mat-icon>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold">Member Management</h1>
+            <p class="text-indigo-100 text-sm">Manage member information and accounts</p>
           </div>
         </div>
         <button mat-raised-button 
-                class="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-all duration-300 transform hover:scale-105 px-6 py-3 rounded-xl font-semibold">
-          <mat-icon class="mr-2">add</mat-icon>
-          Add New Member
+                class="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-all duration-300 px-4 py-2 rounded-lg font-medium">
+          <mat-icon class="mr-2 text-lg">add</mat-icon>
+          Add Member
         </button>
       </div>
     </div>
-    
-    <!-- Decorative Elements -->
-    <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-xl"></div>
-    <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-400/20 rounded-full blur-xl"></div>
   </div>
 
-  <!-- Enhanced Filters Card -->
-  <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
-    <div class="flex items-center mb-6">
-      <div class="p-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-600 mr-4">
-        <mat-icon class="text-white text-2xl">filter_list</mat-icon>
+  <!-- Search & Filter Section -->
+  <div class="form-section">
+    <div class="form-section-header">
+      <div class="flex items-center">
+        <mat-icon class="mr-2">filter_list</mat-icon>
+        Search & Filter Members
       </div>
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Search & Filter</h2>
     </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Search Members</mat-label>
-        <input matInput placeholder="Enter member name or ID" class="rounded-xl">
-        <mat-icon matPrefix>search</mat-icon>
-      </mat-form-field>
+    <div class="form-section-content">
+      <div class="form-field-group three-column">
+        <div class="form-field-container">
+          <label class="form-label">Search Members</label>
+          <mat-form-field appearance="outline">
+            <input matInput placeholder="Enter member name or ID">
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+        </div>
+        
+        <div class="form-field-container">
+          <label class="form-label">Status</label>
+          <mat-form-field appearance="outline">
+            <mat-select>
+              <mat-option value="all">All Status</mat-option>
+              <mat-option value="active">Active</mat-option>
+              <mat-option value="inactive">Inactive</mat-option>
+              <mat-option value="pending">Pending</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <div class="form-field-container">
+          <label class="form-label">Member Type</label>
+          <mat-form-field appearance="outline">
+            <mat-select>
+              <mat-option value="all">All Types</mat-option>
+              <mat-option value="regular">Regular</mat-option>
+              <mat-option value="premium">Premium</mat-option>
+              <mat-option value="corporate">Corporate</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
       
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Status</mat-label>
-        <mat-select class="rounded-xl">
-          <mat-option value="all">All Status</mat-option>
-          <mat-option value="active">Active</mat-option>
-          <mat-option value="inactive">Inactive</mat-option>
-          <mat-option value="pending">Pending</mat-option>
-        </mat-select>
-      </mat-form-field>
-      
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Member Type</mat-label>
-        <mat-select class="rounded-xl">
-          <mat-option value="all">All Types</mat-option>
-          <mat-option value="regular">Regular</mat-option>
-          <mat-option value="premium">Premium</mat-option>
-          <mat-option value="corporate">Corporate</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-    
-    <div class="flex justify-end space-x-3 mt-6">
-      <button mat-button class="text-gray-600 hover:text-gray-800 transition-colors px-6 py-2 rounded-xl">
-        Clear Filters
-      </button>
-      <button mat-raised-button 
-              class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 px-8 py-2 rounded-xl font-semibold shadow-lg">
-        <mat-icon class="mr-2">search</mat-icon>
-        Search
-      </button>
+      <div class="form-actions">
+        <button mat-button class="text-gray-600 hover:text-gray-800 transition-colors">
+          Clear Filters
+        </button>
+        <button mat-raised-button 
+                class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-300">
+          <mat-icon class="mr-1">search</mat-icon>
+          Search
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Enhanced Members Table -->
-  <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+  <!-- Members Table -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
     <!-- Table Header -->
-    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6">
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-4">
       <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <mat-icon class="text-white text-3xl">table_chart</mat-icon>
-          <h3 class="text-2xl font-bold text-white">Member Directory</h3>
+        <div class="flex items-center space-x-3">
+          <mat-icon class="text-white text-xl">table_chart</mat-icon>
+          <h3 class="text-lg font-semibold text-white">Member Directory</h3>
         </div>
-        <div class="flex space-x-3">
-          <button mat-button class="text-white hover:bg-white/20 transition-all duration-300 px-4 py-2 rounded-xl">
-            <mat-icon class="mr-2">download</mat-icon>
+        <div class="flex space-x-2">
+          <button mat-button class="text-white hover:bg-white/20 transition-all duration-300 text-sm">
+            <mat-icon class="mr-1">download</mat-icon>
             Export
           </button>
-          <button mat-button class="text-white hover:bg-white/20 transition-all duration-300 px-4 py-2 rounded-xl">
-            <mat-icon class="mr-2">print</mat-icon>
+          <button mat-button class="text-white hover:bg-white/20 transition-all duration-300 text-sm">
+            <mat-icon class="mr-1">print</mat-icon>
             Print
           </button>
         </div>
@@ -105,12 +106,12 @@
       <table mat-table class="w-full">
         <!-- Member ID Column -->
         <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-4 px-6 text-left">
+          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 px-4 text-left text-sm">
             Member ID
           </th>
-          <td mat-cell *matCellDef="let member" class="py-4 px-6 font-medium text-gray-800 dark:text-white">
+          <td mat-cell *matCellDef="let member" class="py-3 px-4 font-medium text-gray-800 dark:text-white text-sm">
             <div class="flex items-center space-x-2">
-              <div class="w-2 h-2 bg-gradient-to-r from-green-400 to-green-600 rounded-full"></div>
+              <div class="w-1.5 h-1.5 bg-gradient-to-r from-green-400 to-green-600 rounded-full"></div>
               <span>{{member.id}}</span>
             </div>
           </td>
@@ -118,17 +119,17 @@
 
         <!-- Name Column -->
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-4 px-6 text-left">
+          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold py-3 px-4 text-left text-sm">
             Full Name
           </th>
-          <td mat-cell *matCellDef="let member" class="py-4 px-6">
+          <td mat-cell *matCellDef="let member" class="py-3 px-4">
             <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs">
                 {{member.name.charAt(0)}}
               </div>
               <div>
-                <div class="font-semibold text-gray-800 dark:text-white">{{member.name}}</div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">{{member.email}}</div>
+                <div class="font-medium text-gray-800 dark:text-white text-sm">{{member.name}}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">{{member.email}}</div>
               </div>
             </div>
           </td>
@@ -136,12 +137,12 @@
 
         <!-- Phone Column -->
         <ng-container matColumnDef="phone">
-          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-6 text-left">
+          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-4 text-left text-sm">
             Phone Number
           </th>
-          <td mat-cell *matCellDef="let member" class="py-4 px-6 text-gray-800 dark:text-white">
+          <td mat-cell *matCellDef="let member" class="py-3 px-4 text-gray-800 dark:text-white text-sm">
             <div class="flex items-center space-x-2">
-              <mat-icon class="text-green-500">phone</mat-icon>
+              <mat-icon class="text-green-500 text-lg">phone</mat-icon>
               <span>{{member.phone}}</span>
             </div>
           </td>
@@ -149,22 +150,22 @@
 
         <!-- Join Date Column -->
         <ng-container matColumnDef="joinDate">
-          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-4 px-6 text-left">
+          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold py-3 px-4 text-left text-sm">
             Join Date
           </th>
-          <td mat-cell *matCellDef="let member" class="py-4 px-6 text-gray-800 dark:text-white">
+          <td mat-cell *matCellDef="let member" class="py-3 px-4 text-gray-800 dark:text-white text-sm">
             {{member.joinDate | date:'mediumDate'}}
           </td>
         </ng-container>
 
         <!-- Status Column -->
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-bold py-4 px-6 text-left">
+          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold py-3 px-4 text-left text-sm">
             Status
           </th>
-          <td mat-cell *matCellDef="let member" class="py-4 px-6">
-            <mat-chip class="status-chip" [class]="getStatusClass(member.status)">
-              <mat-icon class="mr-1">{{getStatusIcon(member.status)}}</mat-icon>
+          <td mat-cell *matCellDef="let member" class="py-3 px-4">
+            <mat-chip class="status-chip text-xs" [class]="getStatusClass(member.status)">
+              <mat-icon class="mr-1 text-sm">{{getStatusIcon(member.status)}}</mat-icon>
               {{member.status}}
             </mat-chip>
           </td>
@@ -172,25 +173,25 @@
 
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold py-4 px-6 text-center">
+          <th mat-header-cell *matHeaderCellDef class="bg-gradient-to-r from-violet-500 to-purple-600 text-white font-semibold py-3 px-4 text-center text-sm">
             Actions
           </th>
-          <td mat-cell *matCellDef="let member" class="py-4 px-6">
+          <td mat-cell *matCellDef="let member" class="py-3 px-4">
             <div class="flex space-x-2 justify-center">
               <button mat-mini-fab 
-                      class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-110"
+                      class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 !w-8 !h-8"
                       matTooltip="View Details">
-                <mat-icon>visibility</mat-icon>
+                <mat-icon class="text-sm">visibility</mat-icon>
               </button>
               <button mat-mini-fab 
-                      class="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-110"
+                      class="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 !w-8 !h-8"
                       matTooltip="Edit Member">
-                <mat-icon>edit</mat-icon>
+                <mat-icon class="text-sm">edit</mat-icon>
               </button>
               <button mat-mini-fab 
-                      class="bg-gradient-to-r from-red-500 to-pink-600 text-white hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-110"
+                      class="bg-gradient-to-r from-red-500 to-pink-600 text-white hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 !w-8 !h-8"
                       matTooltip="Delete Member">
-                <mat-icon>delete</mat-icon>
+                <mat-icon class="text-sm">delete</mat-icon>
               </button>
             </div>
           </td>
@@ -198,14 +199,14 @@
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
-            class="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 dark:hover:from-indigo-900/20 dark:hover:to-purple-900/20 transition-all duration-300 cursor-pointer border-b border-gray-200/30 dark:border-gray-700/30"></tr>
+            class="hover:bg-gradient-to-r hover:from-indigo-50/30 hover:to-purple-50/30 dark:hover:from-indigo-900/10 dark:hover:to-purple-900/10 transition-all duration-200 cursor-pointer border-b border-gray-200/30 dark:border-gray-700/30"></tr>
       </table>
     </div>
 
-    <!-- Enhanced Pagination -->
-    <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 p-6 border-t border-gray-200/50 dark:border-gray-700/50">
+    <!-- Pagination -->
+    <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 p-4 border-t border-gray-200/50 dark:border-gray-700/50">
       <div class="flex items-center justify-between">
-        <div class="text-sm text-gray-600 dark:text-gray-400">
+        <div class="text-xs text-gray-600 dark:text-gray-400">
           Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">97</span> results
         </div>
         <mat-paginator [length]="100" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" 
