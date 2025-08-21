@@ -37,29 +37,23 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
   template: `
     <div class="dashboard-container p-6 space-y-8" [@fadeInStagger]>
       <!-- Welcome Header -->
-      <div class="relative overflow-hidden rounded-3xl p-8 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white shadow-2xl">
-        <div class="absolute inset-0 bg-black/10"></div>
+      <div class="relative overflow-hidden rounded-xl p-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+        <div class="absolute inset-0 bg-black/5"></div>
         <div class="relative z-10">
           <div class="flex items-center justify-between">
-            <div class="space-y-2">
-              <h1 class="text-4xl font-bold animate-fade-in">Welcome to FMS Dashboard</h1>
-              <p class="text-xl text-indigo-100">Manage your financial data with elegance and efficiency</p>
+            <div class="space-y-1">
+              <h1 class="text-2xl font-bold">Welcome to FMS Dashboard</h1>
+              <p class="text-base text-indigo-100">Manage your financial data with elegance and efficiency</p>
             </div>
-            <div class="animate-float">
-              <mat-icon class="text-8xl text-white/20">dashboard</mat-icon>
-            </div>
+            <mat-icon class="text-4xl text-white/30">dashboard</mat-icon>
           </div>
         </div>
-        
-        <!-- Decorative Elements -->
-        <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-xl"></div>
-        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-400/20 rounded-full blur-xl"></div>
       </div>
 
       <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div *ngFor="let stat of statistics; let i = index" 
-             class="stat-card group relative overflow-hidden rounded-2xl p-6 bg-white dark:bg-gray-800 shadow-xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+             class="stat-card group relative overflow-hidden rounded-lg p-4 bg-white dark:bg-gray-800 shadow-md border border-gray-200/50 dark:border-gray-700/50 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
           
           <!-- Gradient Background -->
           <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -67,26 +61,26 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
           
           <!-- Content -->
           <div class="relative z-10">
-            <div class="flex items-center justify-between mb-4">
-              <div class="p-3 rounded-full" [class]="getIconBackgroundClass(i)">
-                <mat-icon class="text-2xl" [class]="getIconColorClass(i)">{{stat.icon}}</mat-icon>
+            <div class="flex items-center justify-between mb-3">
+              <div class="p-2 rounded-lg" [class]="getIconBackgroundClass(i)">
+                <mat-icon class="text-xl" [class]="getIconColorClass(i)">{{stat.icon}}</mat-icon>
               </div>
               <div class="text-right">
-                <div class="text-2xl font-bold group-hover:text-white transition-colors duration-500" 
+                <div class="text-xl font-bold group-hover:text-white transition-colors duration-200" 
                      [class]="getTextColorClass()">
                   {{stat.value}}
                 </div>
-                <div class="text-sm font-medium group-hover:text-white/80 transition-colors duration-500" 
+                <div class="text-xs font-medium group-hover:text-white/80 transition-colors duration-200" 
                      [class]="getSecondaryTextColorClass()">
                   {{stat.change}}
                 </div>
               </div>
             </div>
-            <h3 class="text-lg font-semibold group-hover:text-white transition-colors duration-500" 
+            <h3 class="text-base font-semibold group-hover:text-white transition-colors duration-200" 
                 [class]="getTextColorClass()">
               {{stat.title}}
             </h3>
-            <p class="text-sm group-hover:text-white/70 transition-colors duration-500" 
+            <p class="text-sm group-hover:text-white/70 transition-colors duration-200" 
                [class]="getSecondaryTextColorClass()">
               {{stat.description}}
             </p>

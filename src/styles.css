@@ -7,57 +7,59 @@
 
 /* CSS Variables for Dynamic Theming */
 :root {
-  /* Light Theme Gradients */
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  --gradient-background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  /* Light Theme Gradients - More subtle */
+  --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  --gradient-accent: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  --gradient-sidebar: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-  --gradient-button: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  --gradient-sidebar: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+  --gradient-button: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --gradient-hover: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
   
   /* Light Theme Colors */
-  --color-text-primary: #1a202c;
-  --color-text-secondary: #4a5568;
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #64748b;
   --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f7fafc;
+  --color-bg-secondary: #f8fafc;
   --color-border: #e2e8f0;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.08);
 }
 
 /* Dark Theme Variables */
 .dark {
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-secondary: linear-gradient(135deg, #ff006e 0%, #8338ec 100%);
-  --gradient-accent: linear-gradient(135deg, #06ffa5 0%, #00d4ff 100%);
-  --gradient-background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-  --gradient-card: linear-gradient(145deg, #1a202c 0%, #2d3748 100%);
-  --gradient-sidebar: linear-gradient(180deg, #1a202c 0%, #2d3748 100%);
-  --gradient-button: linear-gradient(135deg, #06ffa5 0%, #00d4ff 100%);
-  --gradient-hover: linear-gradient(135deg, #05e89b 0%, #00bfcc 100%);
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  --gradient-accent: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --gradient-card: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  --gradient-sidebar: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+  --gradient-button: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --gradient-hover: linear-gradient(135deg, #5b61f7 0%, #9333ea 100%);
   
   /* Dark Theme Colors */
-  --color-text-primary: #f7fafc;
-  --color-text-secondary: #e2e8f0;
-  --color-bg-primary: #1a202c;
-  --color-bg-secondary: #2d3748;
-  --color-border: #4a5568;
-  --shadow-color: rgba(0, 0, 0, 0.3);
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-bg-primary: #1e293b;
+  --color-bg-secondary: #334155;
+  --color-border: #475569;
+  --shadow-color: rgba(0, 0, 0, 0.25);
 }
 
 /* Global Styles */
 * {
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-duration: 300ms;
+  transition-duration: 200ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
-  font-family: 'Roboto', sans-serif;
-  background: var(--gradient-background);
+  font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+  background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* Custom Utility Classes */
@@ -165,18 +167,21 @@ body {
 
 /* Angular Material Overrides */
 .mat-mdc-card {
-  background: var(--gradient-card) !important;
+  background: var(--color-bg-primary) !important;
   border: 1px solid var(--color-border);
-  box-shadow: 0 8px 32px var(--shadow-color) !important;
-  border-radius: 16px !important;
+  box-shadow: 0 4px 12px var(--shadow-color) !important;
+  border-radius: 12px !important;
   overflow: hidden;
 }
 
 .mat-mdc-button {
-  border-radius: 12px !important;
-  font-weight: 600 !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
   text-transform: none !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.2s ease !important;
+  font-size: 14px !important;
+  height: 36px !important;
+  min-width: 80px !important;
 }
 
 .mat-mdc-raised-button {
@@ -186,45 +191,65 @@ body {
 
 .mat-mdc-raised-button:hover {
   background: var(--gradient-hover) !important;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px var(--shadow-color) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--shadow-color) !important;
 }
 
 .mat-mdc-form-field {
-  margin-bottom: 16px !important;
+  margin-bottom: 12px !important;
+  width: 100%;
 }
 
 .mat-mdc-form-field .mat-mdc-text-field-wrapper {
-  border-radius: 12px !important;
+  border-radius: 8px !important;
   background: var(--color-bg-primary) !important;
+}
+
+.mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__leading,
+.mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__notch,
+.mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__trailing {
+  border-color: var(--color-border) !important;
 }
 
 .mat-mdc-table {
   background: var(--color-bg-primary) !important;
-  border-radius: 12px !important;
+  border-radius: 8px !important;
   overflow: hidden;
-  box-shadow: 0 4px 20px var(--shadow-color) !important;
+  box-shadow: 0 2px 8px var(--shadow-color) !important;
+  font-size: 14px !important;
 }
 
 .mat-mdc-header-row {
   background: var(--gradient-primary) !important;
+  height: 48px !important;
 }
 
 .mat-mdc-header-cell {
   color: white !important;
   font-weight: 600 !important;
+  font-size: 14px !important;
+  padding: 0 16px !important;
+}
+
+.mat-mdc-cell {
+  padding: 0 16px !important;
+  font-size: 14px !important;
+}
+
+.mat-mdc-row {
+  height: 52px !important;
 }
 
 .mat-mdc-row:hover {
-  background: rgba(102, 126, 234, 0.1) !important;
+  background: rgba(79, 70, 229, 0.06) !important;
 }
 
 .mat-mdc-row:nth-child(even) {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(0, 0, 0, 0.02) !important;
 }
 
 .dark .mat-mdc-row:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03) !important;
 }
 
 .mat-sidenav {

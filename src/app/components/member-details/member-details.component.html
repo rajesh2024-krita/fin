@@ -1,0 +1,67 @@
+<!-- Enhanced Header -->
+  <div class="relative overflow-hidden rounded-xl p-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+    <div class="absolute inset-0 bg-black/5"></div>
+    <div class="relative z-10">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+            <mat-icon class="text-2xl">people</mat-icon>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold">Member Management</h1>
+            <p class="text-base text-indigo-100">Manage member information and accounts</p>
+          </div>
+        </div>
+        <button mat-raised-button 
+                class="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-all duration-200 px-4 py-2 rounded-lg font-medium">
+          <mat-icon class="mr-2">add</mat-icon>
+          Add New Member
+        </button>
+      </div>
+    </div>
+  </div>
+
+<!-- Enhanced Filters Card -->
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-200/50 dark:border-gray-700/50">
+    <div class="flex items-center mb-4">
+      <div class="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-600 mr-3">
+        <mat-icon class="text-white text-lg">filter_list</mat-icon>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Search & Filter</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      </div>
+    <div class="flex justify-end space-x-2 mt-4">
+      <button mat-button class="text-gray-600 hover:text-gray-800 transition-colors">
+        Clear Filters
+      </button>
+      <button mat-raised-button 
+              class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-200">
+        <mat-icon class="mr-2">search</mat-icon>
+        Search
+      </button>
+    </div>
+  </div>
+
+<!-- Enhanced Members Table -->
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+    <!-- Table Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <mat-icon class="text-white text-xl">table_chart</mat-icon>
+          <h3 class="text-lg font-semibold text-white">Member Directory</h3>
+        </div>
+        <div class="flex space-x-2">
+          <button mat-button class="text-white hover:bg-white/20 transition-all duration-200 text-sm">
+            <mat-icon class="mr-1 text-lg">download</mat-icon>
+            Export
+          </button>
+          <button mat-button class="text-white hover:bg-white/20 transition-all duration-200 text-sm">
+            <mat-icon class="mr-1 text-lg">print</mat-icon>
+            Print
+          </button>
+        </div>
+      </div>
+    </div>

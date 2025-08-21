@@ -1,2 +1,24 @@
-
 /* Tailwind CSS classes will be used directly in the template */
+
+.member-details-container {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.filter-field .mat-mdc-form-field-wrapper {
+  border-radius: 8px !important;
+  background: var(--color-bg-primary);
+}
+
+.filter-field .mat-mdc-form-field-outline {
+  border-radius: 8px !important;
+}
+
+.status-chip {
+  font-weight: 500;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}

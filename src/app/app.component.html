@@ -489,35 +489,33 @@
   <!-- Main content -->
   <div [class.lg:ml-80]="!isLoginPage()">
     <!-- Enhanced Top navigation bar -->
-    <header *ngIf="!isLoginPage()" class="hidden lg:block backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 shadow-xl border-b border-white/20">
-      <div class="px-8 py-6">
+    <header *ngIf="!isLoginPage()" class="hidden lg:block backdrop-blur-md bg-white/90 dark:bg-gray-900/90 shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
+      <div class="px-6 py-4">
         <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4">
-            <div class="animate-float">
-              <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Financial Management System
-              </h1>
-            </div>
+          <div class="flex items-center space-x-3">
+            <mat-icon class="text-indigo-600 dark:text-indigo-400 text-2xl">account_balance</mat-icon>
+            <h1 class="text-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Financial Management System
+            </h1>
           </div>
 
-          <div class="flex items-center space-x-6">
+          <div class="flex items-center space-x-4">
             <!-- Theme toggle -->
-            <div class="flex items-center space-x-3 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 backdrop-blur-sm">
-              <mat-icon class="text-yellow-500">light_mode</mat-icon>
+            <div class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+              <mat-icon class="text-yellow-500 text-lg">light_mode</mat-icon>
               <mat-slide-toggle
                 [(ngModel)]="isDarkMode"
                 (change)="toggleTheme()"
                 color="primary"
                 matTooltip="Toggle Dark Mode">
               </mat-slide-toggle>
-              <mat-icon class="text-indigo-500">dark_mode</mat-icon>
+              <mat-icon class="text-indigo-500 text-lg">dark_mode</mat-icon>
             </div>
 
             <!-- User info -->
-            <div *ngIf="isLoggedIn()" class="text-sm font-medium px-4 py-2 rounded-full"
-                 [class]="isDarkMode ? 'bg-gradient-to-r from-gray-800 to-gray-700 text-gray-200' : 'bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700'">
+            <div *ngIf="isLoggedIn()" class="text-sm font-medium px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
               <div class="flex items-center space-x-2">
-                <mat-icon class="text-indigo-500">business</mat-icon>
+                <mat-icon class="text-indigo-500 text-lg">business</mat-icon>
                 <span>{{ currentUser?.societyName ? currentUser?.societyName + ' - ' : '' }}{{ getUserRoleDisplayName() }}</span>
               </div>
             </div>
@@ -527,7 +525,7 @@
               *ngIf="isLoggedIn()"
               mat-icon-button
               [matMenuTriggerFor]="userMenu"
-              class="p-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-110"
+              class="w-10 h-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all duration-200"
             >
               <mat-icon>account_circle</mat-icon>
             </button>
