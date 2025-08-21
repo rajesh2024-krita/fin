@@ -1,30 +1,29 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
+import { MatBadgeModule } from '@angular/material/badge';
 
 interface SocietyData {
   id: string;
   name: string;
+  registrationNo: string;
   address: string;
   city: string;
   phone: string;
-  fax: string;
+  fax?: string;
   email: string;
-  website: string;
-  registrationNo: string;
+  website?: string;
   interests: {
     dividend: number;
     od: number;
@@ -49,18 +48,16 @@ interface ApprovalRequest {
   societyId: string;
   requestedBy: string;
   requestedAt: Date;
-  changes: Partial<SocietyData>;
-  approvals: ApprovalStatus[];
+  changes: any;
+  approvals: {
+    userId: string;
+    userName: string;
+    approved: boolean;
+    approvedAt?: Date;
+    comments?: string;
+  }[];
   totalRequired: number;
   status: 'pending' | 'approved' | 'rejected';
-}
-
-interface ApprovalStatus {
-  userId: string;
-  userName: string;
-  approved: boolean;
-  approvedAt?: Date;
-  comments?: string;
 }
 
 interface User {
@@ -70,59 +67,10 @@ interface User {
 }
 
 @Component({
-  selector: 'app-society-approval-dialog',
-  template: `
-    <div class="p-6">
-      <div class="flex items-center mb-4">
-        <mat-icon class="text-blue-500 mr-3">check_circle</mat-icon>
-        <h2 class="text-section-header font-semibold">Approve Society Changes</h2>
-      </div>
-      
-      <div class="space-y-4 mb-6">
-        <p class="text-body text-gray-600 dark:text-gray-400">
-          Do you want to approve the pending changes to society information?
-        </p>
-        
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Comments (Optional)</mat-label>
-          <textarea matInput [(ngModel)]="comments" rows="3" placeholder="Add any comments about your approval"></textarea>
-        </mat-form-field>
-      </div>
-      
-      <div class="flex justify-end space-x-3">
-        <button mat-button (click)="cancel()" class="btn-secondary">
-          Cancel
-        </button>
-        <button mat-raised-button (click)="approve()" class="btn-primary">
-          <mat-icon class="mr-2">check</mat-icon>
-          Approve Changes
-        </button>
-      </div>
-    </div>
-  `,
-  standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule]
-})
-export class SocietyApprovalDialogComponent {
-  comments = '';
-
-  constructor(private dialogRef: MatDialogRef<SocietyApprovalDialogComponent>) {}
-
-  approve() {
-    this.dialogRef.close({ approved: true, comments: this.comments });
-  }
-
-  cancel() {
-    this.dialogRef.close();
-  }
-}
-
-@Component({
   selector: 'app-society',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
@@ -130,361 +78,548 @@ export class SocietyApprovalDialogComponent {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatTabsModule,
+    MatDividerModule,
+    MatProgressBarModule,
     MatChipsModule,
-    MatBadgeModule,
-    MatDialogModule,
-    MatTooltipModule,
-    MatProgressBarModule
+    MatBadgeModule
   ],
   template: `
-    <div class="space-y-6 animate-fade-in">
-      <!-- Professional Page Header -->
-      <div class="card-professional overflow-hidden">
-        <div class="gradient-header p-6 text-white">
-          <div class="flex items-center justify-between">
+    <div class="animate-fade-in">
+      <!-- Page Header -->
+      <div class="content-header">
+        <div class="breadcrumb">
+          <span>File</span>
+          <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+          <span class="breadcrumb-active">Society</span>
+        </div>
+        <h1 class="text-page-title">Society Management</h1>
+        <p class="text-body text-gray-600 dark:text-gray-400">Manage society information, interest rates, and limits</p>
+      </div>
+
+      <!-- Pending Approval Alert -->
+      <div *ngIf="pendingRequest" class="card mb-6 border-l-4 border-l-orange-400">
+        <div class="card-header bg-gradient-to-r from-orange-500 to-red-500">
+          <div class="card-title">
+            <mat-icon>pending_actions</mat-icon>
+            <span>Pending Approval Request</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <mat-icon class="text-lg">schedule</mat-icon>
+            <span>{{ pendingRequest.requestedAt | date:'short' }}</span>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-4">
+            <!-- Request Info -->
             <div>
-              <!-- Breadcrumb -->
-              <nav class="breadcrumb-professional text-white/80 mb-2">
-                <span>Dashboard</span>
-                <mat-icon class="separator text-sm">chevron_right</mat-icon>
-                <span>File</span>
-                <mat-icon class="separator text-sm">chevron_right</mat-icon>
-                <span class="active text-white font-medium">Society</span>
-              </nav>
-              
-              <div class="flex items-center space-x-3">
-                <div class="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-                  <mat-icon class="text-2xl">business</mat-icon>
+              <h4 class="text-section-header mb-3">Request Details</h4>
+              <div class="space-y-2 text-body">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Requested by:</span>
+                  <span class="font-medium">{{ pendingRequest.requestedBy }}</span>
                 </div>
-                <div>
-                  <h1 class="text-page-title font-bold">Society Management</h1>
-                  <p class="text-body text-white/90">Manage society information and settings</p>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Status:</span>
+                  <span class="badge badge-warning">{{ pendingRequest.status | titlecase }}</span>
                 </div>
               </div>
             </div>
-            
-            <!-- Pending Approval Badge -->
-            <div *ngIf="pendingRequest" class="status-badge warning animate-pulse">
-              <mat-icon class="text-sm mr-1">pending</mat-icon>
-              Pending Approval ({{getApprovedCount()}}/{{pendingRequest.totalRequired}})
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Approval Status Panel -->
-      <div *ngIf="pendingRequest" class="card-professional">
-        <div class="gradient-secondary p-4">
-          <div class="flex items-center space-x-3">
-            <mat-icon class="text-white text-xl">approval</mat-icon>
-            <h3 class="text-section-header font-semibold text-white">Approval Status</h3>
-          </div>
-        </div>
-        
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-4">
-              <div class="text-center">
-                <div class="text-2xl font-bold text-blue-600">{{getApprovedCount()}}</div>
-                <div class="text-caption text-gray-500">Approved</div>
-              </div>
-              <div class="text-gray-300">/</div>
-              <div class="text-center">
-                <div class="text-2xl font-bold text-gray-600">{{pendingRequest.totalRequired}}</div>
-                <div class="text-caption text-gray-500">Required</div>
+            <!-- Approval Progress -->
+            <div>
+              <h4 class="text-section-header mb-3">Approval Progress</h4>
+              <div class="space-y-3">
+                <div class="flex justify-between text-body">
+                  <span>{{ getApprovedCount() }} of {{ pendingRequest.totalRequired }} approved</span>
+                  <span class="font-medium">{{ getApprovalProgress() | number:'1.0-0' }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                  <div 
+                    class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-300"
+                    [style.width.%]="getApprovalProgress()">
+                  </div>
+                </div>
               </div>
             </div>
-            
-            <div class="flex-1 mx-6">
-              <mat-progress-bar 
-                mode="determinate" 
-                [value]="getApprovalProgress()"
-                class="h-3 rounded-full">
-              </mat-progress-bar>
-            </div>
-            
-            <div class="text-right">
-              <div class="text-body font-medium text-gray-800 dark:text-white">
-                {{getPendingCount()}} pending
-              </div>
-              <div class="text-caption text-gray-500">
-                Requested by {{pendingRequest.requestedBy}}
+
+            <!-- Quick Actions -->
+            <div>
+              <h4 class="text-section-header mb-3">Actions</h4>
+              <div class="space-y-2">
+                <button 
+                  *ngIf="canApprove()" 
+                  (click)="openApprovalDialog()"
+                  class="btn btn-success btn-sm w-full">
+                  <mat-icon class="text-sm">check_circle</mat-icon>
+                  Approve Changes
+                </button>
+                <button class="btn btn-outline btn-sm w-full">
+                  <mat-icon class="text-sm">visibility</mat-icon>
+                  View Changes
+                </button>
               </div>
             </div>
           </div>
-          
-          <!-- Approver List -->
-          <div class="space-y-2 mb-4">
-            <h4 class="text-body font-semibold text-gray-800 dark:text-white mb-3">Approval Status:</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+          <!-- Approval Status List -->
+          <div class="border-t pt-4">
+            <h4 class="text-section-header mb-3">Approval Status</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <div *ngFor="let approval of pendingRequest.approvals" 
-                   class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center space-x-3">
-                  <div [class]="approval.approved ? 'w-3 h-3 bg-green-500 rounded-full' : 'w-3 h-3 bg-gray-300 rounded-full'"></div>
-                  <span class="text-body font-medium">{{approval.userName}}</span>
+                   class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <mat-icon [class]="approval.approved ? 'text-green-500' : 'text-gray-400'">
+                    {{ approval.approved ? 'check_circle' : 'schedule' }}
+                  </mat-icon>
+                  <div>
+                    <p class="font-medium text-sm">{{ approval.userName }}</p>
+                    <p class="text-xs text-gray-500">
+                      {{ approval.approved ? (approval.approvedAt | date:'short') : 'Pending' }}
+                    </p>
+                  </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                  <mat-icon *ngIf="approval.approved" class="text-green-500 text-lg">check_circle</mat-icon>
-                  <mat-icon *ngIf="!approval.approved" class="text-gray-400 text-lg">pending</mat-icon>
-                  <span class="text-caption text-gray-500">
-                    {{approval.approved ? (approval.approvedAt | date:'short') : 'Pending'}}
-                  </span>
-                </div>
+                <span [class]="approval.approved ? 'badge badge-success' : 'badge badge-secondary'">
+                  {{ approval.approved ? 'Approved' : 'Pending' }}
+                </span>
               </div>
             </div>
-          </div>
-          
-          <!-- Approve Button -->
-          <div *ngIf="canApprove()" class="flex justify-end">
-            <button mat-raised-button (click)="openApprovalDialog()" class="btn-primary">
-              <mat-icon class="mr-2">check_circle</mat-icon>
-              Approve Changes
-            </button>
           </div>
         </div>
       </div>
 
-      <!-- Society Form -->
-      <div class="card-professional">
-        <div class="gradient-header p-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <mat-icon class="text-white text-xl">business</mat-icon>
-              <h3 class="text-section-header font-semibold text-white">Society Information</h3>
+      <!-- Main Society Form -->
+      <form [formGroup]="societyForm" class="form-container">
+        
+        <!-- Basic Information Section -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <mat-icon>business</mat-icon>
+            <span>Basic Information</span>
+          </div>
+          <div class="form-section-content">
+            <div class="form-grid form-grid-2">
+              <div class="form-field">
+                <label class="form-label form-label-required">Society Name</label>
+                <input 
+                  type="text" 
+                  class="form-input"
+                  formControlName="name"
+                  placeholder="Enter society name"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label form-label-required">Registration Number</label>
+                <input 
+                  type="text" 
+                  class="form-input"
+                  formControlName="registrationNo"
+                  placeholder="Enter registration number"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label form-label-required">Address</label>
+                <textarea 
+                  class="form-textarea"
+                  formControlName="address"
+                  placeholder="Enter complete address"
+                  [readonly]="!isEditing"
+                  rows="3"></textarea>
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label form-label-required">City</label>
+                <input 
+                  type="text" 
+                  class="form-input"
+                  formControlName="city"
+                  placeholder="Enter city name"
+                  [readonly]="!isEditing">
+              </div>
             </div>
-            <div class="flex space-x-2">
-              <button *ngIf="!isEditing" mat-button (click)="enableEdit()" class="text-white hover:bg-white/20">
-                <mat-icon class="mr-2">edit</mat-icon>
-                Edit
-              </button>
-              <button *ngIf="isEditing" mat-button (click)="cancelEdit()" class="text-white hover:bg-white/20">
-                <mat-icon class="mr-2">cancel</mat-icon>
+          </div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <mat-icon>contact_phone</mat-icon>
+            <span>Contact Information</span>
+          </div>
+          <div class="form-section-content">
+            <div class="form-grid form-grid-2">
+              <div class="form-field">
+                <label class="form-label form-label-required">Phone</label>
+                <input 
+                  type="tel" 
+                  class="form-input"
+                  formControlName="phone"
+                  placeholder="+91 9876543210"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Fax</label>
+                <input 
+                  type="tel" 
+                  class="form-input"
+                  formControlName="fax"
+                  placeholder="+91 2234567890"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label form-label-required">Email</label>
+                <input 
+                  type="email" 
+                  class="form-input"
+                  formControlName="email"
+                  placeholder="info@society.com"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Website</label>
+                <input 
+                  type="url" 
+                  class="form-input"
+                  formControlName="website"
+                  placeholder="www.society.com"
+                  [readonly]="!isEditing">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interest Rates Section -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <mat-icon>trending_up</mat-icon>
+            <span>Interest Rates (%)</span>
+          </div>
+          <div class="form-section-content">
+            <div class="form-grid form-grid-3">
+              <div class="form-field">
+                <label class="form-label">Dividend</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="dividend"
+                  placeholder="8.5"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Overdraft (OD)</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="od"
+                  placeholder="12.0"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Current Deposit (CD)</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="cd"
+                  placeholder="6.5"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Loan</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="loan"
+                  placeholder="10.0"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Emergency Loan</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="emergencyLoan"
+                  placeholder="15.0"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">LAS</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="las"
+                  placeholder="7.5"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  [readonly]="!isEditing">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Limits Section -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <mat-icon>account_balance</mat-icon>
+            <span>Financial Limits</span>
+          </div>
+          <div class="form-section-content">
+            <div class="form-grid form-grid-3">
+              <div class="form-field">
+                <label class="form-label">Share Limit (₹)</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="shareLimit"
+                  placeholder="500000"
+                  min="0"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Loan Limit (₹)</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="loanLimit"
+                  placeholder="1000000"
+                  min="0"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Emergency Loan Limit (₹)</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="emergencyLoanLimit"
+                  placeholder="200000"
+                  min="0"
+                  [readonly]="!isEditing">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Settings Section -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <mat-icon>settings</mat-icon>
+            <span>Additional Settings</span>
+          </div>
+          <div class="form-section-content">
+            <div class="form-grid form-grid-4">
+              <div class="form-field">
+                <label class="form-label">Cheque Bounce Charge (₹)</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="chBounceCharge"
+                  placeholder="500"
+                  min="0"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Cheque Return Charge</label>
+                <select class="form-select" formControlName="chequeReturnCharge" [disabled]="!isEditing">
+                  <option value="fixed">Fixed Amount</option>
+                  <option value="percentage">Percentage</option>
+                </select>
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Cash (₹)</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="cash"
+                  placeholder="1000"
+                  min="0"
+                  [readonly]="!isEditing">
+              </div>
+              
+              <div class="form-field">
+                <label class="form-label">Bonus (₹)</label>
+                <input 
+                  type="number" 
+                  class="form-input"
+                  formControlName="bonus"
+                  placeholder="2500"
+                  min="0"
+                  [readonly]="!isEditing">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="card-actions">
+          <div class="flex justify-end gap-3">
+            <button 
+              *ngIf="!isEditing" 
+              type="button"
+              (click)="enableEdit()"
+              class="btn btn-primary">
+              <mat-icon>edit</mat-icon>
+              Edit Society Details
+            </button>
+            
+            <div *ngIf="isEditing" class="flex gap-3">
+              <button 
+                type="button"
+                (click)="cancelEdit()"
+                class="btn btn-secondary">
+                <mat-icon>close</mat-icon>
                 Cancel
               </button>
-              <button *ngIf="isEditing" mat-raised-button (click)="saveChanges()" class="bg-white/20 text-white hover:bg-white/30">
-                <mat-icon class="mr-2">save</mat-icon>
+              <button 
+                type="button"
+                (click)="saveChanges()"
+                [disabled]="societyForm.invalid"
+                class="btn btn-success">
+                <mat-icon>save</mat-icon>
                 Save Changes
               </button>
             </div>
           </div>
         </div>
-
-        <div class="p-6">
-          <form [formGroup]="societyForm">
-            <mat-tab-group class="professional-tabs">
-              
-              <!-- Basic Information Tab -->
-              <mat-tab label="Basic Information">
-                <div class="form-section-content">
-                  <div class="form-grid form-grid-2">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Society Name *</mat-label>
-                      <input matInput formControlName="name" [readonly]="!isEditing" placeholder="Enter society name">
-                      <mat-icon matSuffix>business</mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Registration Number *</mat-label>
-                      <input matInput formControlName="registrationNo" [readonly]="!isEditing" placeholder="Enter registration number">
-                      <mat-icon matSuffix>assignment</mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="md:col-span-2">
-                      <mat-label>Address *</mat-label>
-                      <textarea matInput formControlName="address" rows="3" [readonly]="!isEditing" placeholder="Enter complete address"></textarea>
-                      <mat-icon matSuffix>location_on</mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>City *</mat-label>
-                      <input matInput formControlName="city" [readonly]="!isEditing" placeholder="Enter city name">
-                      <mat-icon matSuffix>location_city</mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Phone Number *</mat-label>
-                      <input matInput formControlName="phone" [readonly]="!isEditing" placeholder="Enter phone number">
-                      <mat-icon matSuffix>phone</mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Fax Number</mat-label>
-                      <input matInput formControlName="fax" [readonly]="!isEditing" placeholder="Enter fax number">
-                      <mat-icon matSuffix>fax</mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Email Address *</mat-label>
-                      <input matInput type="email" formControlName="email" [readonly]="!isEditing" placeholder="Enter email address">
-                      <mat-icon matSuffix>email</mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="md:col-span-2">
-                      <mat-label>Website URL</mat-label>
-                      <input matInput formControlName="website" [readonly]="!isEditing" placeholder="Enter website URL">
-                      <mat-icon matSuffix>web</mat-icon>
-                    </mat-form-field>
-                  </div>
-                </div>
-              </mat-tab>
-
-              <!-- Interest Rates Tab -->
-              <mat-tab label="Interest Rates">
-                <div class="form-section-content">
-                  <div class="mb-6">
-                    <h4 class="text-section-header text-gray-700 dark:text-gray-300 mb-4">Configure Interest Rates (%)</h4>
-                    <p class="text-body-sm text-gray-500 mb-6">Set the annual interest rates for different financial products</p>
-                  </div>
-                  <div class="form-grid form-grid-3">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Dividend Rate (%)</mat-label>
-                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="dividend" [readonly]="!isEditing" placeholder="0.0">
-                      <mat-icon matSuffix>trending_up</mat-icon>
-                      <mat-hint>Annual dividend rate</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Overdraft Rate (%)</mat-label>
-                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="od" [readonly]="!isEditing" placeholder="0.0">
-                      <mat-icon matSuffix>account_balance</mat-icon>
-                      <mat-hint>OD interest rate</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Certificate Deposit (%)</mat-label>
-                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="cd" [readonly]="!isEditing" placeholder="0.0">
-                      <mat-icon matSuffix>savings</mat-icon>
-                      <mat-hint>CD interest rate</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Regular Loan (%)</mat-label>
-                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="loan" [readonly]="!isEditing" placeholder="0.0">
-                      <mat-icon matSuffix>money</mat-icon>
-                      <mat-hint>Standard loan rate</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Emergency Loan (%)</mat-label>
-                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="emergencyLoan" [readonly]="!isEditing" placeholder="0.0">
-                      <mat-icon matSuffix>emergency</mat-icon>
-                      <mat-hint>Emergency loan rate</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>LAS Rate (%)</mat-label>
-                      <input matInput type="number" step="0.1" min="0" max="100" formControlName="las" [readonly]="!isEditing" placeholder="0.0">
-                      <mat-icon matSuffix>assessment</mat-icon>
-                      <mat-hint>Loan against shares</mat-hint>
-                    </mat-form-field>
-                  </div>
-                </div>
-              </mat-tab>
-
-              <!-- Limits Tab -->
-              <mat-tab label="Financial Limits">
-                <div class="form-section-content">
-                  <div class="mb-6">
-                    <h4 class="text-section-header text-gray-700 dark:text-gray-300 mb-4">Configure Financial Limits</h4>
-                    <p class="text-body-sm text-gray-500 mb-6">Set maximum limits for different financial transactions</p>
-                  </div>
-                  <div class="form-grid form-grid-3">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Share Limit (₹)</mat-label>
-                      <input matInput type="number" min="0" formControlName="shareLimit" [readonly]="!isEditing" placeholder="0">
-                      <mat-icon matSuffix>share</mat-icon>
-                      <mat-hint>Maximum share amount</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Loan Limit (₹)</mat-label>
-                      <input matInput type="number" min="0" formControlName="loanLimit" [readonly]="!isEditing" placeholder="0">
-                      <mat-icon matSuffix>account_balance_wallet</mat-icon>
-                      <mat-hint>Maximum loan amount</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Emergency Loan Limit (₹)</mat-label>
-                      <input matInput type="number" min="0" formControlName="emergencyLoanLimit" [readonly]="!isEditing" placeholder="0">
-                      <mat-icon matSuffix>emergency</mat-icon>
-                      <mat-hint>Maximum emergency loan</mat-hint>
-                    </mat-form-field>
-                  </div>
-                </div>
-              </mat-tab>
-
-              <!-- Charges Tab -->
-              <mat-tab label="Charges & Fees">
-                <div class="form-section-content">
-                  <div class="mb-6">
-                    <h4 class="text-section-header text-gray-700 dark:text-gray-300 mb-4">Configure Charges & Fees</h4>
-                    <p class="text-body-sm text-gray-500 mb-6">Set various charges and bonus amounts for society operations</p>
-                  </div>
-                  <div class="form-grid form-grid-2">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Cheque Bounce Charge (₹)</mat-label>
-                      <input matInput type="number" min="0" formControlName="chBounceCharge" [readonly]="!isEditing" placeholder="0">
-                      <mat-icon matSuffix>money_off</mat-icon>
-                      <mat-hint>Charge for bounced cheques</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Cheque Return Charge Type</mat-label>
-                      <mat-select formControlName="chequeReturnCharge" [disabled]="!isEditing">
-                        <mat-option value="">Select charge type</mat-option>
-                        <mat-option value="fixed">Fixed Amount</mat-option>
-                        <mat-option value="percentage">Percentage Based</mat-option>
-                      </mat-select>
-                      <mat-icon matSuffix>receipt</mat-icon>
-                      <mat-hint>How cheque return charges are calculated</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Cash Handling Charge (₹)</mat-label>
-                      <input matInput type="number" min="0" formControlName="cash" [readonly]="!isEditing" placeholder="0">
-                      <mat-icon matSuffix>payments</mat-icon>
-                      <mat-hint>Charge for cash transactions</mat-hint>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Annual Bonus (₹)</mat-label>
-                      <input matInput type="number" min="0" formControlName="bonus" [readonly]="!isEditing" placeholder="0">
-                      <mat-icon matSuffix>card_giftcard</mat-icon>
-                      <mat-hint>Annual bonus amount for members</mat-hint>
-                    </mat-form-field>
-                  </div>
-                </div>
-              </mat-tab>
-
-            </mat-tab-group>
-          </form>
-        </div>
-      </div>
+      </form>
     </div>
   `,
   styles: [`
-    .professional-tabs ::ng-deep .mat-mdc-tab-group {
-      --mdc-secondary-navigation-tab-container-height: 48px;
+    .content-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--color-border-primary);
     }
 
-    .professional-tabs ::ng-deep .mat-mdc-tab {
-      min-width: 120px;
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+
+    .breadcrumb-separator {
+      font-size: 1rem;
+      color: var(--color-text-light);
+    }
+
+    .breadcrumb-active {
+      color: var(--color-text-primary);
       font-weight: 500;
     }
 
-    .professional-tabs ::ng-deep .mat-mdc-tab-header {
-      border-bottom: 1px solid var(--color-border);
+    .border-l-4 {
+      border-left-width: 4px;
     }
 
-    .animate-pulse {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    .border-l-orange-400 {
+      border-left-color: #fb923c;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: .5; }
+    .grid {
+      display: grid;
     }
+
+    .grid-cols-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    .grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (min-width: 768px) {
+      .md\\:grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .lg\\:grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+    .gap-6 { gap: 1.5rem; }
+
+    .space-y-2 > * + * { margin-top: 0.5rem; }
+    .space-y-3 > * + * { margin-top: 0.75rem; }
+
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+
+    .p-3 { padding: 0.75rem; }
+    .pt-4 { padding-top: 1rem; }
+
+    .w-full { width: 100%; }
+    .h-2 { height: 0.5rem; }
+
+    .bg-gray-50 { background-color: #f9fafb; }
+    .bg-gray-200 { background-color: #e5e7eb; }
+
+    .dark .bg-gray-700 { background-color: #374151; }
+    .dark .bg-gray-800 { background-color: #1f2937; }
+
+    .rounded-full { border-radius: 9999px; }
+    .rounded-lg { border-radius: 0.5rem; }
+
+    .text-xs { font-size: 0.75rem; }
+    .text-sm { font-size: 0.875rem; }
+    .text-lg { font-size: 1.125rem; }
+
+    .font-medium { font-weight: 500; }
+
+    .text-gray-400 { color: #9ca3af; }
+    .text-gray-500 { color: #6b7280; }
+    .text-gray-600 { color: #4b5563; }
+    .text-green-500 { color: #10b981; }
+
+    .transition-all { transition-property: all; }
+    .duration-300 { transition-duration: 300ms; }
+
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-end { justify-content: flex-end; }
+
+    .border-t { border-top: 1px solid var(--color-border-primary); }
   `]
 })
 export class SocietyComponent implements OnInit {
@@ -672,20 +807,15 @@ export class SocietyComponent implements OnInit {
     return (this.getApprovedCount() / this.pendingRequest.totalRequired) * 100;
   }
 
-  canApprove(): any {
+  canApprove(): boolean {
     if (!this.pendingRequest) return false;
     const userApproval = this.pendingRequest.approvals.find(a => a.userId === this.currentUser.id);
-    return userApproval && !userApproval.approved;
+    return userApproval ? !userApproval.approved : false;
   }
 
   openApprovalDialog() {
-    const dialogRef = this.dialog.open(SocietyApprovalDialogComponent);
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && result.approved) {
-        this.approveChanges(result.comments);
-      }
-    });
+    // Implementation for approval dialog
+    console.log('Opening approval dialog...');
   }
 
   approveChanges(comments?: string) {
