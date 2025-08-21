@@ -5,24 +5,304 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom utility classes */
+/* CSS Variables for Dynamic Theming */
+:root {
+  /* Light Theme Gradients */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-sidebar: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  --gradient-button: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  
+  /* Light Theme Colors */
+  --color-text-primary: #1a202c;
+  --color-text-secondary: #4a5568;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f7fafc;
+  --color-border: #e2e8f0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Theme Variables */
+.dark {
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #ff006e 0%, #8338ec 100%);
+  --gradient-accent: linear-gradient(135deg, #06ffa5 0%, #00d4ff 100%);
+  --gradient-background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  --gradient-card: linear-gradient(145deg, #1a202c 0%, #2d3748 100%);
+  --gradient-sidebar: linear-gradient(180deg, #1a202c 0%, #2d3748 100%);
+  --gradient-button: linear-gradient(135deg, #06ffa5 0%, #00d4ff 100%);
+  --gradient-hover: linear-gradient(135deg, #05e89b 0%, #00bfcc 100%);
+  
+  /* Dark Theme Colors */
+  --color-text-primary: #f7fafc;
+  --color-text-secondary: #e2e8f0;
+  --color-bg-primary: #1a202c;
+  --color-bg-secondary: #2d3748;
+  --color-border: #4a5568;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Global Styles */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: var(--gradient-background);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
+/* Custom Utility Classes */
 @layer utilities {
   .toolbar-spacer {
     flex: 1 1 auto;
   }
   
   .user-info {
-    @apply text-sm text-gray-200;
+    @apply text-sm;
+    color: var(--color-text-secondary);
+  }
+  
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .gradient-sidebar {
+    background: var(--gradient-sidebar);
+  }
+  
+  .gradient-button {
+    background: var(--gradient-button);
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  .gradient-button:hover {
+    background: var(--gradient-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px var(--shadow-color);
+  }
+  
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 4s ease infinite;
+  }
+  
+  .glass-effect {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px var(--shadow-color);
   }
 }
 
-/* Dark mode compatibility */
-@layer base {
-  html {
-    @apply bg-gray-50 dark:bg-gray-900;
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Angular Material Overrides */
+.mat-mdc-card {
+  background: var(--gradient-card) !important;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 32px var(--shadow-color) !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+.mat-mdc-button {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.mat-mdc-raised-button {
+  background: var(--gradient-button) !important;
+  color: white !important;
+}
+
+.mat-mdc-raised-button:hover {
+  background: var(--gradient-hover) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--shadow-color) !important;
+}
+
+.mat-mdc-form-field {
+  margin-bottom: 16px !important;
+}
+
+.mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  border-radius: 12px !important;
+  background: var(--color-bg-primary) !important;
+}
+
+.mat-mdc-table {
+  background: var(--color-bg-primary) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 20px var(--shadow-color) !important;
+}
+
+.mat-mdc-header-row {
+  background: var(--gradient-primary) !important;
+}
+
+.mat-mdc-header-cell {
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.mat-mdc-row:hover {
+  background: rgba(102, 126, 234, 0.1) !important;
+}
+
+.mat-mdc-row:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.dark .mat-mdc-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.mat-sidenav {
+  background: var(--gradient-sidebar) !important;
+}
+
+.mat-toolbar {
+  background: var(--gradient-primary) !important;
+  color: white !important;
+}
+
+/* Sidebar Animations */
+.sidebar-item {
+  animation: slideIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+.sidebar-item:nth-child(1) { animation-delay: 0.1s; }
+.sidebar-item:nth-child(2) { animation-delay: 0.2s; }
+.sidebar-item:nth-child(3) { animation-delay: 0.3s; }
+.sidebar-item:nth-child(4) { animation-delay: 0.4s; }
+.sidebar-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* Page Content Animations */
+.page-content {
+  animation: fadeIn 0.6s ease;
+}
+
+/* Floating Settings Button */
+.floating-settings {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: var(--gradient-accent);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 8px 25px var(--shadow-color);
+  transition: all 0.3s ease;
+}
+
+.floating-settings:hover {
+  transform: scale(1.1) rotate(180deg);
+  box-shadow: 0 12px 35px var(--shadow-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mat-mdc-card {
+    margin: 8px;
   }
   
-  body {
-    @apply text-gray-900 dark:text-gray-100;
+  .page-content {
+    padding: 16px;
   }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gradient-hover);
 }

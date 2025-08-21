@@ -1,3 +1,4 @@
+
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -8,6 +9,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { FormsModule } from '@angular/forms';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthService, User, UserRole } from './services/auth.service';
 
 @Component({
@@ -24,10 +30,34 @@ import { AuthService, User, UserRole } from './services/auth.service';
     MatIconModule,
     MatListModule,
     MatExpansionModule,
-    MatMenuModule
+    MatMenuModule,
+    MatSlideToggleModule,
+    MatTooltipModule,
+    MatBottomSheetModule,
+    FormsModule
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
+  animations: [
+    trigger('slideInOut', [
+      transition(':enter', [
+        style({ transform: 'translateX(-100%)' }),
+        animate('300ms ease-in-out', style({ transform: 'translateX(0%)' }))
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in-out', style({ transform: 'translateX(-100%)' }))
+      ])
+    ]),
+    trigger('fadeInOut', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-in-out', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in-out', style({ opacity: 0 }))
+      ])
+    ])
+  ]
 })
 export class AppComponent implements OnInit {
   title = 'Financial Management System';
@@ -42,9 +72,11 @@ export class AppComponent implements OnInit {
   isTransactionMenuOpen = false;
   isAccountsMenuOpen = false;
   isReportsMenuOpen = false;
+  isSettingsOpen = false;
 
   // Theme state
   isDarkMode = false;
+  layoutDensity: 'compact' | 'comfortable' = 'comfortable';
 
   constructor(
     private authService: AuthService,
@@ -54,8 +86,10 @@ export class AppComponent implements OnInit {
     // Initialize theme from localStorage
     if (typeof window !== 'undefined' && window.localStorage) {
       this.isDarkMode = localStorage.getItem('theme') === 'dark';
+      this.layoutDensity = (localStorage.getItem('layoutDensity') as 'compact' | 'comfortable') || 'comfortable';
     } else {
       this.isDarkMode = false;
+      this.layoutDensity = 'comfortable';
     }
     this.applyTheme();
   }
@@ -82,7 +116,6 @@ export class AppComponent implements OnInit {
     this.applyTheme();
   }
 
-
   private applyTheme() {
     if (isPlatformBrowser(this.platformId)) {
       if (this.isDarkMode) {
@@ -93,6 +126,18 @@ export class AppComponent implements OnInit {
     }
   }
 
+  // Layout density management
+  toggleLayoutDensity() {
+    this.layoutDensity = this.layoutDensity === 'comfortable' ? 'compact' : 'comfortable';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('layoutDensity', this.layoutDensity);
+    }
+  }
+
+  // Settings management
+  toggleSettings() {
+    this.isSettingsOpen = !this.isSettingsOpen;
+  }
 
   // Mobile sidebar management
   toggleMobileSidebar() {
@@ -200,5 +245,9 @@ export class AppComponent implements OnInit {
   getUserRoleDisplayName(): string {
     if (!this.currentUser) return '';
     return this.currentUser.role.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  getSpacingClass(): string {
+    return this.layoutDensity === 'compact' ? 'p-2 space-y-1' : 'p-4 space-y-3';
   }
 }
