@@ -60,10 +60,10 @@
       
       <!-- User Management - Only for Super Admin -->
       <div *ngIf="currentUser?.role === 'super_admin'" class="sidebar-item space-y-1">
-        <div class="px-3 py-2 text-xs font-bold uppercase tracking-wider"
+        <div class="px-3 py-2 flex items-center text-xs font-bold uppercase tracking-wider"
              [class]="isDarkMode ? 'text-indigo-300' : 'text-indigo-600'">
           <mat-icon class="mr-2 text-sm">supervisor_account</mat-icon>
-          User Management
+          <span>User Management</span>
         </div>
         <a
           routerLink="/user-management"
@@ -78,10 +78,10 @@
 
       <!-- Member Management -->
       <div *ngIf="currentUser?.role === 'super_admin' || currentUser?.role === 'society_admin'" class="sidebar-item space-y-1">
-        <div class="px-3 py-2 text-xs font-bold uppercase tracking-wider"
+        <div class="px-3 py-2 text-xs flex items-center font-bold uppercase tracking-wider"
              [class]="isDarkMode ? 'text-purple-300' : 'text-purple-600'">
           <mat-icon class="mr-2 text-sm">people</mat-icon>
-          Member Management
+          <span>Member Management</span>
         </div>
         <a
           routerLink="/master/member-details"

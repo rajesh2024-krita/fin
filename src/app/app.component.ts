@@ -109,12 +109,12 @@ export class AppComponent implements OnInit {
 
   // Theme management
   toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
     }
     this.applyTheme();
   }
+
 
   private applyTheme() {
     if (isPlatformBrowser(this.platformId)) {
