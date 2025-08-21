@@ -68,7 +68,7 @@
     <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto h-[calc(100vh-5rem)]">
       
       <!-- Dashboard -->
-      <div class="nav-section-header">
+      <div class="nav-section-header flex">
         <mat-icon class="text-sm mr-2">dashboard</mat-icon>
         Dashboard
       </div>
@@ -84,7 +84,7 @@
 
       <!-- User Management - Only for Super Admin -->
       <div *ngIf="currentUser?.role === 'super_admin'" class="space-y-1">
-        <div class="nav-section-header">
+        <div class="nav-section-header flex">
           <mat-icon class="text-sm mr-2">supervisor_account</mat-icon>
           User Management
         </div>
@@ -100,7 +100,7 @@
 
       <!-- Member Management -->
       <div *ngIf="currentUser?.role === 'super_admin' || currentUser?.role === 'society_admin'" class="space-y-1">
-        <div class="nav-section-header">
+        <div class="nav-section-header flex">
           <mat-icon class="text-sm mr-2">people</mat-icon>
           Members
         </div>
@@ -239,7 +239,7 @@
 
       <!-- Transaction Menu -->
       <div *ngIf="canAccessTransactions()" class="space-y-1">
-        <div class="nav-section-header">
+        <div class="nav-section-header flex">
           <mat-icon class="text-sm mr-2">receipt</mat-icon>
           Transactions
         </div>
@@ -304,7 +304,7 @@
 
       <!-- Accounts Menu -->
       <div *ngIf="canAccessAccounts()" class="space-y-1">
-        <div class="nav-section-header">
+        <div class="nav-section-header flex">
           <mat-icon class="text-sm mr-2">account_balance</mat-icon>
           Accounts
         </div>
@@ -386,7 +386,7 @@
 
       <!-- Reports Menu -->
       <div *ngIf="canAccessReports()" class="space-y-1">
-        <div class="nav-section-header">
+        <div class="nav-section-header flex">
           <mat-icon class="text-sm mr-2">assessment</mat-icon>
           Reports
         </div>
@@ -438,7 +438,7 @@
 
       <!-- Other Menu Items -->
       <div class="space-y-1">
-        <div class="nav-section-header">
+        <div class="nav-section-header flex">
           <mat-icon class="text-sm mr-2">more_horiz</mat-icon>
           Other
         </div>

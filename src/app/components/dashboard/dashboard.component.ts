@@ -27,8 +27,8 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
         query(':enter', [
           style({ opacity: 0, transform: 'translateY(30px)' }),
           stagger(100, [
-            animate('600ms cubic-bezier(0.35, 0, 0.25, 1)', 
-                   style({ opacity: 1, transform: 'translateY(0)' }))
+            animate('600ms cubic-bezier(0.35, 0, 0.25, 1)',
+              style({ opacity: 1, transform: 'translateY(0)' }))
           ])
         ], { optional: true })
       ])
@@ -100,7 +100,7 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <button *ngFor="let action of quickActions; let i = index"
                   mat-raised-button
-                  class="action-button p-6 rounded-2xl text-left transition-all duration-300 transform hover:scale-105"
+                  class="action-button p-6 py-20 rounded-2xl text-left transition-all duration-300 transform hover:scale-105"
                   [class]="getActionButtonClass(i)">
             <div class="flex items-center space-x-4">
               <mat-icon class="text-2xl">{{action.icon}}</mat-icon>
@@ -193,6 +193,10 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 
     .stat-card:hover::before {
       opacity: 1;
+    }
+    .mdc-button{
+      padding-top: 2rem !important;
+      padding-bottom: 2rem !important;
     }
 
     .action-button {
