@@ -3,6 +3,7 @@ import { Component, signal, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { MatTableDataSource } from '@angular/material/table';
@@ -27,6 +29,11 @@ interface Employee {
   memberName: string;
 }
 
+interface GivenTakenMember {
+  memNo: string;
+  name: string;
+}
+
 @Component({
   selector: 'app-loan-taken',
   standalone: true,
@@ -35,6 +42,7 @@ interface Employee {
     FormsModule,
     ReactiveFormsModule,
     MatCardModule,
+    MatTabsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -42,6 +50,7 @@ interface Employee {
     MatDatepickerModule,
     MatNativeDateModule,
     MatIconModule,
+    MatRadioModule,
     MatDialogModule,
     MatTableModule
   ],
@@ -54,8 +63,8 @@ interface Employee {
           <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
           <span class="breadcrumb-active">Loan Taken</span>
         </div>
-        <h1 class="text-page-title">Loan Management</h1>
-        <p class="text-body text-gray-600 dark:text-gray-400">Process and manage loan applications</p>
+        <h1 class="text-page-title">Loan Entry</h1>
+        <p class="text-body text-gray-600 dark:text-gray-400">Manage loan applications and processing</p>
       </div>
 
       <!-- Main Loan Form -->
@@ -65,18 +74,361 @@ interface Employee {
           <div class="card-header bg-gradient-to-r from-blue-600 to-purple-600">
             <div class="card-title">
               <mat-icon>account_balance</mat-icon>
-              <span>Loan Entry Form</span>
-            </div>
-            <div class="flex gap-3">
-              <button type="button" class="btn btn-outline-light" (click)="openLoanSummary()">
-                <mat-icon>list</mat-icon>
-                Loan Summary
-              </button>
+              <span>Loan Entry</span>
             </div>
           </div>
 
           <mat-card-content class="p-0">
             <div class="p-6">
+              <!-- Main Form Section -->
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>description</mat-icon>
+                  <span>Loan Information</span>
+                </div>
+                <div class="form-section-content">
+                  <div class="form-row">
+                    <!-- Left Column -->
+                    <div class="form-column">
+                      <div class="form-field">
+                        <label class="form-label form-label-required">Loan Type</label>
+                        <select class="form-select" formControlName="loanType">
+                          <option value="">Select loan type</option>
+                          <option value="General">General Loan</option>
+                          <option value="Emergency">Emergency Loan</option>
+                          <option value="Festival">Festival Loan</option>
+                          <option value="Medical">Medical Loan</option>
+                        </select>
+                        <div class="form-error" *ngIf="loanForm.get('loanType')?.invalid && loanForm.get('loanType')?.touched">
+                          Loan type is required
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label form-label-required">Loan No.</label>
+                        <div class="input-group">
+                          <input 
+                            type="text" 
+                            class="form-input"
+                            placeholder="Enter loan number"
+                            formControlName="loanNo">
+                          <button type="button" class="btn btn-outline" (click)="openLoanSummary()">
+                            <mat-icon>search</mat-icon>
+                          </button>
+                        </div>
+                        <div class="form-error" *ngIf="loanForm.get('loanNo')?.invalid && loanForm.get('loanNo')?.touched">
+                          Loan number is required
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label form-label-required">Loan Date</label>
+                        <input 
+                          type="date" 
+                          class="form-input"
+                          formControlName="loanDate">
+                        <div class="form-error" *ngIf="loanForm.get('loanDate')?.invalid && loanForm.get('loanDate')?.touched">
+                          Loan date is required
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label form-label-required">EDP No.</label>
+                        <div class="input-group">
+                          <input 
+                            type="text" 
+                            class="form-input"
+                            placeholder="Enter EDP number"
+                            formControlName="edpNo">
+                          <button type="button" class="btn btn-outline" (click)="openEmployeeSearch()">
+                            <mat-icon>search</mat-icon>
+                          </button>
+                        </div>
+                        <div class="form-error" *ngIf="loanForm.get('edpNo')?.invalid && loanForm.get('edpNo')?.touched">
+                          EDP number is required
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Name</label>
+                        <input 
+                          type="text" 
+                          class="form-input"
+                          placeholder="Auto-filled from employee search"
+                          formControlName="name"
+                          readonly>
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label form-label-required">Loan Amount</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="Enter loan amount"
+                          formControlName="loanAmount"
+                          (input)="calculateNetLoan()">
+                        <div class="form-error" *ngIf="loanForm.get('loanAmount')?.invalid && loanForm.get('loanAmount')?.touched">
+                          Loan amount is required
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Previous Loan (Remaining)</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="Previous loan amount"
+                          formControlName="previousLoan"
+                          (input)="calculateNetLoan()">
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Net Loan</label>
+                        <input 
+                          type="number" 
+                          class="form-input calculation-field"
+                          placeholder="Auto-calculated"
+                          formControlName="netLoan"
+                          readonly>
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label form-label-required">No. of Inst.</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="Number of installments"
+                          formControlName="noOfInstallments"
+                          (input)="calculateInstallmentAmount()">
+                        <div class="form-error" *ngIf="loanForm.get('noOfInstallments')?.invalid && loanForm.get('noOfInstallments')?.touched">
+                          Number of installments is required
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Inst. Amount</label>
+                        <input 
+                          type="number" 
+                          class="form-input calculation-field"
+                          placeholder="Auto-calculated"
+                          formControlName="installmentAmount"
+                          readonly>
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Purpose</label>
+                        <textarea 
+                          class="form-textarea"
+                          placeholder="Enter purpose of loan"
+                          rows="3"
+                          formControlName="purpose"></textarea>
+                      </div>
+
+                      <div class="form-field" *ngIf="requiresAuthorization()">
+                        <label class="form-label form-label-required">Authorized By</label>
+                        <input 
+                          type="text" 
+                          class="form-input"
+                          placeholder="Authorization required"
+                          formControlName="authorizedBy">
+                        <div class="form-error" *ngIf="loanForm.get('authorizedBy')?.invalid && loanForm.get('authorizedBy')?.touched">
+                          Authorization is required for this loan amount
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="form-column">
+                      <div class="form-field">
+                        <label class="form-label">Share</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="Share amount"
+                          formControlName="share">
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">CD</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="CD amount"
+                          formControlName="cd">
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Last Salary</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="Last salary"
+                          formControlName="lastSalary">
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Share</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="Share amount"
+                          formControlName="shareRight">
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">CD</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="CD amount"
+                          formControlName="cdRight">
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">MWF</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="MWF amount"
+                          formControlName="mwf">
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Pay Amount</label>
+                        <input 
+                          type="number" 
+                          class="form-input"
+                          placeholder="Pay amount"
+                          formControlName="payAmount">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Mode Section -->
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>payment</mat-icon>
+                  <span>Payment Mode</span>
+                </div>
+                <div class="form-section-content">
+                  <mat-radio-group formControlName="paymentMode" class="payment-mode-group">
+                    <mat-radio-button value="Cash" class="payment-mode-option">Cash</mat-radio-button>
+                    <mat-radio-button value="Cheque" class="payment-mode-option">Cheque</mat-radio-button>
+                    <mat-radio-button value="Opening" class="payment-mode-option">Opening</mat-radio-button>
+                  </mat-radio-group>
+
+                  <div class="cheque-details" *ngIf="loanForm.get('paymentMode')?.value === 'Cheque'">
+                    <div class="form-grid form-grid-3">
+                      <div class="form-field">
+                        <label class="form-label">Bank Name</label>
+                        <input 
+                          type="text" 
+                          class="form-input"
+                          placeholder="Enter bank name"
+                          formControlName="bankName">
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Cheque No.</label>
+                        <input 
+                          type="text" 
+                          class="form-input"
+                          placeholder="Enter cheque number"
+                          formControlName="chequeNo">
+                      </div>
+
+                      <div class="form-field">
+                        <label class="form-label">Cheque Date</label>
+                        <input 
+                          type="date" 
+                          class="form-input"
+                          formControlName="chequeDate">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabs Section -->
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>swap_horiz</mat-icon>
+                  <span>Given & Taken Details</span>
+                </div>
+                <div class="form-section-content">
+                  <mat-tab-group class="member-tabs">
+                    <mat-tab label="Given">
+                      <div class="tab-content">
+                        <div class="table-container">
+                          <table class="member-table">
+                            <thead>
+                              <tr>
+                                <th>Mem No</th>
+                                <th>Name</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let member of givenMembers; let i = index">
+                                <td>{{member.memNo}}</td>
+                                <td>{{member.name}}</td>
+                                <td>
+                                  <button type="button" class="btn btn-sm btn-danger" (click)="removeGivenMember(i)">
+                                    <mat-icon>delete</mat-icon>
+                                  </button>
+                                </td>
+                              </tr>
+                              <tr *ngIf="givenMembers.length === 0">
+                                <td colspan="3" class="text-center text-gray-500">No members added</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <button type="button" class="btn btn-primary mt-3" (click)="addGivenMember()">
+                          <mat-icon>add</mat-icon>
+                          Add Member
+                        </button>
+                      </div>
+                    </mat-tab>
+
+                    <mat-tab label="Taken">
+                      <div class="tab-content">
+                        <div class="table-container">
+                          <table class="member-table">
+                            <thead>
+                              <tr>
+                                <th>Mem No</th>
+                                <th>Name</th>
+                                <th>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let member of takenMembers; let i = index">
+                                <td>{{member.memNo}}</td>
+                                <td>{{member.name}}</td>
+                                <td>
+                                  <button type="button" class="btn btn-sm btn-danger" (click)="removeTakenMember(i)">
+                                    <mat-icon>delete</mat-icon>
+                                  </button>
+                                </td>
+                              </tr>
+                              <tr *ngIf="takenMembers.length === 0">
+                                <td colspan="3" class="text-center text-gray-500">No members added</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <button type="button" class="btn btn-primary mt-3" (click)="addTakenMember()">
+                          <mat-icon>add</mat-icon>
+                          Add Member
+                        </button>
+                      </div>
+                    </mat-tab>
+                  </mat-tab-group>
+                </div>
+              </div>
               <!-- Loan Basic Details Section -->
               <div class="form-section">
                 <div class="form-section-header">
@@ -432,13 +784,21 @@ interface Employee {
           <!-- Action Buttons -->
           <div class="card-actions">
             <div class="flex justify-end gap-3">
-              <button type="button" class="btn btn-secondary" (click)="onCancel()">
-                <mat-icon>close</mat-icon>
-                Cancel
+              <button type="button" class="btn btn-secondary" (click)="onValidate()">
+                <mat-icon>check_circle</mat-icon>
+                Validate
               </button>
               <button type="button" class="btn btn-primary" (click)="onSave()">
                 <mat-icon>save</mat-icon>
-                Save Loan
+                Save
+              </button>
+              <button type="button" class="btn btn-warning" (click)="onClear()">
+                <mat-icon>clear</mat-icon>
+                Clear
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="onClose()">
+                <mat-icon>close</mat-icon>
+                Close
               </button>
             </div>
           </div>
@@ -450,6 +810,8 @@ interface Employee {
 })
 export class LoanTakenComponent {
   loanForm: FormGroup;
+  givenMembers: GivenTakenMember[] = [];
+  takenMembers: GivenTakenMember[] = [];
   
   // Sample data
   loanSummaryData: LoanSummary[] = [
@@ -470,7 +832,7 @@ export class LoanTakenComponent {
     this.loanForm = this.fb.group({
       loanType: ['', Validators.required],
       loanNo: ['', Validators.required],
-      loanDate: ['', Validators.required],
+      loanDate: [new Date().toISOString().split('T')[0], Validators.required],
       edpNo: ['', Validators.required],
       name: [''],
       loanAmount: ['', [Validators.required, Validators.min(1)]],
@@ -480,19 +842,17 @@ export class LoanTakenComponent {
       installmentAmount: [0],
       purpose: [''],
       authorizedBy: [''],
-      paymentMode: ['', Validators.required],
-      bank: [''],
+      paymentMode: ['Cash', Validators.required],
+      bankName: [''],
       chequeNo: [''],
       chequeDate: [''],
-      shareLeft: [0],
-      cdLeft: [0],
+      share: [0],
+      cd: [0],
       shareRight: [0],
       cdRight: [0],
       lastSalary: [0],
       mwf: [0],
-      payAmount: [0],
-      given: [''],
-      taken: ['']
+      payAmount: [0]
     });
   }
 
@@ -516,29 +876,44 @@ export class LoanTakenComponent {
     return loanAmount > 100000; // Require authorization for loans above 1 lakh
   }
 
-  onPaymentModeChange() {
-    const paymentMode = this.loanForm.get('paymentMode')?.value;
-    if (paymentMode !== 'Cheque') {
-      this.loanForm.patchValue({ chequeNo: '', chequeDate: '' });
-    }
-    if (paymentMode === 'Cash') {
-      this.loanForm.patchValue({ bank: '' });
-    }
+  addGivenMember() {
+    // In a real application, this would open a member selection dialog
+    const newMember: GivenTakenMember = {
+      memNo: 'M' + (this.givenMembers.length + 1).toString().padStart(3, '0'),
+      name: 'Member ' + (this.givenMembers.length + 1)
+    };
+    this.givenMembers.push(newMember);
   }
 
-  showBankFields(): boolean {
-    const paymentMode = this.loanForm.get('paymentMode')?.value;
-    return paymentMode === 'Cheque' || paymentMode === 'Bank Transfer';
+  removeGivenMember(index: number) {
+    this.givenMembers.splice(index, 1);
   }
 
-  showChequeFields(): boolean {
-    return this.loanForm.get('paymentMode')?.value === 'Cheque';
+  addTakenMember() {
+    // In a real application, this would open a member selection dialog
+    const newMember: GivenTakenMember = {
+      memNo: 'M' + (this.takenMembers.length + 1).toString().padStart(3, '0'),
+      name: 'Member ' + (this.takenMembers.length + 1)
+    };
+    this.takenMembers.push(newMember);
+  }
+
+  removeTakenMember(index: number) {
+    this.takenMembers.splice(index, 1);
   }
 
   openLoanSummary() {
     const dialogRef = this.dialog.open(LoanSummaryDialog, {
       width: '800px',
       data: this.loanSummaryData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loanForm.patchValue({
+          loanNo: result.loanNo
+        });
+      }
     });
   }
 
@@ -558,18 +933,54 @@ export class LoanTakenComponent {
     });
   }
 
-  onSave() {
+  onValidate() {
+    this.markFormGroupTouched(this.loanForm);
     if (this.loanForm.valid) {
-      const formData = this.loanForm.value;
-      console.log('Loan data:', formData);
-      // Handle save logic here
+      alert('All fields are valid!');
     } else {
-      this.markFormGroupTouched(this.loanForm);
+      alert('Please fill in all required fields.');
     }
   }
 
-  onCancel() {
+  onSave() {
+    if (this.loanForm.valid) {
+      const formData = {
+        ...this.loanForm.value,
+        givenMembers: this.givenMembers,
+        takenMembers: this.takenMembers
+      };
+      console.log('Loan data:', formData);
+      alert('Loan data saved successfully!');
+    } else {
+      this.markFormGroupTouched(this.loanForm);
+      alert('Please fill in all required fields.');
+    }
+  }
+
+  onClear() {
     this.loanForm.reset();
+    this.loanForm.patchValue({
+      loanDate: new Date().toISOString().split('T')[0],
+      paymentMode: 'Cash',
+      previousLoan: 0,
+      netLoan: 0,
+      installmentAmount: 0,
+      share: 0,
+      cd: 0,
+      shareRight: 0,
+      cdRight: 0,
+      lastSalary: 0,
+      mwf: 0,
+      payAmount: 0
+    });
+    this.givenMembers = [];
+    this.takenMembers = [];
+  }
+
+  onClose() {
+    if (confirm('Are you sure you want to close? Any unsaved changes will be lost.')) {
+      this.onClear();
+    }
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {
@@ -633,7 +1044,9 @@ export class LoanTakenComponent {
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+                class="clickable-row" 
+                (click)="selectLoan(row)"></tr>
           </table>
         </div>
       </div>
@@ -688,6 +1101,10 @@ export class LoanSummaryDialog {
 
   applyFilter() {
     this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+  }
+
+  selectLoan(loan: LoanSummary) {
+    this.dialogRef.close(loan);
   }
 
   close() {
