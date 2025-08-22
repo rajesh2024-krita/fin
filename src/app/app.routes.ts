@@ -98,6 +98,10 @@ export const routes: Routes = [
         loadComponent: () => import('./components/transaction/loan-taken/loan-taken.component').then(m => m.LoanTakenComponent)
       },
       {
+        path: 'transaction/monthly-demand',
+        loadComponent: () => import('./components/transaction/monthly-demand/monthly-demand.component').then(m => m.MonthlyDemandComponent)
+      },
+      {
         path: 'transaction/demand-process',
         loadComponent: () => import('./components/transaction/demand-process/demand-process.component').then(m => m.DemandProcessComponent)
       },
