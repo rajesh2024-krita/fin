@@ -1,350 +1,423 @@
-
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-  <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-        Member Details
-      </h1>
-      <p class="text-gray-600 text-lg">
-        Manage member information and settings
-      </p>
+<div class="animate-fade-in">
+  <!-- Page Header -->
+  <div class="content-header mb-6">
+    <div class="breadcrumb">
+      <span>Members</span>
+      <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+      <span class="breadcrumb-active">Member Details</span>
     </div>
+    <h1 class="text-page-title">Member Management</h1>
+    <p class="text-body text-gray-600 dark:text-gray-400">Manage member information and settings</p>
+  </div>
 
-    <!-- Main Card -->
-    <mat-card class="shadow-2xl border-0 rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
-      <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
-        <h2 class="text-2xl font-semibold text-white flex items-center gap-3">
-          <mat-icon class="text-white">person</mat-icon>
-          Member Information
-        </h2>
+  <!-- Main Member Form -->
+  <form class="form-container">
+    <mat-card class="card">
+      <!-- Card Header -->
+      <div class="card-header bg-gradient-to-r from-blue-600 to-purple-600">
+        <div class="card-title">
+          <mat-icon>person</mat-icon>
+          <span>Member Information</span>
+        </div>
       </div>
 
       <mat-card-content class="p-0">
-        <mat-tab-group class="member-tabs" backgroundColor="primary">
+        <mat-tab-group class="member-tabs">
           <!-- General Tab -->
           <mat-tab label="General">
-            <div class="p-8">
-              <form [formGroup]="generalForm" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <!-- Member No -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Member No</mat-label>
-                    <input matInput formControlName="memberNo" placeholder="Enter member number">
-                    <mat-error *ngIf="generalForm.get('memberNo')?.hasError('required')">
-                      Member number is required
-                    </mat-error>
-                  </mat-form-field>
-
-                  <!-- Name -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Name</mat-label>
-                    <input matInput formControlName="name" placeholder="Enter full name">
-                    <mat-error *ngIf="generalForm.get('name')?.hasError('required')">
-                      Name is required
-                    </mat-error>
-                  </mat-form-field>
-
-                  <!-- F/H Name -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>F/H Name</mat-label>
-                    <input matInput formControlName="fhName" placeholder="Father/Husband name">
-                    <mat-error *ngIf="generalForm.get('fhName')?.hasError('required')">
-                      F/H Name is required
-                    </mat-error>
-                  </mat-form-field>
-
-                  <!-- Office Address -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Office Address</mat-label>
-                    <textarea matInput formControlName="officeAddress" placeholder="Enter office address" rows="2"></textarea>
-                  </mat-form-field>
-
-                  <!-- City -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>City</mat-label>
-                    <input matInput formControlName="city" placeholder="Enter city">
-                  </mat-form-field>
-
-                  <!-- Phone (Office) -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Phone (Office)</mat-label>
-                    <input matInput formControlName="phoneOffice" placeholder="Enter office phone">
-                  </mat-form-field>
-
-                  <!-- Branch -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Branch</mat-label>
-                    <input matInput formControlName="branch" placeholder="Enter branch">
-                  </mat-form-field>
-
-                  <!-- Phone (Residence) -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Phone (Residence)</mat-label>
-                    <input matInput formControlName="phoneResidence" placeholder="Enter residence phone">
-                  </mat-form-field>
-
-                  <!-- Designation -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Designation</mat-label>
-                    <input matInput formControlName="designation" placeholder="Enter designation">
-                  </mat-form-field>
-
-                  <!-- Mobile -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Mobile</mat-label>
-                    <input matInput formControlName="mobile" placeholder="Enter mobile number">
-                    <mat-error *ngIf="generalForm.get('mobile')?.hasError('pattern')">
-                      Enter valid 10-digit mobile number
-                    </mat-error>
-                  </mat-form-field>
-
-                  <!-- Residence Address -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Residence Address</mat-label>
-                    <textarea matInput formControlName="residenceAddress" placeholder="Enter residence address" rows="2"></textarea>
-                  </mat-form-field>
-
-                  <!-- DOB -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Date of Birth</mat-label>
-                    <input matInput [matDatepicker]="dobPicker" formControlName="dob" placeholder="Select DOB">
-                    <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #dobPicker></mat-datepicker>
-                  </mat-form-field>
-
-                  <!-- DOJ Society -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>DOJ Society</mat-label>
-                    <input matInput [matDatepicker]="dojSocietyPicker" formControlName="dojSociety" placeholder="Select DOJ Society">
-                    <mat-datepicker-toggle matIconSuffix [for]="dojSocietyPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #dojSocietyPicker></mat-datepicker>
-                  </mat-form-field>
-
-                  <!-- Email -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Email</mat-label>
-                    <input matInput formControlName="email" placeholder="Enter email address">
-                    <mat-error *ngIf="generalForm.get('email')?.hasError('email')">
-                      Enter valid email address
-                    </mat-error>
-                  </mat-form-field>
-
-                  <!-- DOJ -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>DOJ (Date of Joining Job)</mat-label>
-                    <input matInput [matDatepicker]="dojPicker" formControlName="doj" placeholder="Select DOJ">
-                    <mat-datepicker-toggle matIconSuffix [for]="dojPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #dojPicker></mat-datepicker>
-                  </mat-form-field>
-
-                  <!-- DOR -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>DOR (Date of Retirement)</mat-label>
-                    <input matInput [matDatepicker]="dorPicker" formControlName="dor" placeholder="Select DOR">
-                    <mat-datepicker-toggle matIconSuffix [for]="dorPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #dorPicker></mat-datepicker>
-                  </mat-form-field>
-
-                  <!-- Nominee -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Nominee</mat-label>
-                    <input matInput formControlName="nominee" placeholder="Enter nominee name">
-                  </mat-form-field>
-
-                  <!-- Nominee Relation -->
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Nominee Relation</mat-label>
-                    <mat-select formControlName="nomineeRelation">
-                      <mat-option value="Father">Father</mat-option>
-                      <mat-option value="Mother">Mother</mat-option>
-                      <mat-option value="Spouse">Spouse</mat-option>
-                      <mat-option value="Son">Son</mat-option>
-                      <mat-option value="Daughter">Daughter</mat-option>
-                      <mat-option value="Brother">Brother</mat-option>
-                      <mat-option value="Sister">Sister</mat-option>
-                      <mat-option value="Other">Other</mat-option>
-                    </mat-select>
-                  </mat-form-field>
+            <div class="p-6">
+              <div class="form-section">
+                <div class="form-section-header text-white">
+                  <mat-icon>person_outline</mat-icon>
+                  <span>Personal Details</span>
                 </div>
-              </form>
+                <div class="form-section-content">
+                  <div class="form-grid form-grid-3">
+                    <div class="form-field">
+                      <label class="form-label form-label-required">Member No</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Enter member number">
+                      <div class="form-error">
+                        Member number is required
+                      </div>
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label form-label-required">Name</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Enter full name">
+                      <div class="form-error">
+                        Name is required
+                      </div>
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label form-label-required">F/H Name</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Father/Husband name">
+                      <div class="form-error">
+                        F/H Name is required
+                      </div>
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">Date of Birth</label>
+                      <input 
+                        type="date" 
+                        class="form-input">
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">Mobile</label>
+                      <input 
+                        type="tel" 
+                        class="form-input"
+                        placeholder="Enter mobile number">
+                      <div class="form-error">
+                        Enter valid 10-digit mobile number
+                      </div>
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">Email</label>
+                      <input 
+                        type="email" 
+                        class="form-input"
+                        placeholder="Enter email address">
+                      <div class="form-error">
+                        Enter valid email address
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>work_outline</mat-icon>
+                  <span>Employment Details</span>
+                </div>
+                <div class="form-section-content">
+                  <div class="form-grid form-grid-3">
+                    <div class="form-field">
+                      <label class="form-label">Designation</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Enter designation">
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">DOJ (Date of Joining Job)</label>
+                      <input 
+                        type="date" 
+                        class="form-input">
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">DOR (Date of Retirement)</label>
+                      <input 
+                        type="date" 
+                        class="form-input">
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">Branch</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Enter branch">
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">DOJ Society</label>
+                      <input 
+                        type="date" 
+                        class="form-input">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>location_on</mat-icon>
+                  <span>Address Details</span>
+                </div>
+                <div class="form-section-content">
+                  <div class="form-grid form-grid-2">
+                    <div class="form-field">
+                      <label class="form-label">Office Address</label>
+                      <textarea 
+                        class="form-textarea"
+                        placeholder="Enter office address"
+                        rows="3"></textarea>
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">Residence Address</label>
+                      <textarea 
+                        class="form-textarea"
+                        placeholder="Enter residence address"
+                        rows="3"></textarea>
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">City</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Enter city">
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">Phone (Office)</label>
+                      <input 
+                        type="tel" 
+                        class="form-input"
+                        placeholder="Enter office phone">
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">Phone (Residence)</label>
+                      <input 
+                        type="tel" 
+                        class="form-input"
+                        placeholder="Enter residence phone">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>person_pin</mat-icon>
+                  <span>Nominee Details</span>
+                </div>
+                <div class="form-section-content">
+                  <div class="form-grid form-grid-2">
+                    <div class="form-field">
+                      <label class="form-label">Nominee</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Enter nominee name">
+                    </div>
+
+                    <div class="form-field">
+                      <label class="form-label">Nominee Relation</label>
+                      <select class="form-select">
+                        <option value="">Select relation</option>
+                        <option value="Father">Father</option>
+                        <option value="Mother">Mother</option>
+                        <option value="Spouse">Spouse</option>
+                        <option value="Son">Son</option>
+                        <option value="Daughter">Daughter</option>
+                        <option value="Brother">Brother</option>
+                        <option value="Sister">Sister</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </mat-tab>
 
           <!-- Photo & Opening Balance Tab -->
           <mat-tab label="Photo & Opening Balance">
-            <div class="p-8">
-              <form [formGroup]="photoBalanceForm" class="space-y-8">
-                <!-- Opening Balance Section -->
-                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
-                  <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <mat-icon class="text-blue-600">account_balance</mat-icon>
-                    Opening Balance
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Share</mat-label>
-                      <input matInput formControlName="share" placeholder="Enter share amount" type="number">
-                      <mat-error *ngIf="photoBalanceForm.get('share')?.hasError('required')">
+            <div class="p-6">
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>account_balance</mat-icon>
+                  <span>Opening Balance</span>
+                </div>
+                <div class="form-section-content">
+                  <div class="form-grid form-grid-2">
+                    <div class="form-field">
+                      <label class="form-label form-label-required">Share</label>
+                      <input 
+                        type="number" 
+                        class="form-input"
+                        placeholder="Enter share amount">
+                      <div class="form-error">
                         Share amount is required
-                      </mat-error>
-                    </mat-form-field>
+                      </div>
+                    </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>CD (Credit Deposit)</mat-label>
-                      <input matInput formControlName="cd" placeholder="Enter CD amount" type="number">
-                      <mat-error *ngIf="photoBalanceForm.get('cd')?.hasError('required')">
+                    <div class="form-field">
+                      <label class="form-label form-label-required">CD (Credit Deposit)</label>
+                      <input 
+                        type="number" 
+                        class="form-input"
+                        placeholder="Enter CD amount">
+                      <div class="form-error">
                         CD amount is required
-                      </mat-error>
-                    </mat-form-field>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <!-- Bank Details Section -->
-                <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6">
-                  <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <mat-icon class="text-green-600">account_balance</mat-icon>
-                    Bank Details
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Bank Name</mat-label>
-                      <input matInput formControlName="bankName" placeholder="Enter bank name">
-                    </mat-form-field>
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>account_balance_wallet</mat-icon>
+                  <span>Bank Details</span>
+                </div>
+                <div class="form-section-content">
+                  <div class="form-grid form-grid-3">
+                    <div class="form-field">
+                      <label class="form-label">Bank Name</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Enter bank name">
+                    </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Payable At</mat-label>
-                      <input matInput formControlName="payableAt" placeholder="Enter payable at">
-                    </mat-form-field>
+                    <div class="form-field">
+                      <label class="form-label">Payable At</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Enter payable at">
+                    </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Account No</mat-label>
-                      <input matInput formControlName="accountNo" placeholder="Enter account number">
-                    </mat-form-field>
+                    <div class="form-field">
+                      <label class="form-label">Account No</label>
+                      <input 
+                        type="text" 
+                        class="form-input"
+                        placeholder="Enter account number">
+                    </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Status</mat-label>
-                      <mat-select formControlName="status">
-                        <mat-option value="Active">Active</mat-option>
-                        <mat-option value="Inactive">Inactive</mat-option>
-                      </mat-select>
-                    </mat-form-field>
+                    <div class="form-field">
+                      <label class="form-label">Status</label>
+                      <select class="form-select">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                      </select>
+                    </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Date</mat-label>
-                      <input matInput [matDatepicker]="datePicker" formControlName="date" placeholder="Select date">
-                      <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
-                      <mat-datepicker #datePicker></mat-datepicker>
-                    </mat-form-field>
+                    <div class="form-field">
+                      <label class="form-label">Date</label>
+                      <input 
+                        type="date" 
+                        class="form-input">
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <!-- Upload Section -->
-                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
-                  <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-                    <mat-icon class="text-purple-600">cloud_upload</mat-icon>
-                    Upload Documents
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Photo Upload -->
-                    <div class="space-y-4">
-                      <h4 class="font-medium text-gray-700">Member Photo</h4>
-                      <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <input type="file" accept="image/*" (change)="onFileSelected($event, 'photo')" class="hidden" #photoInput>
-                        <div *ngIf="!memberPhoto()" class="space-y-2">
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>cloud_upload</mat-icon>
+                  <span>Upload Documents</span>
+                </div>
+                <div class="form-section-content">
+                  <div class="form-grid form-grid-2">
+                    <div class="form-field">
+                      <label class="form-label">Member Photo</label>
+                      <div class="file-upload-container">
+                        <input type="file" accept="image/*" class="hidden">
+                        <div class="file-upload-placeholder">
                           <mat-icon class="text-gray-400 text-4xl">photo_camera</mat-icon>
                           <p class="text-gray-500">Click to upload photo</p>
-                          <button mat-raised-button color="primary" (click)="photoInput.click()">
+                          <button type="button" class="btn btn-outline btn-sm">
                             <mat-icon>upload</mat-icon>
                             Upload Photo
                           </button>
                         </div>
-                        <div *ngIf="memberPhoto()" class="space-y-2">
-                          <img [src]="memberPhoto()" alt="Member Photo" class="mx-auto max-w-32 max-h-32 rounded-lg shadow-md">
-                          <button mat-raised-button color="accent" (click)="photoInput.click()">
-                            <mat-icon>edit</mat-icon>
-                            Change Photo
-                          </button>
-                        </div>
                       </div>
                     </div>
 
-                    <!-- Signature Upload -->
-                    <div class="space-y-4">
-                      <h4 class="font-medium text-gray-700">Member Signature</h4>
-                      <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <input type="file" accept="image/*" (change)="onFileSelected($event, 'signature')" class="hidden" #signatureInput>
-                        <div *ngIf="!memberSignature()" class="space-y-2">
+                    <div class="form-field">
+                      <label class="form-label">Member Signature</label>
+                      <div class="file-upload-container">
+                        <input type="file" accept="image/*" class="hidden">
+                        <div class="file-upload-placeholder">
                           <mat-icon class="text-gray-400 text-4xl">edit</mat-icon>
                           <p class="text-gray-500">Click to upload signature</p>
-                          <button mat-raised-button color="primary" (click)="signatureInput.click()">
+                          <button type="button" class="btn btn-outline btn-sm">
                             <mat-icon>upload</mat-icon>
                             Upload Signature
-                          </button>
-                        </div>
-                        <div *ngIf="memberSignature()" class="space-y-2">
-                          <img [src]="memberSignature()" alt="Member Signature" class="mx-auto max-w-32 max-h-16 rounded-lg shadow-md">
-                          <button mat-raised-button color="accent" (click)="signatureInput.click()">
-                            <mat-icon>edit</mat-icon>
-                            Change Signature
                           </button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
           </mat-tab>
 
           <!-- Monthly Deduction Tab -->
           <mat-tab label="Monthly Deduction">
-            <div class="p-8">
-              <form [formGroup]="deductionForm">
-                <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6">
-                  <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-                    <mat-icon class="text-orange-600">calculate</mat-icon>
-                    Monthly Deduction Details
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Share</mat-label>
-                      <input matInput formControlName="share" placeholder="Enter share deduction" type="number">
-                    </mat-form-field>
+            <div class="p-6">
+              <div class="form-section">
+                <div class="form-section-header">
+                  <mat-icon>calculate</mat-icon>
+                  <span>Monthly Deduction Details</span>
+                </div>
+                <div class="form-section-content">
+                  <div class="form-grid form-grid-2">
+                    <div class="form-field">
+                      <label class="form-label">Share</label>
+                      <input 
+                        type="number" 
+                        class="form-input"
+                        placeholder="Enter share deduction">
+                    </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Withdrawal</mat-label>
-                      <input matInput formControlName="withdrawal" placeholder="Enter withdrawal amount" type="number">
-                    </mat-form-field>
+                    <div class="form-field">
+                      <label class="form-label">Withdrawal</label>
+                      <input 
+                        type="number" 
+                        class="form-input"
+                        placeholder="Enter withdrawal amount">
+                    </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>G Loan Instalment</mat-label>
-                      <input matInput formControlName="gLoanInstalment" placeholder="Enter G loan instalment" type="number">
-                    </mat-form-field>
+                    <div class="form-field">
+                      <label class="form-label">G Loan Instalment</label>
+                      <input 
+                        type="number" 
+                        class="form-input"
+                        placeholder="Enter G loan instalment">
+                    </div>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>E Loan Instalment</mat-label>
-                      <input matInput formControlName="eLoanInstalment" placeholder="Enter E loan instalment" type="number">
-                    </mat-form-field>
+                    <div class="form-field">
+                      <label class="form-label">E Loan Instalment</label>
+                      <input 
+                        type="number" 
+                        class="form-input"
+                        placeholder="Enter E loan instalment">
+                    </div>
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
           </mat-tab>
         </mat-tab-group>
       </mat-card-content>
 
       <!-- Action Buttons -->
-      <div class="p-6 bg-gray-50 border-t flex justify-end gap-4">
-        <button mat-raised-button color="warn" (click)="onCancel()" class="px-8">
-          <mat-icon>cancel</mat-icon>
-          Cancel
-        </button>
-        <button mat-raised-button color="primary" (click)="onSave()" class="px-8">
-          <mat-icon>save</mat-icon>
-          Save Member
-        </button>
+      <div class="card-actions">
+        <div class="flex justify-end gap-3">
+          <button type="button" class="btn btn-secondary">
+            <mat-icon>close</mat-icon>
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary">
+            <mat-icon>save</mat-icon>
+            Save Member
+          </button>
+        </div>
       </div>
     </mat-card>
-  </div>
+  </form>
 </div>
