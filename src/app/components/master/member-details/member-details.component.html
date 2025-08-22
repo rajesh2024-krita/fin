@@ -1,283 +1,350 @@
 
-<div class="animate-fade-in">
-  <!-- Page Header -->
-  <div class="content-header">
-    <div class="breadcrumb">
-      <span>Master</span>
-      <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
-      <span class="breadcrumb-active">Member Details</span>
-    </div>
-    <h1 class="text-page-title">Member Management</h1>
-    <p class="text-body text-gray-600 dark:text-gray-400">Manage member information, accounts, and details</p>
-  </div>
-
-  <!-- Statistics Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="card hover:shadow-lg transition-all duration-200">
-      <div class="card-content">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-caption text-gray-500 mb-1">Total Members</p>
-            <p class="text-2xl font-bold text-blue-600">{{ getTotalMembers() }}</p>
-          </div>
-          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
-            <mat-icon class="text-blue-600 text-2xl">people</mat-icon>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="card hover:shadow-lg transition-all duration-200">
-      <div class="card-content">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-caption text-gray-500 mb-1">Active Members</p>
-            <p class="text-2xl font-bold text-green-600">{{ getActiveMembers() }}</p>
-          </div>
-          <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center">
-            <mat-icon class="text-green-600 text-2xl">person_check</mat-icon>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="card hover:shadow-lg transition-all duration-200">
-      <div class="card-content">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-caption text-gray-500 mb-1">Inactive Members</p>
-            <p class="text-2xl font-bold text-red-600">{{ getInactiveMembers() }}</p>
-          </div>
-          <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-xl flex items-center justify-center">
-            <mat-icon class="text-red-600 text-2xl">person_off</mat-icon>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="card hover:shadow-lg transition-all duration-200">
-      <div class="card-content">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-caption text-gray-500 mb-1">This Month</p>
-            <p class="text-2xl font-bold text-purple-600">{{ getThisMonthMembers() }}</p>
-          </div>
-          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center">
-            <mat-icon class="text-purple-600 text-2xl">person_add</mat-icon>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content Card -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">
-        <mat-icon>people</mat-icon>
-        <span>All Members</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <button class="btn btn-outline btn-sm">
-          <mat-icon class="text-sm">download</mat-icon>
-          Export
-        </button>
-        <button class="btn btn-primary btn-sm" (click)="openAddMemberDialog()">
-          <mat-icon class="text-sm">person_add</mat-icon>
-          Add Member
-        </button>
-      </div>
-    </div>
-
-    <!-- Filters Section -->
-    <div class="table-filters">
-      <div class="flex flex-wrap items-center gap-4 w-full">
-        <!-- Search Input -->
-        <div class="flex-1 min-w-64">
-          <div class="form-field">
-            <input 
-              type="text" 
-              class="form-input"
-              placeholder="Search by name, ID, phone, or email..."
-              [(ngModel)]="searchTerm"
-              (input)="filterMembers()">
-          </div>
-        </div>
-
-        <!-- Status Filter -->
-        <div class="min-w-40">
-          <div class="form-field">
-            <select 
-              class="form-select"
-              [(ngModel)]="selectedStatus"
-              (change)="filterMembers()">
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="pending">Pending</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Category Filter -->
-        <div class="min-w-40">
-          <div class="form-field">
-            <select 
-              class="form-select"
-              [(ngModel)]="selectedCategory"
-              (change)="filterMembers()">
-              <option value="">All Categories</option>
-              <option value="regular">Regular</option>
-              <option value="associate">Associate</option>
-              <option value="life">Life</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Clear Filters -->
-        <button 
-          class="btn btn-secondary btn-sm"
-          (click)="clearFilters()">
-          <mat-icon class="text-sm">clear</mat-icon>
-          Clear
-        </button>
-      </div>
-    </div>
-
-    <!-- Members Table -->
-    <div class="overflow-x-auto">
-      <table mat-table [dataSource]="dataSource" class="w-full">
-        
-        <!-- Member ID Column -->
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold">Member ID</th>
-          <td mat-cell *matCellDef="let member" class="font-medium text-blue-600">
-            #{{ member.id }}
-          </td>
-        </ng-container>
-
-        <!-- Name Column -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold">Name</th>
-          <td mat-cell *matCellDef="let member">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                {{ getInitials(member.name) }}
-              </div>
-              <div>
-                <p class="font-medium">{{ member.name }}</p>
-                <p class="text-caption text-gray-500">{{ member.fatherName }}</p>
-              </div>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Contact Column -->
-        <ng-container matColumnDef="contact">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold">Contact</th>
-          <td mat-cell *matCellDef="let member">
-            <div>
-              <p class="font-medium">{{ member.phone }}</p>
-              <p class="text-caption text-gray-500">{{ member.email }}</p>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Address Column -->
-        <ng-container matColumnDef="address">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold">Address</th>
-          <td mat-cell *matCellDef="let member">
-            <div class="max-w-48">
-              <p class="text-sm line-clamp-2">{{ member.address }}</p>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Category Column -->
-        <ng-container matColumnDef="category">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold">Category</th>
-          <td mat-cell *matCellDef="let member">
-            <span [class]="getCategoryBadgeClass(member.category)">
-              {{ member.category | titlecase }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Status Column -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold">Status</th>
-          <td mat-cell *matCellDef="let member">
-            <span [class]="getStatusBadgeClass(member.status)">
-              <mat-icon class="text-xs mr-1">{{ getStatusIcon(member.status) }}</mat-icon>
-              {{ member.status | titlecase }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Join Date Column -->
-        <ng-container matColumnDef="joinDate">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold">Join Date</th>
-          <td mat-cell *matCellDef="let member">
-            <div>
-              <p class="font-medium">{{ member.joinDate | date:'mediumDate' }}</p>
-              <p class="text-caption text-gray-500">{{ getDateFromNow(member.joinDate) }}</p>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Actions</th>
-          <td mat-cell *matCellDef="let member">
-            <div class="flex items-center justify-center gap-1">
-              <button 
-                class="btn btn-secondary btn-sm btn-icon"
-                matTooltip="View Details"
-                (click)="viewMember(member)">
-                <mat-icon class="text-sm">visibility</mat-icon>
-              </button>
-              <button 
-                class="btn btn-outline btn-sm btn-icon"
-                matTooltip="Edit Member"
-                (click)="editMember(member)">
-                <mat-icon class="text-sm">edit</mat-icon>
-              </button>
-              <button 
-                class="btn btn-danger btn-sm btn-icon"
-                matTooltip="Delete Member"
-                (click)="deleteMember(member)">
-                <mat-icon class="text-sm">delete</mat-icon>
-              </button>
-            </div>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"></tr>
-      </table>
-    </div>
-
-    <!-- No Data Message -->
-    <div *ngIf="dataSource.data.length === 0" class="text-center py-12">
-      <mat-icon class="text-gray-400 text-6xl mb-4">people_outline</mat-icon>
-      <h3 class="text-section-header text-gray-500 mb-2">No Members Found</h3>
-      <p class="text-body text-gray-400 mb-4">
-        {{ searchTerm || selectedStatus || selectedCategory ? 'No members match your current filters.' : 'Start by adding your first member.' }}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        Member Details
+      </h1>
+      <p class="text-gray-600 text-lg">
+        Manage member information and settings
       </p>
-      <button class="btn btn-primary" (click)="openAddMemberDialog()">
-        <mat-icon>person_add</mat-icon>
-        Add First Member
-      </button>
     </div>
 
-    <!-- Pagination -->
-    <div *ngIf="dataSource.data.length > 0" class="border-t border-gray-200 dark:border-gray-700">
-      <mat-paginator
-        [pageSizeOptions]="[10, 25, 50, 100]"
-        [pageSize]="10"
-        showFirstLastButtons
-        aria-label="Select page of members">
-      </mat-paginator>
-    </div>
+    <!-- Main Card -->
+    <mat-card class="shadow-2xl border-0 rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+        <h2 class="text-2xl font-semibold text-white flex items-center gap-3">
+          <mat-icon class="text-white">person</mat-icon>
+          Member Information
+        </h2>
+      </div>
+
+      <mat-card-content class="p-0">
+        <mat-tab-group class="member-tabs" backgroundColor="primary">
+          <!-- General Tab -->
+          <mat-tab label="General">
+            <div class="p-8">
+              <form [formGroup]="generalForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <!-- Member No -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Member No</mat-label>
+                    <input matInput formControlName="memberNo" placeholder="Enter member number">
+                    <mat-error *ngIf="generalForm.get('memberNo')?.hasError('required')">
+                      Member number is required
+                    </mat-error>
+                  </mat-form-field>
+
+                  <!-- Name -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" placeholder="Enter full name">
+                    <mat-error *ngIf="generalForm.get('name')?.hasError('required')">
+                      Name is required
+                    </mat-error>
+                  </mat-form-field>
+
+                  <!-- F/H Name -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>F/H Name</mat-label>
+                    <input matInput formControlName="fhName" placeholder="Father/Husband name">
+                    <mat-error *ngIf="generalForm.get('fhName')?.hasError('required')">
+                      F/H Name is required
+                    </mat-error>
+                  </mat-form-field>
+
+                  <!-- Office Address -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Office Address</mat-label>
+                    <textarea matInput formControlName="officeAddress" placeholder="Enter office address" rows="2"></textarea>
+                  </mat-form-field>
+
+                  <!-- City -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>City</mat-label>
+                    <input matInput formControlName="city" placeholder="Enter city">
+                  </mat-form-field>
+
+                  <!-- Phone (Office) -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Phone (Office)</mat-label>
+                    <input matInput formControlName="phoneOffice" placeholder="Enter office phone">
+                  </mat-form-field>
+
+                  <!-- Branch -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Branch</mat-label>
+                    <input matInput formControlName="branch" placeholder="Enter branch">
+                  </mat-form-field>
+
+                  <!-- Phone (Residence) -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Phone (Residence)</mat-label>
+                    <input matInput formControlName="phoneResidence" placeholder="Enter residence phone">
+                  </mat-form-field>
+
+                  <!-- Designation -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Designation</mat-label>
+                    <input matInput formControlName="designation" placeholder="Enter designation">
+                  </mat-form-field>
+
+                  <!-- Mobile -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Mobile</mat-label>
+                    <input matInput formControlName="mobile" placeholder="Enter mobile number">
+                    <mat-error *ngIf="generalForm.get('mobile')?.hasError('pattern')">
+                      Enter valid 10-digit mobile number
+                    </mat-error>
+                  </mat-form-field>
+
+                  <!-- Residence Address -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Residence Address</mat-label>
+                    <textarea matInput formControlName="residenceAddress" placeholder="Enter residence address" rows="2"></textarea>
+                  </mat-form-field>
+
+                  <!-- DOB -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Date of Birth</mat-label>
+                    <input matInput [matDatepicker]="dobPicker" formControlName="dob" placeholder="Select DOB">
+                    <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #dobPicker></mat-datepicker>
+                  </mat-form-field>
+
+                  <!-- DOJ Society -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>DOJ Society</mat-label>
+                    <input matInput [matDatepicker]="dojSocietyPicker" formControlName="dojSociety" placeholder="Select DOJ Society">
+                    <mat-datepicker-toggle matIconSuffix [for]="dojSocietyPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #dojSocietyPicker></mat-datepicker>
+                  </mat-form-field>
+
+                  <!-- Email -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email" placeholder="Enter email address">
+                    <mat-error *ngIf="generalForm.get('email')?.hasError('email')">
+                      Enter valid email address
+                    </mat-error>
+                  </mat-form-field>
+
+                  <!-- DOJ -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>DOJ (Date of Joining Job)</mat-label>
+                    <input matInput [matDatepicker]="dojPicker" formControlName="doj" placeholder="Select DOJ">
+                    <mat-datepicker-toggle matIconSuffix [for]="dojPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #dojPicker></mat-datepicker>
+                  </mat-form-field>
+
+                  <!-- DOR -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>DOR (Date of Retirement)</mat-label>
+                    <input matInput [matDatepicker]="dorPicker" formControlName="dor" placeholder="Select DOR">
+                    <mat-datepicker-toggle matIconSuffix [for]="dorPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #dorPicker></mat-datepicker>
+                  </mat-form-field>
+
+                  <!-- Nominee -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Nominee</mat-label>
+                    <input matInput formControlName="nominee" placeholder="Enter nominee name">
+                  </mat-form-field>
+
+                  <!-- Nominee Relation -->
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Nominee Relation</mat-label>
+                    <mat-select formControlName="nomineeRelation">
+                      <mat-option value="Father">Father</mat-option>
+                      <mat-option value="Mother">Mother</mat-option>
+                      <mat-option value="Spouse">Spouse</mat-option>
+                      <mat-option value="Son">Son</mat-option>
+                      <mat-option value="Daughter">Daughter</mat-option>
+                      <mat-option value="Brother">Brother</mat-option>
+                      <mat-option value="Sister">Sister</mat-option>
+                      <mat-option value="Other">Other</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </form>
+            </div>
+          </mat-tab>
+
+          <!-- Photo & Opening Balance Tab -->
+          <mat-tab label="Photo & Opening Balance">
+            <div class="p-8">
+              <form [formGroup]="photoBalanceForm" class="space-y-8">
+                <!-- Opening Balance Section -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
+                  <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <mat-icon class="text-blue-600">account_balance</mat-icon>
+                    Opening Balance
+                  </h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Share</mat-label>
+                      <input matInput formControlName="share" placeholder="Enter share amount" type="number">
+                      <mat-error *ngIf="photoBalanceForm.get('share')?.hasError('required')">
+                        Share amount is required
+                      </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>CD (Credit Deposit)</mat-label>
+                      <input matInput formControlName="cd" placeholder="Enter CD amount" type="number">
+                      <mat-error *ngIf="photoBalanceForm.get('cd')?.hasError('required')">
+                        CD amount is required
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <!-- Bank Details Section -->
+                <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6">
+                  <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <mat-icon class="text-green-600">account_balance</mat-icon>
+                    Bank Details
+                  </h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Bank Name</mat-label>
+                      <input matInput formControlName="bankName" placeholder="Enter bank name">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Payable At</mat-label>
+                      <input matInput formControlName="payableAt" placeholder="Enter payable at">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Account No</mat-label>
+                      <input matInput formControlName="accountNo" placeholder="Enter account number">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Status</mat-label>
+                      <mat-select formControlName="status">
+                        <mat-option value="Active">Active</mat-option>
+                        <mat-option value="Inactive">Inactive</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Date</mat-label>
+                      <input matInput [matDatepicker]="datePicker" formControlName="date" placeholder="Select date">
+                      <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+                      <mat-datepicker #datePicker></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
+                  <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                    <mat-icon class="text-purple-600">cloud_upload</mat-icon>
+                    Upload Documents
+                  </h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Photo Upload -->
+                    <div class="space-y-4">
+                      <h4 class="font-medium text-gray-700">Member Photo</h4>
+                      <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <input type="file" accept="image/*" (change)="onFileSelected($event, 'photo')" class="hidden" #photoInput>
+                        <div *ngIf="!memberPhoto()" class="space-y-2">
+                          <mat-icon class="text-gray-400 text-4xl">photo_camera</mat-icon>
+                          <p class="text-gray-500">Click to upload photo</p>
+                          <button mat-raised-button color="primary" (click)="photoInput.click()">
+                            <mat-icon>upload</mat-icon>
+                            Upload Photo
+                          </button>
+                        </div>
+                        <div *ngIf="memberPhoto()" class="space-y-2">
+                          <img [src]="memberPhoto()" alt="Member Photo" class="mx-auto max-w-32 max-h-32 rounded-lg shadow-md">
+                          <button mat-raised-button color="accent" (click)="photoInput.click()">
+                            <mat-icon>edit</mat-icon>
+                            Change Photo
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Signature Upload -->
+                    <div class="space-y-4">
+                      <h4 class="font-medium text-gray-700">Member Signature</h4>
+                      <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <input type="file" accept="image/*" (change)="onFileSelected($event, 'signature')" class="hidden" #signatureInput>
+                        <div *ngIf="!memberSignature()" class="space-y-2">
+                          <mat-icon class="text-gray-400 text-4xl">edit</mat-icon>
+                          <p class="text-gray-500">Click to upload signature</p>
+                          <button mat-raised-button color="primary" (click)="signatureInput.click()">
+                            <mat-icon>upload</mat-icon>
+                            Upload Signature
+                          </button>
+                        </div>
+                        <div *ngIf="memberSignature()" class="space-y-2">
+                          <img [src]="memberSignature()" alt="Member Signature" class="mx-auto max-w-32 max-h-16 rounded-lg shadow-md">
+                          <button mat-raised-button color="accent" (click)="signatureInput.click()">
+                            <mat-icon>edit</mat-icon>
+                            Change Signature
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-tab>
+
+          <!-- Monthly Deduction Tab -->
+          <mat-tab label="Monthly Deduction">
+            <div class="p-8">
+              <form [formGroup]="deductionForm">
+                <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6">
+                  <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                    <mat-icon class="text-orange-600">calculate</mat-icon>
+                    Monthly Deduction Details
+                  </h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Share</mat-label>
+                      <input matInput formControlName="share" placeholder="Enter share deduction" type="number">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Withdrawal</mat-label>
+                      <input matInput formControlName="withdrawal" placeholder="Enter withdrawal amount" type="number">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>G Loan Instalment</mat-label>
+                      <input matInput formControlName="gLoanInstalment" placeholder="Enter G loan instalment" type="number">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>E Loan Instalment</mat-label>
+                      <input matInput formControlName="eLoanInstalment" placeholder="Enter E loan instalment" type="number">
+                    </mat-form-field>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card-content>
+
+      <!-- Action Buttons -->
+      <div class="p-6 bg-gray-50 border-t flex justify-end gap-4">
+        <button mat-raised-button color="warn" (click)="onCancel()" class="px-8">
+          <mat-icon>cancel</mat-icon>
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" (click)="onSave()" class="px-8">
+          <mat-icon>save</mat-icon>
+          Save Member
+        </button>
+      </div>
+    </mat-card>
   </div>
 </div>

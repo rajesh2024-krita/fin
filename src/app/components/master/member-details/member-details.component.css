@@ -111,3 +111,93 @@
     gap: 16px;
   }
 }
+
+.member-tabs ::ng-deep .mat-mdc-tab-group {
+  --mdc-secondary-navigation-tab-container-height: 64px;
+}
+
+.member-tabs ::ng-deep .mat-mdc-tab {
+  min-width: 160px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.member-tabs ::ng-deep .mat-mdc-tab-label-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.member-tabs ::ng-deep .mat-mdc-tab-body-wrapper {
+  background: white;
+}
+
+.member-tabs ::ng-deep .mat-mdc-tab-header {
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.member-tabs ::ng-deep .mdc-tab-indicator__content--underline {
+  border-top-width: 3px;
+  border-radius: 3px 3px 0 0;
+}
+
+/* Form field styling */
+::ng-deep .mat-mdc-form-field {
+  --mdc-filled-text-field-container-shape: 12px;
+  --mdc-outlined-text-field-container-shape: 12px;
+}
+
+::ng-deep .mat-mdc-form-field-outline {
+  border-radius: 12px;
+}
+
+::ng-deep .mat-mdc-form-field-outline-thick {
+  border-width: 2px;
+}
+
+/* Upload area styling */
+.upload-area {
+  transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+  border-color: #3b82f6;
+  background-color: #f8fafc;
+}
+
+/* Button styling */
+::ng-deep .mat-mdc-raised-button {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0 24px;
+  height: 44px;
+}
+
+/* Card styling */
+::ng-deep .mat-mdc-card {
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .member-tabs ::ng-deep .mat-mdc-tab {
+    min-width: 120px;
+    font-size: 14px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animation for form sections */
+.bg-gradient-to-r {
+  transition: all 0.3s ease;
+}
+
+.bg-gradient-to-r:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
