@@ -708,7 +708,7 @@ interface GivenTakenMember {
                   <div class="form-grid form-grid-3">
                     <div class="form-field">
                       <label class="form-label form-label-required">Payment Mode</label>
-                      <select class="form-select" formControlName="paymentMode" (change)="onPaymentModeChange()">
+                      <select class="form-select" formControlName="paymentMode">
                         <option value="">Select payment mode</option>
                         <option value="Cash">Cash</option>
                         <option value="Cheque">Cheque</option>
@@ -719,7 +719,7 @@ interface GivenTakenMember {
                       </div>
                     </div>
 
-                    <div class="form-field" *ngIf="showBankFields()">
+                    <div class="form-field">
                       <label class="form-label">Bank</label>
                       <input 
                         type="text" 
@@ -728,7 +728,7 @@ interface GivenTakenMember {
                         formControlName="bank">
                     </div>
 
-                    <div class="form-field" *ngIf="showChequeFields()">
+                    <div class="form-field">
                       <label class="form-label">Cheque No.</label>
                       <input 
                         type="text" 
@@ -737,7 +737,7 @@ interface GivenTakenMember {
                         formControlName="chequeNo">
                     </div>
 
-                    <div class="form-field" *ngIf="showChequeFields()">
+                    <div class="form-field">
                       <label class="form-label">Cheque Date</label>
                       <input 
                         type="date" 
@@ -1012,7 +1012,7 @@ export class LoanTakenComponent {
         <div class="search-container mb-4">
           <mat-form-field appearance="outline" class="w-full">
             <mat-icon matPrefix>search</mat-icon>
-            <input matInput placeholder="Search loans..." [(ngModel)]="searchTerm" (input)="applyFilter()">
+            <input matInput placeholder="Search loans..." (input)="applyFilter()">
           </mat-form-field>
         </div>
 
@@ -1133,7 +1133,7 @@ export class LoanSummaryDialog {
         <div class="search-container mb-4">
           <mat-form-field appearance="outline" class="w-full">
             <mat-icon matPrefix>search</mat-icon>
-            <input matInput placeholder="Search employees..." [(ngModel)]="searchTerm" (input)="applyFilter()">
+            <input matInput placeholder="Search employees..." (input)="applyFilter()">
           </mat-form-field>
         </div>
 
