@@ -172,7 +172,7 @@ export const routes: Routes = [
       },
       {
         path: 'reports/voucher',
-        loadComponent: () => import('./components/reports/voucher/voucher.component').then(m => m.VoucherComponent)
+        loadComponent: () => import('./components/reports/voucher/voucher.component').then(m => m.VoucherReportComponent)
       },
       {
         path: 'reports/opening-balance',
@@ -184,7 +184,7 @@ export const routes: Routes = [
       },
       {
         path: 'reports/loan',
-        loadComponent: () => import('./components/reports/loan/loan.component').then(m => m.LoanComponent)
+        loadComponent: () => import('./components/reports/loan/loan.component').then(m => m.LoanReportComponent)
       },
 
       // System
