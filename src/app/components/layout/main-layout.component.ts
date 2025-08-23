@@ -183,6 +183,14 @@ interface MenuItem {
                 <mat-icon>payment</mat-icon>
                 <span>Deposit Payment</span>
               </a>
+              
+              <a routerLink="/transaction/monthly-demand" 
+                 routerLinkActive="active" 
+                 class="nav-item"
+                 (click)="closeMobileNav()">
+                <mat-icon>payment</mat-icon>
+                <span>Demand</span>
+              </a>
 
               <a routerLink="/transaction/loan-taken" 
                  routerLinkActive="active" 

@@ -1,9 +1,9 @@
 
 /* Monthly Demand Processing Styles */
-@import '../../../styles/forms.css';
+/* @import '../../../styles/forms.css';
 @import '../../../styles/cards.css';
 @import '../../../styles/buttons.css';
-@import '../../../styles/tables.css';
+@import '../../../styles/tables.css'; */
 
 .demand-tabs {
   --mdc-tab-text-label-color-active: #1976d2;
