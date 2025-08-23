@@ -148,6 +148,10 @@ export const routes: Routes = [
         loadComponent: () => import('./components/accounts/voucher/voucher.component').then(m => m.VoucherComponent)
       },
       {
+        path: 'accounts/voucher-creation',
+        loadComponent: () => import('./components/accounts/voucher-creation/voucher-creation.component').then(m => m.VoucherCreationComponent)
+      },
+      {
         path: 'accounts/loan-receipt',
         loadComponent: () => import('./components/accounts/loan-receipt/loan-receipt.component').then(m => m.LoanReceiptComponent)
       },
