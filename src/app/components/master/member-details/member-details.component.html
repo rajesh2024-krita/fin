@@ -10,414 +10,341 @@
     <p class="text-body text-gray-600 dark:text-gray-400">Manage member information and settings</p>
   </div>
 
-  <!-- Main Member Form -->
-  <form class="form-container">
-    <mat-card class="card">
-      <!-- Card Header -->
-      <div class="card-header bg-gradient-to-r from-blue-600 to-purple-600">
-        <div class="card-title">
-          <mat-icon>person</mat-icon>
-          <span>Member Information</span>
-        </div>
+  <!-- Action Bar -->
+  <div class="mb-6 flex justify-between items-center">
+    <div class="flex items-center gap-4">
+      <mat-form-field appearance="outline" class="w-80">
+        <mat-label>Search members...</mat-label>
+        <input matInput [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Search by name, member no, or mobile">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+    <button mat-raised-button color="primary" class="btn btn-primary" (click)="openOffCanvas('create')">
+      <mat-icon>add</mat-icon>
+      Create Member
+    </button>
+  </div>
+
+  <!-- Members Table -->
+  <mat-card class="card">
+    <div class="card-header bg-gradient-to-r from-blue-600 to-purple-600">
+      <div class="card-title">
+        <mat-icon>people</mat-icon>
+        <span>Members List</span>
       </div>
+    </div>
 
-      <mat-card-content class="p-0">
-        <mat-tab-group class="member-tabs">
-          <!-- General Tab -->
-          <mat-tab label="General">
-            <div class="p-6">
-              <div class="form-section">
-                <div class="form-section-header text-white">
-                  <mat-icon>person_outline</mat-icon>
-                  <span>Personal Details</span>
+    <mat-card-content class="p-0">
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="dataSource" class="w-full">
+
+          <!-- Member No Column -->
+          <ng-container matColumnDef="memberNo">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold">Member No</th>
+            <td mat-cell *matCellDef="let element" class="text-body font-medium">{{element.memberNo}}</td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold">Full Name</th>
+            <td mat-cell *matCellDef="let element" class="text-body font-medium">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span class="text-blue-600 font-medium text-sm">{{element.name.charAt(0)}}</span>
                 </div>
-                <div class="form-section-content">
-                  <div class="form-grid form-grid-3">
-                    <div class="form-field">
-                      <label class="form-label form-label-required">Member No</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Enter member number">
-                      <div class="form-error">
-                        Member number is required
-                      </div>
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label form-label-required">Name</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Enter full name">
-                      <div class="form-error">
-                        Name is required
-                      </div>
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label form-label-required">F/H Name</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Father/Husband name">
-                      <div class="form-error">
-                        F/H Name is required
-                      </div>
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Date of Birth</label>
-                      <input 
-                        type="date" 
-                        class="form-input">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Mobile</label>
-                      <input 
-                        type="tel" 
-                        class="form-input"
-                        placeholder="Enter mobile number">
-                      <div class="form-error">
-                        Enter valid 10-digit mobile number
-                      </div>
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Email</label>
-                      <input 
-                        type="email" 
-                        class="form-input"
-                        placeholder="Enter email address">
-                      <div class="form-error">
-                        Enter valid email address
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <span>{{element.name}}</span>
               </div>
+            </td>
+          </ng-container>
 
-              <div class="form-section">
-                <div class="form-section-header">
-                  <mat-icon>work_outline</mat-icon>
-                  <span>Employment Details</span>
-                </div>
-                <div class="form-section-content">
-                  <div class="form-grid form-grid-3">
-                    <div class="form-field">
-                      <label class="form-label">Designation</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Enter designation">
-                    </div>
+          <!-- Mobile Column -->
+          <ng-container matColumnDef="mobile">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold">Mobile</th>
+            <td mat-cell *matCellDef="let element" class="text-body">{{element.mobile || 'N/A'}}</td>
+          </ng-container>
 
-                    <div class="form-field">
-                      <label class="form-label">DOJ (Date of Joining Job)</label>
-                      <input 
-                        type="date" 
-                        class="form-input">
-                    </div>
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold">Status</th>
+            <td mat-cell *matCellDef="let element" class="text-body">
+              <span class="px-2 py-1 rounded-full text-xs font-medium"
+                    [class]="element.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                {{element.status}}
+              </span>
+            </td>
+          </ng-container>
 
-                    <div class="form-field">
-                      <label class="form-label">DOR (Date of Retirement)</label>
-                      <input 
-                        type="date" 
-                        class="form-input">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Branch</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Enter branch">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">DOJ Society</label>
-                      <input 
-                        type="date" 
-                        class="form-input">
-                    </div>
-                  </div>
-                </div>
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold">Actions</th>
+            <td mat-cell *matCellDef="let element" class="text-body">
+              <div class="flex gap-2">
+                <button mat-icon-button color="primary" matTooltip="View" (click)="onView(element)">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button color="accent" matTooltip="Edit" (click)="onEdit(element)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Delete" (click)="onDelete(element)">
+                  <mat-icon>delete</mat-icon>
+                </button>
               </div>
+            </td>
+          </ng-container>
 
-              <div class="form-section">
-                <div class="form-section-header">
-                  <mat-icon>location_on</mat-icon>
-                  <span>Address Details</span>
-                </div>
-                <div class="form-section-content">
-                  <div class="form-grid form-grid-2">
-                    <div class="form-field">
-                      <label class="form-label">Office Address</label>
-                      <textarea 
-                        class="form-textarea"
-                        placeholder="Enter office address"
-                        rows="3"></textarea>
-                    </div>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-gray-50"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+        </table>
 
-                    <div class="form-field">
-                      <label class="form-label">Residence Address</label>
-                      <textarea 
-                        class="form-textarea"
-                        placeholder="Enter residence address"
-                        rows="3"></textarea>
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">City</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Enter city">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Phone (Office)</label>
-                      <input 
-                        type="tel" 
-                        class="form-input"
-                        placeholder="Enter office phone">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Phone (Residence)</label>
-                      <input 
-                        type="tel" 
-                        class="form-input"
-                        placeholder="Enter residence phone">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-section">
-                <div class="form-section-header">
-                  <mat-icon>person_pin</mat-icon>
-                  <span>Nominee Details</span>
-                </div>
-                <div class="form-section-content">
-                  <div class="form-grid form-grid-2">
-                    <div class="form-field">
-                      <label class="form-label">Nominee</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Enter nominee name">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Nominee Relation</label>
-                      <select class="form-select">
-                        <option value="">Select relation</option>
-                        <option value="Father">Father</option>
-                        <option value="Mother">Mother</option>
-                        <option value="Spouse">Spouse</option>
-                        <option value="Son">Son</option>
-                        <option value="Daughter">Daughter</option>
-                        <option value="Brother">Brother</option>
-                        <option value="Sister">Sister</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Photo & Opening Balance Tab -->
-          <mat-tab label="Photo & Opening Balance">
-            <div class="p-6">
-              <div class="form-section">
-                <div class="form-section-header">
-                  <mat-icon>account_balance</mat-icon>
-                  <span>Opening Balance</span>
-                </div>
-                <div class="form-section-content">
-                  <div class="form-grid form-grid-2">
-                    <div class="form-field">
-                      <label class="form-label form-label-required">Share</label>
-                      <input 
-                        type="number" 
-                        class="form-input"
-                        placeholder="Enter share amount">
-                      <div class="form-error">
-                        Share amount is required
-                      </div>
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label form-label-required">CD (Credit Deposit)</label>
-                      <input 
-                        type="number" 
-                        class="form-input"
-                        placeholder="Enter CD amount">
-                      <div class="form-error">
-                        CD amount is required
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-section">
-                <div class="form-section-header">
-                  <mat-icon>account_balance_wallet</mat-icon>
-                  <span>Bank Details</span>
-                </div>
-                <div class="form-section-content">
-                  <div class="form-grid form-grid-3">
-                    <div class="form-field">
-                      <label class="form-label">Bank Name</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Enter bank name">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Payable At</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Enter payable at">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Account No</label>
-                      <input 
-                        type="text" 
-                        class="form-input"
-                        placeholder="Enter account number">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Status</label>
-                      <select class="form-select">
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                      </select>
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Date</label>
-                      <input 
-                        type="date" 
-                        class="form-input">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-section">
-                <div class="form-section-header">
-                  <mat-icon>cloud_upload</mat-icon>
-                  <span>Upload Documents</span>
-                </div>
-                <div class="form-section-content">
-                  <div class="form-grid form-grid-2">
-                    <div class="form-field">
-                      <label class="form-label">Member Photo</label>
-                      <div class="file-upload-container">
-                        <input type="file" accept="image/*" class="hidden">
-                        <div class="file-upload-placeholder">
-                          <mat-icon class="text-gray-400 text-4xl">photo_camera</mat-icon>
-                          <p class="text-gray-500">Click to upload photo</p>
-                          <button type="button" class="btn btn-outline btn-sm">
-                            <mat-icon>upload</mat-icon>
-                            Upload Photo
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Member Signature</label>
-                      <div class="file-upload-container">
-                        <input type="file" accept="image/*" class="hidden">
-                        <div class="file-upload-placeholder">
-                          <mat-icon class="text-gray-400 text-4xl">edit</mat-icon>
-                          <p class="text-gray-500">Click to upload signature</p>
-                          <button type="button" class="btn btn-outline btn-sm">
-                            <mat-icon>upload</mat-icon>
-                            Upload Signature
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </mat-tab>
-
-          <!-- Monthly Deduction Tab -->
-          <mat-tab label="Monthly Deduction">
-            <div class="p-6">
-              <div class="form-section">
-                <div class="form-section-header">
-                  <mat-icon>calculate</mat-icon>
-                  <span>Monthly Deduction Details</span>
-                </div>
-                <div class="form-section-content">
-                  <div class="form-grid form-grid-2">
-                    <div class="form-field">
-                      <label class="form-label">Share</label>
-                      <input 
-                        type="number" 
-                        class="form-input"
-                        placeholder="Enter share deduction">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">Withdrawal</label>
-                      <input 
-                        type="number" 
-                        class="form-input"
-                        placeholder="Enter withdrawal amount">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">G Loan Instalment</label>
-                      <input 
-                        type="number" 
-                        class="form-input"
-                        placeholder="Enter G loan instalment">
-                    </div>
-
-                    <div class="form-field">
-                      <label class="form-label">E Loan Instalment</label>
-                      <input 
-                        type="number" 
-                        class="form-input"
-                        placeholder="Enter E loan instalment">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
-      </mat-card-content>
-
-      <!-- Action Buttons -->
-      <div class="card-actions">
-        <div class="flex justify-end gap-3">
-          <button type="button" class="btn btn-secondary">
-            <mat-icon>close</mat-icon>
-            Cancel
-          </button>
-          <button type="button" class="btn btn-primary">
-            <mat-icon>save</mat-icon>
-            Save Member
+        <!-- No data message -->
+        <div *ngIf="dataSource.data.length === 0" class="text-center py-8">
+          <mat-icon class="text-gray-400 text-6xl mb-4">person_off</mat-icon>
+          <h3 class="text-lg font-medium text-gray-600 mb-2">No Members Found</h3>
+          <p class="text-gray-400 mb-4">Get started by creating your first member</p>
+          <button mat-raised-button color="primary" (click)="openOffCanvas('create')">
+            <mat-icon>add</mat-icon>
+            Create Member
           </button>
         </div>
       </div>
-    </mat-card>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- Off-canvas Overlay -->
+<div class="off-canvas-overlay" [class.active]="isOffCanvasOpen()" (click)="closeOffCanvas()"></div>
+
+<!-- Off-canvas Form -->
+<div class="off-canvas" [class.active]="isOffCanvasOpen()">
+  <div class="off-canvas-header">
+    <h2 class="text-xl font-semibold text-white">
+      <mat-icon class="mr-2">{{isEditMode() ? 'edit' : 'person_add'}}</mat-icon>
+      {{isEditMode() ? 'Edit Member' : 'Create New Member'}}
+    </h2>
+    <button mat-icon-button (click)="closeOffCanvas()" class="text-white">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="memberForm" (ngSubmit)="onSubmit()" class="off-canvas-content">
+    <mat-tab-group class="member-form-tabs">
+      <!-- Personal Details Tab -->
+      <mat-tab label="Personal Details">
+        <div class="form-section p-6">
+          <div class="form-grid form-grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Member Number *</mat-label>
+              <input matInput formControlName="memberNo" required>
+              <mat-error *ngIf="memberForm.get('memberNo')?.hasError('required')">
+                Member number is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Full Name *</mat-label>
+              <input matInput formControlName="name" required>
+              <mat-error *ngIf="memberForm.get('name')?.hasError('required')">
+                Name is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Father/Husband Name *</mat-label>
+              <input matInput formControlName="fhName" required>
+              <mat-error *ngIf="memberForm.get('fhName')?.hasError('required')">
+                Father/Husband name is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Birth</mat-label>
+              <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth">
+              <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+              <mat-datepicker #dobPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Mobile</mat-label>
+              <input matInput formControlName="mobile" maxlength="10">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" type="email">
+              <mat-error *ngIf="memberForm.get('email')?.hasError('email')">
+                Please enter a valid email
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                <mat-option value="Active">Active</mat-option>
+                <mat-option value="Inactive">Inactive</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-section mt-6">
+            <h3 class="text-lg font-medium mb-4">Address Information</h3>
+            <div class="form-grid form-grid-1">
+              <mat-form-field appearance="outline">
+                <mat-label>Office Address</mat-label>
+                <textarea matInput formControlName="officeAddress" rows="3"></textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Residence Address</mat-label>
+                <textarea matInput formControlName="residenceAddress" rows="3"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Professional Details Tab -->
+      <mat-tab label="Professional">
+        <div class="form-section p-6">
+          <div class="form-grid form-grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Designation</mat-label>
+              <input matInput formControlName="designation">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Branch</mat-label>
+              <input matInput formControlName="branch">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Joining Job</mat-label>
+              <input matInput [matDatepicker]="dojJobPicker" formControlName="dojJob">
+              <mat-datepicker-toggle matSuffix [for]="dojJobPicker"></mat-datepicker-toggle>
+              <mat-datepicker #dojJobPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Retirement</mat-label>
+              <input matInput [matDatepicker]="doRetirementPicker" formControlName="doRetirement">
+              <mat-datepicker-toggle matSuffix [for]="doRetirementPicker"></mat-datepicker-toggle>
+              <mat-datepicker #doRetirementPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Joining Society</mat-label>
+              <input matInput [matDatepicker]="dojSocietyPicker" formControlName="dojSociety">
+              <mat-datepicker-toggle matSuffix [for]="dojSocietyPicker"></mat-datepicker-toggle>
+              <mat-datepicker #dojSocietyPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Phone Office</mat-label>
+              <input matInput formControlName="phoneOffice">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Phone Residence</mat-label>
+              <input matInput formControlName="phoneResidence">
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Financial Details Tab -->
+      <mat-tab label="Financial">
+        <div class="form-section p-6">
+          <div class="form-grid form-grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Share Amount</mat-label>
+              <input matInput formControlName="shareAmount" type="number" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>CD Amount</mat-label>
+              <input matInput formControlName="cdAmount" type="number" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Bank Name</mat-label>
+              <input matInput formControlName="bankName">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Payable At</mat-label>
+              <input matInput formControlName="payableAt">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Account Number</mat-label>
+              <input matInput formControlName="accountNo">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Share Deduction</mat-label>
+              <input matInput formControlName="shareDeduction" type="number" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Withdrawal</mat-label>
+              <input matInput formControlName="withdrawal" type="number" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>G-Loan Instalment</mat-label>
+              <input matInput formControlName="gLoanInstalment" type="number" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>E-Loan Instalment</mat-label>
+              <input matInput formControlName="eLoanInstalment" type="number" min="0">
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Nominee Details Tab -->
+      <mat-tab label="Nominee">
+        <div class="form-section p-6">
+          <div class="form-grid form-grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Nominee Name</mat-label>
+              <input matInput formControlName="nominee">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nominee Relation</mat-label>
+              <mat-select formControlName="nomineeRelation">
+                <mat-option value="Spouse">Spouse</mat-option>
+                <mat-option value="Son">Son</mat-option>
+                <mat-option value="Daughter">Daughter</mat-option>
+                <mat-option value="Father">Father</mat-option>
+                <mat-option value="Mother">Mother</mat-option>
+                <mat-option value="Brother">Brother</mat-option>
+                <mat-option value="Sister">Sister</mat-option>
+                <mat-option value="Other">Other</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+    <div class="off-canvas-footer">
+      <div class="flex gap-3 justify-end">
+        <button mat-stroked-button type="button" (click)="closeOffCanvas()">
+          <mat-icon>close</mat-icon>
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="memberForm.invalid || isSubmitting()">
+          <mat-icon>{{isEditMode() ? 'save' : 'add'}}</mat-icon>
+          {{isEditMode() ? 'Update Member' : 'Create Member'}}
+        </button>
+      </div>
+    </div>
   </form>
 </div>
