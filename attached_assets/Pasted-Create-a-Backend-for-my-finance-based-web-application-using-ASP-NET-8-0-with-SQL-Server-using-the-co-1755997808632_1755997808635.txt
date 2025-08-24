@@ -1,0 +1,14 @@
+Create a Backend for my finance based web application using ASP.NET 8.0 with SQL Server using the connection string "Server=localhost;Database=BackendDb;Trusted_Connection=True;TrustServerCertificate=True;"
+I need fully secured web application.
+It has four layer of users such as Super Admin, Society Admin, User (as Accountant) and member. Here member doesn't need to authenticate of panel for now.
+The super admin should be login with username = "superadmin" and password = "superadmin" when superadmin login that should be navigate to super admin panel. There he can create society by form Society Management fields are society name, registration number, address, city, phone,fax, email, website, dividend, overdraft, current deposit, loan, emergency loan, las, share limit, loan limit, emergency loan limit, cheque bounce charge, cheque return charge, cash, bonus etc.
+
+Also in super admin dashboard he can create society admin also using the form society admin name, society admin password adndropdown for listing of society to be choose and submit.
+
+Society admin can be login using the credentials, his dashboard he had a society Management only be edit and also need the society users acceptance for the changes. society admin can add users of his society only using the form new user by collecting the details auto generated EDP No, name, address(O), address(R),designation, phone(O), Phone(R), mobile, email, username, password and confirm password.
+
+society admin also can create the members using member management form Member No auto generate, name, F/H Name, Date of Birth, Mobile, Email, designation, DOJ, DOR, branch, DOJ Society, office address, residence address, city, phone office, phone residence, nominee, nominee relation, share, cd(credit deposit), bank name, payable at, account no, status, date, member photo, member signature (image), monthly deduction - share, withsrawal, G Loan Instalment, E Loan Instalment  etc
+
+User can add members.  Here User as mensioned like Accountant.
+
+Just rename the Accountant as User in both frontend as well as backend.
