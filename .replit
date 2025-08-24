@@ -24,5 +24,22 @@ args = "npm install"
 task = "shell.exec"
 args = "ng serve --host 0.0.0.0 --port 4200"
 
+[[workflows.workflow]]
+name = "Start Backend API"
+author = 46840719
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "dotnet restore"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "dotnet run"
+
 [deployment]
 run = ["sh", "-c", "npm run watch"]
