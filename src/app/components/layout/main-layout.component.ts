@@ -213,7 +213,7 @@ interface MenuItem {
             <div class="nav-section">
               <div class="nav-section-header">Accounts</div>
               
-              <a routerLink="/accounts/voucher" 
+              <a routerLink="/accounts/voucher-creation" 
                  routerLinkActive="active" 
                  class="nav-item"
                  (click)="closeMobileNav()">
