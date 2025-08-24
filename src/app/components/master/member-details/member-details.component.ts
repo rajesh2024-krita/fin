@@ -13,7 +13,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snackbar';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MemberService, Member } from '../../../services/member.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
