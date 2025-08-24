@@ -220,6 +220,14 @@ interface MenuItem {
                 <mat-icon>note</mat-icon>
                 <span>Voucher</span>
               </a>
+              
+              <a routerLink="/accounts/loan-receipt" 
+                 routerLinkActive="active" 
+                 class="nav-item"
+                 (click)="closeMobileNav()">
+                <mat-icon>note</mat-icon>
+                <span>Loan Receipt</span>
+              </a>
 
               <a routerLink="/accounts/cash-book" 
                  routerLinkActive="active" 

@@ -91,7 +91,7 @@
 }
 
 .form-textarea {
-  @apply min-h-[80px] resize-vertical;
+  @apply min-h-[80px] resize-y;
 }
 
 .form-error {

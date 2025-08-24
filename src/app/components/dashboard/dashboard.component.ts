@@ -39,7 +39,7 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
       <!-- Welcome Header -->
       <div class="relative overflow-hidden rounded-xl p-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
         <div class="absolute inset-0 bg-black/5"></div>
-        <div class="relative z-10">
+        <div class="relative">
           <div class="flex items-center justify-between">
             <div class="space-y-1">
               <h1 class="text-2xl font-bold">Welcome to FMS Dashboard</h1>
@@ -60,7 +60,7 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
                [class]="getGradientClass(i)"></div>
           
           <!-- Content -->
-          <div class="relative z-10">
+          <div class="relative">
             <div class="flex items-center justify-between mb-3">
               <div class="p-2 rounded-lg" [class]="getIconBackgroundClass(i)">
                 <mat-icon class="text-xl" [class]="getIconColorClass(i)">{{stat.icon}}</mat-icon>
