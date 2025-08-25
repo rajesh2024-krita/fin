@@ -1,113 +1,95 @@
-<div class="animate-fade-in">
-  <!-- Page Header -->
-  <div class="content-header mb-6">
-    <div class="breadcrumb">
-      <span>Master</span>
-      <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
-      <span class="breadcrumb-active">Member Details</span>
-    </div>
-    <h1 class="text-page-title">Member Management</h1>
-    <p class="text-body text-gray-600 dark:text-gray-400">Manage member information and settings</p>
-  </div>
 
-  <!-- Main Content -->
-  <div class="form-container">
-    <!-- Members List Card -->
-    <mat-card class="card mb-6">
-      <div class="card-header bg-gradient-to-r from-blue-600 to-purple-600">
-        <div class="card-title">
-          <mat-icon>people</mat-icon>
-          <span>Members List</span>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">Member Details Management</h4>
+          <button class="btn btn-primary" (click)="openMemberDialog('create')">
+            Add New Member
+          </button>
         </div>
-        <button mat-raised-button class="btn btn-primary" (click)="openMemberDialog('create')">
-          <mat-icon>add</mat-icon>
-          Create Member
-        </button>
-      </div>
-
-      <div class="card-content border-l-4 border-l-blue-600">
-        <!-- Search Section -->
-        <div class="form-section">
-          <div class="form-section-content">
-            <div class="form-grid form-grid-1 p-4">
-              <div class="form-field">
-                <label class="form-label">Search Members</label>
-                <div class="input-group">
-                  <input 
-                    type="text" 
-                    class="form-input  w-full"
-                    placeholder="Search by name, member no, or mobile"
-                    [(ngModel)]="searchTerm" 
-                    (input)="onSearch()">
-                  <button type="button" class="btn btn-outline">
-                    <mat-icon>search</mat-icon>
-                    Search
-                  </button>
-                </div>
-              </div>
+        <div class="card-body">
+          <!-- Search Filter -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Search members..."
+                (keyup)="applyFilter($event)">
             </div>
           </div>
-        </div>
 
-        <!-- Members Table -->
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Member No</th>
-                <th>Full Name</th>
-                <th>Mobile</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let member of dataSource.data">
-                <td class="text-body font-medium">{{member.memberNo}}</td>
-                <td class="text-body font-medium">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span class="text-blue-600 font-medium text-sm">{{member.name?.charAt(0)}}</span>
-                    </div>
-                    <span>{{member.name}}</span>
-                  </div>
-                </td>
-                <td class="text-body">{{member.mobile || 'N/A'}}</td>
-                <td class="text-body">
-                  <span class="px-2 py-1 rounded-full text-xs font-medium"
-                        [class]="member.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-                    {{member.status}}
-                  </span>
-                </td>
-                <td class="text-body">
-                  <div class="flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline" matTooltip="View" (click)="onView(member)">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                    <button type="button" class="btn btn-sm btn-primary" matTooltip="Edit" (click)="onEdit(member)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button type="button" class="btn btn-sm btn-danger" matTooltip="Delete" (click)="onDelete(member)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Members Table -->
+          <div class="table-responsive">
+            <table mat-table [dataSource]="dataSource" class="table table-striped">
+              <!-- Member Number Column -->
+              <ng-container matColumnDef="memberNo">
+                <th mat-header-cell *matHeaderCellDef>Member No</th>
+                <td mat-cell *matCellDef="let member">{{member.memberNo}}</td>
+              </ng-container>
 
-          <!-- No data message -->
-          <div *ngIf="dataSource.data.length === 0" class="text-center py-8">
-            <mat-icon class="text-gray-400 text-6xl mb-4">person_off</mat-icon>
-            <h3 class="text-lg font-medium text-gray-600 mb-2">No Members Found</h3>
-            <p class="text-gray-400 mb-4">Get started by creating your first member</p>
-            <button mat-raised-button color="primary" (click)="openMemberDialog('create')">
-              <mat-icon>add</mat-icon>
-              Create Member
+              <!-- Name Column -->
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let member">{{member.name}}</td>
+              </ng-container>
+
+              <!-- Father/Husband Name Column -->
+              <ng-container matColumnDef="fhName">
+                <th mat-header-cell *matHeaderCellDef>Father/Husband Name</th>
+                <td mat-cell *matCellDef="let member">{{member.fhName}}</td>
+              </ng-container>
+
+              <!-- Mobile Column -->
+              <ng-container matColumnDef="mobile">
+                <th mat-header-cell *matHeaderCellDef>Mobile</th>
+                <td mat-cell *matCellDef="let member">{{member.mobile}}</td>
+              </ng-container>
+
+              <!-- City Column -->
+              <ng-container matColumnDef="city">
+                <th mat-header-cell *matHeaderCellDef>City</th>
+                <td mat-cell *matCellDef="let member">{{member.city}}</td>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let member">
+                  <button class="btn btn-sm btn-info me-2" (click)="viewMember(member.id)">
+                    View
+                  </button>
+                  <button class="btn btn-sm btn-warning me-2" (click)="openMemberDialog('edit', member)">
+                    Edit
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteMember(member.id)">
+                    Delete
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <mat-paginator 
+            [pageSizeOptions]="[10, 25, 50, 100]" 
+            showFirstLastButtons>
+          </mat-paginator>
+
+          <!-- No Data Message -->
+          <div *ngIf="dataSource.data.length === 0" class="text-center mt-4">
+            <p class="text-muted">No members found</p>
+            <button class="btn btn-primary" (click)="openMemberDialog('create')">
+              Add First Member
             </button>
           </div>
         </div>
       </div>
-    </mat-card>
+    </div>
   </div>
 </div>
