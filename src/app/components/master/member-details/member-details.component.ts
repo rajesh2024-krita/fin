@@ -16,6 +16,8 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MemberService, Member } from '../../../services/member.service';
 import { MemberFormDialogComponent } from './member-form-dialog.component';
+import { Router } from '@angular/router';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-member-details',
@@ -29,7 +31,10 @@ import { MemberFormDialogComponent } from './member-form-dialog.component';
     MatDialogModule,
     MatSnackBarModule,
     MatTooltipModule,
-    MatButtonModule
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatPaginatorModule
   ],
   templateUrl: './member-details.component.html',
   styleUrls: ['./member-details.component.css']
@@ -38,26 +43,25 @@ export class MemberDetailsComponent implements OnInit {
   dataSource = new MatTableDataSource<Member>([]);
   displayedColumns: string[] = ['memberNo', 'name', 'mobile', 'status', 'actions'];
   loading: boolean = false; // Added loading state
-
-  searchTerm: string = '';
   allMembers: Member[] = [];
+  searchTerm: string = '';
 
   constructor(
+    private memberService: MemberService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private memberService: MemberService
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.loadMembers();
   }
 
-
-
   loadMembers() {
     this.loading = true;
     this.memberService.getAllMembers().subscribe({
       next: (members) => {
+        this.allMembers = members; // Store all members for filtering
         this.dataSource.data = members;
         this.loading = false;
         console.log('Members loaded:', members); // Kept for debugging
@@ -87,18 +91,12 @@ export class MemberDetailsComponent implements OnInit {
 
   openMemberDialog(mode: 'create' | 'edit', member?: Member) {
     const dialogRef = this.dialog.open(MemberFormDialogComponent, {
-      width: '90vw',
-      maxWidth: '1200px',
-      height: '90vh',
-      disableClose: true,
-      data: {
-        mode: mode,
-        member: member
-      }
+      width: '600px',
+      data: { mode, member }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === 'saved') {
+      if (result) {
         this.loadMembers();
       }
     });
@@ -113,11 +111,10 @@ export class MemberDetailsComponent implements OnInit {
     // This method is no longer needed but kept for compatibility
   }
 
-
-
   onView(member: Member) {
     console.log('Viewing member:', member);
     // Implement view logic - could open a read-only modal
+    this.router.navigate(['/member-details-view', member.id]);
   }
 
   onEdit(member: Member) {
@@ -145,5 +142,30 @@ export class MemberDetailsComponent implements OnInit {
       horizontalPosition: 'right',
       verticalPosition: 'top'
     });
+  }
+
+  // Added methods from changes
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  viewMember(memberId: number) {
+    this.router.navigate(['/member-details-view', memberId]);
+  }
+
+  deleteMember(memberId: number) {
+    if (confirm('Are you sure you want to delete this member?')) {
+      this.memberService.deleteMember(memberId).subscribe({
+        next: () => {
+          this.snackBar.open('Member deleted successfully', 'Close', { duration: 3000 });
+          this.loadMembers();
+        },
+        error: (error) => {
+          this.snackBar.open('Error deleting member', 'Close', { duration: 3000 });
+          console.error('Delete error:', error);
+        }
+      });
+    }
   }
 }
