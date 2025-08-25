@@ -1,38 +1,12 @@
-// This file represents the backend part of the application and is organized within a 'backend' folder.
-// For example, if you were creating a full project, you might have:
-// project_root/
-// ├── backend/
-// │   ├── Controllers/
-// │   ├── Data/
-// │   ├── Migrations/
-// │   ├── Properties/
-// │   ├── Repositories/
-// │   ├── Services/
-// │   ├── appsettings.json
-// │   ├── backend.csproj
-// │   └── Program.cs
-// ├── frontend/
-// │   └── ...
-// └── .gitignore
-// └── README.md
-
-// The following code simulates a backend file that would reside within the 'backend' folder.
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using MemberManagementAPI.Data;
-using MemberManagementAPI.Repositories;
 using MemberManagementAPI.Services;
+using MemberManagementAPI.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddScoped<IMemberRepository, MemberRepository>();
-builder.Services.AddScoped<IMemberService, MemberService>();
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -40,13 +14,23 @@ builder.Services.AddSwaggerGen();
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.WithOrigins("http://localhost:4200", "https://localhost:4200")
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
+    options.AddPolicy("AllowAngularApp",
+        policy =>
+        {
+            policy.WithOrigins("http://0.0.0.0:4200", "http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
 });
+
+// Add Entity Framework
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseInMemoryDatabase("MemberManagementDB"));
+
+// Add Services
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+builder.Services.AddScoped<IMemberService, MemberService>();
 
 var app = builder.Build();
 
@@ -57,9 +41,57 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors("AllowAngularApp");
+
 app.UseAuthorization();
+
 app.MapControllers();
+
+// Seed some sample data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var memberService = scope.ServiceProvider.GetRequiredService<IMemberService>();
+    
+    if (!context.Members.Any())
+    {
+        var sampleMembers = new[]
+        {
+            new MemberManagementAPI.Models.Member
+            {
+                MemberNo = "MEM001",
+                Name = "John Doe",
+                FHName = "Robert Doe",
+                Mobile = "9876543210",
+                Email = "john@example.com",
+                Designation = "Manager",
+                Branch = "Main Branch",
+                ShareAmount = 10000,
+                CDAmount = 5000,
+                Status = "Active",
+                CreatedDate = DateTime.UtcNow
+            },
+            new MemberManagementAPI.Models.Member
+            {
+                MemberNo = "MEM002",
+                Name = "Jane Smith",
+                FHName = "William Smith",
+                Mobile = "9876543211",
+                Email = "jane@example.com",
+                Designation = "Executive",
+                Branch = "North Branch",
+                ShareAmount = 15000,
+                CDAmount = 7500,
+                Status = "Active",
+                CreatedDate = DateTime.UtcNow
+            }
+        };
+        
+        foreach (var member in sampleMembers)
+        {
+            await memberService.CreateMemberAsync(member);
+        }
+    }
+}
 
 app.Run();

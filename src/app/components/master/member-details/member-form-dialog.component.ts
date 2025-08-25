@@ -1,4 +1,3 @@
-
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -325,7 +324,7 @@ export interface DialogData {
       .form-grid {
         grid-template-columns: 1fr;
       }
-      
+
       .form-grid-full {
         grid-template-columns: 1fr;
       }
@@ -434,35 +433,25 @@ export class MemberFormDialogComponent implements OnInit {
   }
 
   onSave() {
-    if (this.memberForm.valid) {
+    if (this.memberForm.valid && !this.isSubmitting) {
       this.isSubmitting = true;
-      const formData = { ...this.memberForm.value };
+      const formData = this.memberForm.value as Member;
 
-      if (this.isEditMode) {
-        this.memberService.updateMember(this.data.member!.id!, formData).subscribe({
-          next: () => {
-            this.showSnackBar('Member updated successfully');
-            this.dialogRef.close('saved');
-          },
-          error: (error) => {
-            console.error('Error updating member:', error);
-            this.showSnackBar('Error updating member');
-          },
-          complete: () => this.isSubmitting = false
-        });
-      } else {
-        this.memberService.createMember(formData).subscribe({
-          next: () => {
-            this.showSnackBar('Member created successfully');
-            this.dialogRef.close('saved');
-          },
-          error: (error) => {
-            console.error('Error creating member:', error);
-            this.showSnackBar('Error creating member');
-          },
-          complete: () => this.isSubmitting = false
-        });
-      }
+      const operation = this.isEditMode
+        ? this.memberService.updateMember(this.data.member!.id!, formData)
+        : this.memberService.createMember(formData);
+
+      operation.subscribe({
+        next: () => {
+          this.showSnackBar(this.isEditMode ? 'Member updated successfully' : 'Member created successfully');
+          this.dialogRef.close('saved');
+        },
+        error: (error) => {
+          console.error('Error saving member:', error);
+          this.showSnackBar(this.isEditMode ? 'Error updating member' : 'Error creating member');
+        },
+        complete: () => this.isSubmitting = false
+      });
     }
   }
 

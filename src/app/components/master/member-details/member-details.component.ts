@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -38,32 +37,35 @@ import { MemberFormDialogComponent } from './member-form-dialog.component';
 export class MemberDetailsComponent implements OnInit {
   dataSource = new MatTableDataSource<Member>([]);
   displayedColumns: string[] = ['memberNo', 'name', 'mobile', 'status', 'actions'];
-  
+  loading: boolean = false; // Added loading state
+
   searchTerm: string = '';
   allMembers: Member[] = [];
 
   constructor(
-    private memberService: MemberService,
+    private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private memberService: MemberService
   ) {}
 
   ngOnInit() {
     this.loadMembers();
   }
 
-  
+
 
   loadMembers() {
+    this.loading = true;
     this.memberService.getAllMembers().subscribe({
       next: (members) => {
-        this.allMembers = members;
         this.dataSource.data = members;
-        console.log('Members loaded:', members);
+        this.loading = false;
+        console.log('Members loaded:', members); // Kept for debugging
       },
       error: (error) => {
         console.error('Error loading members:', error);
         this.showSnackBar('Error loading members');
+        this.loading = false;
       }
     });
   }
@@ -79,7 +81,7 @@ export class MemberDetailsComponent implements OnInit {
       member.memberNo?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       member.mobile?.includes(this.searchTerm)
     );
-    
+
     this.dataSource.data = filtered;
   }
 
@@ -111,7 +113,7 @@ export class MemberDetailsComponent implements OnInit {
     // This method is no longer needed but kept for compatibility
   }
 
-  
+
 
   onView(member: Member) {
     console.log('Viewing member:', member);

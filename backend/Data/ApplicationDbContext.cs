@@ -6,7 +6,8 @@ namespace MemberManagementAPI.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
         {
         }
 
@@ -16,17 +17,13 @@ namespace MemberManagementAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Member entity
             modelBuilder.Entity<Member>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.MemberNo).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.FHName).IsRequired().HasMaxLength(200);
                 entity.HasIndex(e => e.MemberNo).IsUnique();
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
-                
-                // Set default values
-                entity.Property(e => e.Status).HasDefaultValue("Active");
-                entity.Property(e => e.ShareAmount).HasDefaultValue(0);
-                entity.Property(e => e.CDAmount).HasDefaultValue(0);
             });
         }
     }

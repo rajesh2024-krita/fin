@@ -1,12 +1,10 @@
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MemberManagementAPI.Models
 {
     public class Member
     {
-        [Key]
         public int Id { get; set; }
 
         [Required]
@@ -14,11 +12,11 @@ namespace MemberManagementAPI.Models
         public string MemberNo { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100)]
+        [StringLength(200)]
         public string Name { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(100)]
+        [StringLength(200)]
         public string FHName { get; set; } = string.Empty;
 
         public DateTime? DateOfBirth { get; set; }
@@ -51,25 +49,21 @@ namespace MemberManagementAPI.Models
         [StringLength(100)]
         public string? City { get; set; }
 
-        [StringLength(15)]
+        [StringLength(20)]
         public string? PhoneOffice { get; set; }
 
-        [StringLength(15)]
+        [StringLength(20)]
         public string? PhoneResidence { get; set; }
 
-        [StringLength(100)]
+        [StringLength(200)]
         public string? Nominee { get; set; }
 
         [StringLength(50)]
         public string? NomineeRelation { get; set; }
 
-        [Required]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal ShareAmount { get; set; }
+        public decimal ShareAmount { get; set; } = 0;
 
-        [Required]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal CDAmount { get; set; }
+        public decimal CDAmount { get; set; } = 0;
 
         [StringLength(100)]
         public string? BankName { get; set; }
@@ -81,7 +75,7 @@ namespace MemberManagementAPI.Models
         public string? AccountNo { get; set; }
 
         [StringLength(20)]
-        public string? Status { get; set; }
+        public string? Status { get; set; } = "Active";
 
         public DateTime? Date { get; set; }
 
@@ -91,19 +85,16 @@ namespace MemberManagementAPI.Models
         [StringLength(500)]
         public string? SignaturePath { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
         public decimal? ShareDeduction { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
         public decimal? Withdrawal { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
         public decimal? GLoanInstalment { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
         public decimal? ELoanInstalment { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        public DateTime? CreatedDate { get; set; }
+
         public DateTime? UpdatedDate { get; set; }
     }
 }

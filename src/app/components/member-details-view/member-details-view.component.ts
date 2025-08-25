@@ -1,28 +1,13 @@
 
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
-
-interface Member {
-  id: number;
-  memberNo: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  role: string;
-  society: string;
-  joinDate: Date;
-  status: string;
-  address?: string;
-  city?: string;
-  state?: string;
-}
+import { MemberService, Member } from '../../services/member.service';
 
 @Component({
   selector: 'app-member-details-view',
@@ -51,132 +36,167 @@ interface Member {
           </button>
         </div>
 
-        <!-- Member Profile Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <!-- Profile Header -->
-          <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-8">
-            <div class="flex items-center space-x-4">
-              <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <span class="text-2xl font-bold text-white">
-                  {{member ? getInitials(member.firstName, member.lastName) : ''}}
-                </span>
-              </div>
-              <div class="text-white">
-                <h1 class="text-3xl font-bold">{{member?.firstName}} {{member?.lastName}}</h1>
-                <p class="text-blue-100">{{member?.memberNo}} • {{member?.role}}</p>
-                <div class="mt-2">
-                  <span class="inline-flex px-3 py-1 text-sm font-medium rounded-full"
-                        [class]="member?.status === 'Active' ? 'bg-green-500 bg-opacity-20 text-green-100' : 'bg-red-500 bg-opacity-20 text-red-100'">
-                    {{member?.status}}
-                  </span>
+        <!-- Loading State -->
+        <div *ngIf="loading" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p class="text-gray-500 dark:text-gray-400">Loading member details...</p>
+        </div>
+
+        <!-- Member Details -->
+        <div *ngIf="member && !loading">
+          <!-- Main Member Card -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8 text-white">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center space-x-4">
+                  <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-xl font-semibold">
+                    {{ getInitials(member.name || '', member.fhName || '') }}
+                  </div>
+                  <div>
+                    <h1 class="text-2xl font-bold">{{ member.name }}</h1>
+                    <p class="text-blue-100">{{ member.fhName }}</p>
+                    <p class="text-blue-200 text-sm">Member #{{ member.memberNo }}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <mat-chip-set>
+                    <mat-chip [color]="member.status === 'Active' ? 'primary' : 'warn'">
+                      {{ member.status || 'Active' }}
+                    </mat-chip>
+                  </mat-chip-set>
+                  <button 
+                    mat-raised-button 
+                    color="accent"
+                    (click)="editMember()"
+                    class="mt-2"
+                  >
+                    <mat-icon>edit</mat-icon>
+                    Edit Member
+                  </button>
                 </div>
               </div>
             </div>
+
+            <!-- Tab Content -->
+            <mat-tab-group class="p-6">
+              <!-- Personal Information -->
+              <mat-tab label="Personal Info">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</label>
+                    <p class="text-gray-900 dark:text-white">{{ formatDate(member.dateOfBirth) || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Mobile</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.mobile || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.email || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Designation</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.designation || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">City</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.city || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Branch</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.branch || 'Not provided' }}</p>
+                  </div>
+                </div>
+              </mat-tab>
+
+              <!-- Contact Information -->
+              <mat-tab label="Contact Info">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+                  <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Office Details</h3>
+                    <div class="space-y-1">
+                      <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Office Address</label>
+                      <p class="text-gray-900 dark:text-white">{{ member.officeAddress || 'Not provided' }}</p>
+                    </div>
+                    <div class="space-y-1">
+                      <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Office Phone</label>
+                      <p class="text-gray-900 dark:text-white">{{ member.phoneOffice || 'Not provided' }}</p>
+                    </div>
+                  </div>
+                  <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Residence Details</h3>
+                    <div class="space-y-1">
+                      <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Residence Address</label>
+                      <p class="text-gray-900 dark:text-white">{{ member.residenceAddress || 'Not provided' }}</p>
+                    </div>
+                    <div class="space-y-1">
+                      <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Residence Phone</label>
+                      <p class="text-gray-900 dark:text-white">{{ member.phoneResidence || 'Not provided' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </mat-tab>
+
+              <!-- Financial Information -->
+              <mat-tab label="Financial Info">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Share Amount</label>
+                    <p class="text-gray-900 dark:text-white text-lg font-semibold">₹{{ member.shareAmount || 0 }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">CD Amount</label>
+                    <p class="text-gray-900 dark:text-white text-lg font-semibold">₹{{ member.cdAmount || 0 }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Bank Name</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.bankName || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Account No</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.accountNo || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Payable At</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.payableAt || 'Not provided' }}</p>
+                  </div>
+                </div>
+              </mat-tab>
+
+              <!-- Employment & Dates -->
+              <mat-tab label="Employment">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Joining Job</label>
+                    <p class="text-gray-900 dark:text-white">{{ formatDate(member.dojJob) || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Retirement</label>
+                    <p class="text-gray-900 dark:text-white">{{ formatDate(member.doRetirement) || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Joining Society</label>
+                    <p class="text-gray-900 dark:text-white">{{ formatDate(member.dojSociety) || 'Not provided' }}</p>
+                  </div>
+                </div>
+              </mat-tab>
+
+              <!-- Nominee Information -->
+              <mat-tab label="Nominee">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Nominee Name</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.nominee || 'Not provided' }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Nominee Relation</label>
+                    <p class="text-gray-900 dark:text-white">{{ member.nomineeRelation || 'Not provided' }}</p>
+                  </div>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
           </div>
-
-          <!-- Tabs Content -->
-          <mat-tab-group class="p-6">
-            <!-- Basic Information Tab -->
-            <mat-tab label="Basic Information">
-              <div class="py-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="space-y-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Member Number</label>
-                      <p class="text-lg text-gray-900 dark:text-white">{{member?.memberNo}}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Full Name</label>
-                      <p class="text-lg text-gray-900 dark:text-white">{{member?.firstName}} {{member?.lastName}}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Email</label>
-                      <p class="text-lg text-gray-900 dark:text-white">{{member?.email}}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Phone</label>
-                      <p class="text-lg text-gray-900 dark:text-white">{{member?.phone}}</p>
-                    </div>
-                  </div>
-                  <div class="space-y-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Role</label>
-                      <span class="inline-flex px-3 py-1 text-sm font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                        {{member?.role}}
-                      </span>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Society</label>
-                      <p class="text-lg text-gray-900 dark:text-white">{{member?.society}}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Join Date</label>
-                      <p class="text-lg text-gray-900 dark:text-white">{{member?.joinDate | date:'fullDate'}}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
-                      <span class="inline-flex px-3 py-1 text-sm font-medium rounded-full"
-                            [class]="member?.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'">
-                        {{member?.status}}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </mat-tab>
-
-            <!-- Address Information Tab -->
-            <mat-tab label="Address Information">
-              <div class="py-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="space-y-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Address</label>
-                      <p class="text-lg text-gray-900 dark:text-white">{{member?.address || 'Not provided'}}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">City</label>
-                      <p class="text-lg text-gray-900 dark:text-white">{{member?.city || 'Not provided'}}</p>
-                    </div>
-                  </div>
-                  <div class="space-y-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">State</label>
-                      <p class="text-lg text-gray-900 dark:text-white">{{member?.state || 'Not provided'}}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </mat-tab>
-
-            <!-- Activity Tab -->
-            <mat-tab label="Recent Activity">
-              <div class="py-6">
-                <div class="text-center py-12">
-                  <mat-icon class="text-6xl text-gray-400 dark:text-gray-500 mb-4">history</mat-icon>
-                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Recent Activity</h3>
-                  <p class="text-gray-500 dark:text-gray-400">Member activity will appear here when available.</p>
-                </div>
-              </div>
-            </mat-tab>
-          </mat-tab-group>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex justify-end space-x-3">
-          <button 
-            (click)="goBack()"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
-          >
-            Back to List
-          </button>
-          <button 
-            (click)="editMember()"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
-          >
-            <mat-icon class="mr-2">edit</mat-icon>
-            Edit Member
-          </button>
         </div>
 
         <!-- Member Not Found -->
@@ -206,7 +226,8 @@ export class MemberDetailsViewComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private memberService: MemberService
   ) {}
 
   ngOnInit() {
@@ -217,62 +238,34 @@ export class MemberDetailsViewComponent implements OnInit {
   }
 
   loadMember(id: number) {
-    // In a real application, you would fetch this from a service
-    // For now, using sample data
-    const sampleMembers: Member[] = [
-      {
-        id: 1,
-        memberNo: 'MEM1001',
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@email.com',
-        phone: '9876543210',
-        role: 'Member',
-        society: 'Main Branch',
-        joinDate: new Date('2024-01-15'),
-        status: 'Active',
-        address: '123 Main Street',
-        city: 'Mumbai',
-        state: 'Maharashtra'
+    this.loading = true;
+    this.memberService.getMemberById(id).subscribe({
+      next: (member) => {
+        this.member = member;
+        this.loading = false;
       },
-      {
-        id: 2,
-        memberNo: 'MEM1002',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane.smith@email.com',
-        phone: '9876543211',
-        role: 'Executive',
-        society: 'North Branch',
-        joinDate: new Date('2024-02-20'),
-        status: 'Active',
-        address: '456 Oak Avenue',
-        city: 'Delhi',
-        state: 'Delhi'
-      },
-      {
-        id: 3,
-        memberNo: 'MEM1003',
-        firstName: 'Mike',
-        lastName: 'Johnson',
-        email: 'mike.johnson@email.com',
-        phone: '9876543212',
-        role: 'Board Member',
-        society: 'South Branch',
-        joinDate: new Date('2023-12-10'),
-        status: 'Inactive',
-        address: '789 Pine Road',
-        city: 'Bangalore',
-        state: 'Karnataka'
+      error: (error) => {
+        console.error('Error loading member:', error);
+        this.member = null;
+        this.loading = false;
       }
-    ];
-
-    this.member = sampleMembers.find(m => m.id === id) || null;
-    this.loading = false;
+    });
   }
 
-  getInitials(firstName: string, lastName: string): string {
-    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+  formatDate(date: Date | string | undefined): string {
+    if (!date) return '';
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  }
+
+  getInitials(name: string, fhName: string): string {
+    const nameInitial = name ? name.charAt(0).toUpperCase() : '';
+    const fhNameInitial = fhName ? fhName.charAt(0).toUpperCase() : '';
+    return nameInitial + fhNameInitial || 'M';
   }
 
   goBack() {
