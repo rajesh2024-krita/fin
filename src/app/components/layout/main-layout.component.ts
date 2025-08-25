@@ -54,7 +54,7 @@ interface MenuItem {
                 <mat-icon class="text-white text-xl">account_balance</mat-icon>
               </div>
               <div class="flex-1">
-                <h2 class="text-white font-bold text-lg">FinanceMS</h2>
+                <h2 class="text-white font-bold text-lg">FinTCS</h2>
                 <p class="text-white/70 text-xs">Financial Management</p>
               </div>
             </div>

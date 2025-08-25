@@ -64,7 +64,7 @@
   font-weight: 600;
   color: #374151;
   padding-bottom: 8px;
-  border-bottom: 2px solid #e5e7eb;
+  /* border-bottom: 2px solid #e5e7eb; */
 }
 
 .form-section-content {

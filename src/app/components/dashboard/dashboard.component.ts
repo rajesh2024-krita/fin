@@ -42,7 +42,7 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
         <div class="relative">
           <div class="flex items-center justify-between">
             <div class="space-y-1">
-              <h1 class="text-2xl font-bold">Welcome to FMS Dashboard</h1>
+              <h1 class="text-2xl font-bold">Welcome to FinTCS Dashboard</h1>
               <p class="text-base text-indigo-100">Manage your financial data with elegance and efficiency</p>
             </div>
             <mat-icon class="text-4xl text-white/30">dashboard</mat-icon>

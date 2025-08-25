@@ -45,7 +45,7 @@ export interface Member {
   providedIn: 'root'
 })
 export class MemberService {
-  private apiUrl = 'http://0.0.0.0:5000/api/members';
+  private apiUrl = 'http://localhost:5000/api/members';
 
   private httpOptions = {
     headers: new HttpHeaders({

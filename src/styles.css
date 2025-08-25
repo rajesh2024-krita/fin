@@ -230,7 +230,7 @@ body {
   /* Professional Cards */
   .card {
     background: var(--color-bg-card);
-    border: 1px solid var(--color-border-primary);
+    /* border: 1px solid var(--color-border-primary); */
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
@@ -282,15 +282,15 @@ body {
 
   .form-section {
     background: var(--color-bg-card);
-    border: 1px solid var(--color-border-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    /* border: 1px solid var(--color-border-primary); */
+    /* border-radius: var(--radius-lg); */
+    /* box-shadow: var(--shadow-sm); */
     overflow: hidden;
   }
 
   .form-section-header {
-    background: var(--gradient-card-header);
-    padding: var(--spacing-md) var(--spacing-lg);
+    /* background: var(--gradient-card-header); */
+    /* padding: var(--spacing-md) var(--spacing-lg); */
     color: var(--color-text-inverse);
     font-weight: 600;
     display: flex;
@@ -1006,8 +1006,8 @@ body {
   }
 
   .card {
-    box-shadow: none !important;
-    border: 1px solid #ddd !important;
+    /* box-shadow: none !important; */
+    /* border: 1px solid #ddd !important; */
   }
 }
 
